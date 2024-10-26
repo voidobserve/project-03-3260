@@ -1,0 +1,108 @@
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       10/26/2024 17:00:26 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE INSTRUCTION
+OBJECT MODULE PLACED IN .\Release\Objects\instruction.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\instruction.c LARGE OPTIMIZE(8,SIZE) BROWSE INTVECTOR(0X000C)
+                    - INCDIR(..\..\Libraries\Include;..\..\User;..\..\User\lib;..\..\Hardware) INTERVAL(3) DEBUG OBJECTEXTEND PRINT(.\Release
+                    -\Listings\instruction.lst) OBJECT(.\Release\Objects\instruction.obj)
+
+line level    source
+
+   1          #include "instruction.h"
+   2          
+   3          // 检查接收是否正确的函数，如果接收正确，
+   4          // 根据接收到的数据中的指令，给对应的指令的标志位置一
+   5          void instruction_scan(void)
+   6          {
+   7   1          u32 i = 0;
+   8   1      
+   9   1          for (i = 0; i < (UART0_RXBUF_LEN) / (FRAME_MAX_LEN); i++)
+  10   1          {
+  11   2              if (recved_flagbuf[i]) // 如果对应的位置有合法的数据帧
+  12   2              {
+  13   3                  // 根据接收到数据中的指令，给对应的指令的标志位置一
+  14   3                  if (4 == uart0_recv_buf[i][1]) // 如果是四位长度的指令
+  15   3                  {
+  16   4                      switch (uart0_recv_buf[i][2]) // 根据不同的指令来给对应的标志位置一
+  17   4                      {
+  18   5                      case INSTRUCTION_GET_ALL_STATUS: // 获取所有功能的状态
+  19   5                          flag_get_all_status = 1;
+  20   5                          break;
+  21   5      
+  22   5                      case INSTRUCTION_GET_GEAR: // 获取挡位的状态
+  23   5                          get_gear = 1;
+  24   5                          break;
+  25   5      
+  26   5                      case INSTRUCTION_GET_BATTERY: // 获取电池电量的状态
+  27   5                          get_battery = 1;
+  28   5                          break;
+  29   5      
+  30   5                      case INSTRUCTION_GET_BARKE: // 获取刹车的状态
+  31   5                          get_brake = 1;
+  32   5                          break;
+  33   5      
+  34   5                      case INSTRUCTION_GET_LEFT_TURN: // 获取左转向灯的状态
+  35   5                          get_left_turn = 1;
+  36   5                          break;
+  37   5      
+  38   5                      case INSTRUCTION_GET_RIGHT_TURN: // 获取右转向灯的状态
+  39   5                          get_right_turn = 1;
+  40   5                          break;
+  41   5      
+  42   5                      case INSTRUCTION_GET_HIGH_BEAM: // 获取远光灯的状态
+  43   5                          get_high_beam = 1;
+  44   5                          break;
+  45   5      
+  46   5                      case INSTRUCTION_GET_ENGINE_SPEED: // 获取发动机转速
+  47   5                          get_engine_speed = 1;
+  48   5                          break;
+  49   5      
+  50   5                      case INSTRUCTION_GET_SPEED: // 获取时速
+  51   5                          flag_get_speed = 1;
+  52   5                          break;
+  53   5      
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       10/26/2024 17:00:26 PAGE 2   
+
+  54   5                      case INSTRUCTION_GET_FUEL: // 获取油量
+  55   5                          getFuel = 1;
+  56   5                          break;
+  57   5      
+  58   5                      case INSTRUCTION_GET_WATER_TEMP: // 获取水温
+  59   5                          getWaterTemp = 1;
+  60   5                          break;
+  61   5      
+  62   5                      case INSTRUCTION_GET_TOTAL_MILEAGE: // 获取大计里程
+  63   5                          getTotalMileage = 1;
+  64   5                          break;
+  65   5      
+  66   5                      case INSTRUCTION_GET_SUBTOTAL_MILEAGE: // 获取小计里程
+  67   5                          getSubTotalMileage = 1;
+  68   5                          break;
+  69   5                      }
+  70   4      
+  71   4                      if (recv_frame_cnt > 0) //
+  72   4                      {
+  73   5                          recv_frame_cnt--; // 从串口接收的数据帧数目减一，表示指令已经从�
+             -�冲区取出
+  74   5                      }
+  75   4      
+  76   4                      recved_flagbuf[i] = 0;
+  77   4                  } // if (4 == uart0_recv_buf[i][1])
+  78   3              } 
+  79   2          }
+  80   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    271    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----       4
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
