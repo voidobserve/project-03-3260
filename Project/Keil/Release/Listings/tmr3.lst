@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   TMR3                                                              10/26/2024 17:00:25 PAGE 1   
+C51 COMPILER V9.60.7.0   TMR3                                                              10/28/2024 17:51:21 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TMR3
@@ -62,7 +62,7 @@ line level    source
   51   1          TMR3_CONL &= ~(TMR_SOURCE_SEL(0x07)); // 清除定时器的时钟源配置寄存器
   52   1          TMR3_CONL |= TMR_SOURCE_SEL(0x06);    // 配置定时器的时钟源，使用系统时钟（约21MHz）
   53   1      
-C51 COMPILER V9.60.7.0   TMR3                                                              10/26/2024 17:00:25 PAGE 2   
+C51 COMPILER V9.60.7.0   TMR3                                                              10/28/2024 17:51:21 PAGE 2   
 
   54   1          __EnableIRQ(TMR3_IRQn); // 使能中断
   55   1          IE_EA = 1;              // 打开总中断
@@ -126,7 +126,7 @@ line level    source
  113   1      }
 
 
-C51 COMPILER V9.60.7.0   TMR3                                                              10/26/2024 17:00:25 PAGE 3   
+C51 COMPILER V9.60.7.0   TMR3                                                              10/28/2024 17:51:21 PAGE 3   
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
    CODE SIZE        =    187    ----

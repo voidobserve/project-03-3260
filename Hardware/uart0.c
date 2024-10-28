@@ -13,13 +13,19 @@ volatile u8 uart0_recv_len[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)] = {0};
 // 例如，缓冲区下标0的位置有指令，标志位数组下标0的元素值为1，没有指令，元素的值为0
 volatile u8 recved_flagbuf[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)] = {0};
 
+volatile u8 flagbuf_valid_instruction[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)] = {0}; // 存放有合法指令的标志位数组
+
 // 串口中断服务函数中，接收一帧的标志位，0--准备接收一帧的第一个字节，1--正在接收该帧的数据
-static volatile bit recv_frame_flag = 0;
+// static volatile bit recv_frame_flag = 0;
+// 串口中断服务函数中，接收一帧的标志位，0--准备接收一帧的第一个字节，1--正在接收该帧的数据
+static bit flag_is_recving_data = 0;
 static volatile u8 frame_len = 0;    // 记录串口中断服务函数中，当前要接收的数据帧的字节数
 static volatile u8 cur_recv_len = 0; // 记录串口中断服务函数中，当前已接收的数据帧的字节数
 volatile u8 recv_frame_cnt = 0;      // 接收到的数据帧的个数
 
 static volatile u32 blank_index = 0; // 记录当前存放数据帧的缓冲区的空的地方(缓冲区下标)，准备存放一帧的数据
+
+bit test_bit = 0;
 
 // 重写putchar()函数
 char putchar(char c)
@@ -77,44 +83,38 @@ void uart0_init(void)
 // UART0中断服务函数（接收中断）
 void UART0_IRQHandler(void) interrupt UART0_IRQn
 {
+    volatile u8 uart0_tmp_val = 0;
+
     // 进入中断设置IP，不可删除
     __IRQnIPnPush(UART0_IRQn);
     // ---------------- 用户函数处理 -------------------
     // RX接收完成中断
     if (UART0_STA & UART_RX_DONE(0x1))
     {
-        if (0 == recv_frame_flag && UART0_DATA == 0xA5)
-        {
-            // 如果是新的一帧数据（以格式头0xA5开始），打开定时器，为超时判断做准备
-            recv_frame_flag = 1;
+        // test_bit = 1;
+        uart0_tmp_val = UART0_DATA;
 
-            {
-                // 重新给TMR0配置时钟
-                TMR0_CONL &= ~(TMR_SOURCE_SEL(0x07)); // 清除定时器的时钟源配置寄存器
-                TMR0_CONL |= TMR_SOURCE_SEL(0x06);    // 配置定时器的时钟源，使用系统时钟（约21MHz）
-                __EnableIRQ(TMR0_IRQn);               // 使能中断
-                IE_EA = 1;                            // 打开总中断
-            }
-        }
-        else if (0 == recv_frame_flag && UART0_DATA != 0xA5)
+        // if ((0 == flag_is_recving_data && UART0_DATA == 0xA5) ||
+        //     (1 == flag_is_recving_data && UART0_DATA == 0xA5))
+        if (uart0_tmp_val == 0xA5)
         {
-            // 如果是新的一帧数据，却不是以0xA5开头，说明这一帧数据无效
-
-            // 退出中断设置IP，不可删除
-            __IRQnIPnPop(UART0_IRQn);
-            return;
-        }
-        else if (1 == recv_frame_flag && UART0_DATA == 0xA5)
-        {
-            // 如果正在接收一帧数据，却又收到了一次格式头，舍弃之前收到的数据，重新接收这一帧
+            // 1. 如果是新的一帧数据（以格式头0xA5开始），打开定时器，为超时判断做准备
+            // 2. 如果正在接收一帧数据，却又收到了一次格式头，舍弃之前收到的数据，重新接收这一帧
+            flag_is_recving_data = 1;
             cur_recv_len = 0;
             frame_len = 0;
+            tmr0_disable();
+            tmr0_cnt = 0;
+            tmr0_enable();
         }
-        else if (recv_frame_cnt > ((UART0_RXBUF_LEN) / (FRAME_MAX_LEN)))
+        else if ((0 == flag_is_recving_data && uart0_tmp_val != 0xA5) ||
+                 (recv_frame_cnt >= ((UART0_RXBUF_LEN) / (FRAME_MAX_LEN))))
         {
-            // 如果缓冲区已满，存不下更多的数据帧
-
-            // 退出中断设置IP，不可删除
+            // 1. 如果是新的一帧数据，却不是以0xA5开头，说明这一帧数据无效
+            // 2. 如果缓冲区已满，存不下更多的数据帧
+            // 直接退出中断，不处理数据
+            tmr0_disable();
+            tmr0_cnt = 0;
             __IRQnIPnPop(UART0_IRQn);
             return;
         }
@@ -122,64 +122,72 @@ void UART0_IRQHandler(void) interrupt UART0_IRQn
         if (1 == cur_recv_len)
         {
             // 如果接收到一帧的第二个字节的数据，记录下要接收的数据长度
-            frame_len = UART0_DATA;
+            frame_len = uart0_tmp_val;
         }
 
+        // 程序运行到这里，说明正在接收一个数据帧
         if (0 == recved_flagbuf[blank_index])
         {
             // 如果缓冲区中有剩余位置来存放一个帧，才放入数据
-            uart0_recv_buf[blank_index][cur_recv_len++] = UART0_DATA;
-            uart0_recv_len[blank_index] = cur_recv_len; // 更新当前数据帧的长度
-            tmr0_cnt = 0;                               // 每接收到一个字节数据，清空超时的计时
-        }
+            uart0_recv_buf[blank_index][cur_recv_len++] = uart0_tmp_val;
+            // uart0_recv_buf[0][cur_recv_len++] = UART0_DATA; // 测试用
+            tmr0_cnt = 0; // 每接收到一个字节数据，清空超时的计时
 
-        // 如果发送方填错了数据帧的长度，这里的判断就会影响下一帧数据的接收
-        // 因此在中断开头加了格式头的识别，在扫描函数加了帧长度的验证，避免数据过长或过短的情况
-        if (cur_recv_len == frame_len)
-        {
-            // 如果接收完了一帧数据
-            recv_frame_flag = 0; // 标志位清零，准备接收下一帧数据
-            cur_recv_len = 0;
-            frame_len = 0;
-
-            recved_flagbuf[blank_index] = 1; // 对应的接收完成标志位置一
-            recv_frame_cnt++;                // 接收到完整的一帧，计数值加一
-
-            if (recv_frame_cnt < ((UART0_RXBUF_LEN) / (FRAME_MAX_LEN)))
+#if 1
+            if ((cur_recv_len) == frame_len)
             {
-                // 如果数组中有空位（接收的数据帧个数 < 缓冲区总共能接收的数据帧个数）
+                // 如果接收完了一帧数据
+                uart0_recv_len[blank_index] = frame_len; // 更新当前数据帧的长度
+                flag_is_recving_data = 0;                // 标志位清零，准备接收下一帧数据
+                cur_recv_len = 0;
+                frame_len = 0;
 
-                // 偏移到数组中空的地方，准备填入下一个数据帧
-                while (1)
+                recved_flagbuf[blank_index] = 1; // 对应的接收完成标志位置一
+                recv_frame_cnt++;                // 接收到完整的一帧，计数值加一
+                test_bit = 1;
+                blank_index++;
+                if (blank_index >= ((UART0_RXBUF_LEN) / (FRAME_MAX_LEN)))
                 {
-                    blank_index++;
-
-                    if (blank_index >= ((UART0_RXBUF_LEN) / (FRAME_MAX_LEN)))
-                    {
-                        // 如果下标超出了缓冲区能容纳的指令个数
-                        blank_index = 0;
-                    }
-
-                    if (0 == recved_flagbuf[blank_index])
-                    {
-                        // 如果是空的一处缓冲区，退出，准备给下一次接收数据帧
-                        break;
-                    }
+                    blank_index = 0;
                 }
-            }
 
-            {
-                // 不给定时器提供时钟，让它停止计数
-                TMR0_CONL &= ~(TMR_SOURCE_SEL(0x07)); // 清除定时器的时钟源配置寄存器
-                TMR0_CONL |= TMR_SOURCE_SEL(0x05);    // 配置定时器的时钟源，不用任何时钟
-                // 清除定时器的计数值
-                TMR0_CNTL = 0;
-                TMR0_CNTH = 0;
-                __DisableIRQ(TMR0_IRQn); // 关闭中断（不使能中断）
-                tmr0_cnt = 0;
-            }
-        }
-    }
+                // if (recv_frame_cnt < ((UART0_RXBUF_LEN) / (FRAME_MAX_LEN)))
+                // {
+                //     // 如果数组中有空位（接收的数据帧个数 < 缓冲区总共能接收的数据帧个数）
+
+                //     // 偏移到数组中空的地方，准备填入下一个数据帧
+                //     while (1)
+                //     {
+                //         blank_index++;
+
+                //         if (blank_index >= ((UART0_RXBUF_LEN) / (FRAME_MAX_LEN)))
+                //         {
+                //             // 如果下标超出了缓冲区能容纳的指令个数
+                //             blank_index = 0;
+                //         }
+
+                //         if (0 == recved_flagbuf[blank_index])
+                //         {
+                //             // 如果是空的一处缓冲区，退出，准备给下一次接收数据帧
+                //             break;
+                //         }
+                //     }
+                // }
+
+                {
+                    tmr0_disable();
+                    tmr0_cnt = 0;
+                    __IRQnIPnPop(UART0_IRQn);
+                    return;
+                }
+            } // if ((cur_recv_len) == frame_len)
+#endif
+        } // if (0 == recved_flagbuf[blank_index])
+        // else // 如果当前缓冲区中没有剩余位置来存放一个帧，
+        // {
+        // }
+
+    } // if (UART0_STA & UART_RX_DONE(0x1))
 
     // 退出中断设置IP，不可删除
     __IRQnIPnPop(UART0_IRQn);
@@ -198,35 +206,13 @@ void uart0_sendbyte(u8 senddata)
 // 对UART0接收缓冲区的数据进行验证（超时验证、长度验证、校验和计算）
 void uart0_scan_handle(void)
 {
-    u16 i = 0; // 循环计数值
-
-    u32 checksum = 0; // 存放临时的校验和
-
-    // u16 j = 0; // 测试用的循环计数值
-
-#if 0  // 测试用
-    static volatile u8 tmp1 = 0;
-    static volatile u8 tmp2 = 0;
-
-    tmp2 = recv_frame_cnt;
-
-    if (tmp1 != tmp2) // 如果接收的帧的个数不一样
-    {
-        for (i = 0; i < (UART0_RXBUF_LEN) / (FRAME_MAX_LEN); i++)
-        {
-            printf("%d :\t", i);
-            for (j = 0; j < FRAME_MAX_LEN; j++)
-            {
-                printf("%x ", (int16)uart0_recv_buf[i][j]);
-            }
-            printf("\n");
-        }
-    }
-#endif // 测试用
+    u8 i = 0;                         // 循环计数值（注意循环次数要大于等于数组能存放的指令数目）
+    volatile u8 checksum = 0;         // 存放临时的校验和
+    volatile bit __flag_is_crc_or_len_err = 0; // 标志位，校验和 / 数据长度 是否错误,0--未出错，1--出错
 
 #if 1 // 接收超时处理
 
-    if (tmr0_cnt > 100) // 一帧内，超过10ms没有收到数据
+    if (tmr0_cnt > 10) // 一帧内，超过10ms没有收到数据
     {
         // 如果超时
         // uart0_sendstr("Time out!\n");
@@ -235,19 +221,18 @@ void uart0_scan_handle(void)
         tmr0_cnt = 0;   // 清空定时器计数值
 
         // 当前的数据帧作废
-        cur_recv_len = 0;    // 当前接收到的帧的长度清零
-        frame_len = 0;       // 要接收的帧的长度，清零
-        recv_frame_flag = 0; // 重新开始接收数据
+        cur_recv_len = 0;         // 当前接收到的帧的长度清零
+        frame_len = 0;            // 要接收的帧的长度，清零
+        flag_is_recving_data = 0; // 重新开始接收数据
 
-#if 0  // 向串口发送整个缓冲区的数据
-        for (i = 0; i < (UART0_RXBUF_LEN) / (FRAME_MAX_LEN); i++)
-        {
-            uart0_sendbyte(i + '0');
-            uart0_sendbyte('\n');
-            uart0_sendnums(uart0_recv_buf[i], FRAME_MAX_LEN);
-            uart0_sendstr("\n==========================\n");
-        }
-#endif // 向串口发送整个缓冲区的数据
+        // if (0 == recved_flagbuf[blank_index])
+        // {
+        //     memset(uart0_recv_buf[blank_index], 0, FRAME_MAX_LEN); // 清空超时的指令对应的接收缓冲区
+        // }
+
+#if USE_MY_DEBUG
+        printf("recv time out! \n");
+#endif
 
 #if 0
         for (i = 0; i < (UART0_RXBUF_LEN) / (FRAME_MAX_LEN); i++)
@@ -274,11 +259,14 @@ void uart0_scan_handle(void)
 
             if (uart0_recv_len[i] != uart0_recv_buf[i][1])
             {
-                // 如果数据帧的长度不正确
-                // uart0_sendstr("format len invalid!\n");
+// 如果数据帧的长度不正确
+#if USE_MY_DEBUG
+                printf("format len invalid!\n");
+#endif
+                // flag_is_recving_data = 0;
                 recved_flagbuf[i] = 0;
                 recv_frame_cnt--;
-                // memset(uart0_recv_buf[i], 0, FRAME_MAX_LEN);
+                memset(uart0_recv_buf[i], 0, FRAME_MAX_LEN);
 
                 // for (i = 0; i < (UART0_RXBUF_LEN) / (FRAME_MAX_LEN); i++)
                 // {
@@ -291,6 +279,70 @@ void uart0_scan_handle(void)
                 return;
             }
 
+            {                          // 计算校验和
+                u8 __loop_crc_cnt = 0; // 用于计算校验和的循环计数值
+                checksum = 0;
+                for (__loop_crc_cnt = 0; __loop_crc_cnt < (uart0_recv_len[i] - 1); __loop_crc_cnt++)
+                {
+                    checksum += uart0_recv_buf[i][__loop_crc_cnt];
+                }
+
+                checksum &= 0x0F;
+                if (checksum != uart0_recv_buf[i][uart0_recv_len[i] - 1])
+                {
+                    // 如果计算的校验和与收到的校验和不一致
+                    __flag_is_crc_or_len_err = 1;
+                }
+            } // 计算校验和
+
+            if (__flag_is_crc_or_len_err)
+            {
+#if USE_MY_DEBUG
+                printf("recv crc or len err! \n");
+#endif
+                // flag_is_recving_data = 0;
+                __flag_is_crc_or_len_err = 0; //
+                recved_flagbuf[i] = 0;
+                recv_frame_cnt--;
+                memset(uart0_recv_buf[i], 0, FRAME_MAX_LEN); // 清空校验和错误的指令对应的缓冲区
+            }
+
+            // 如果运行到这里，数据都正常
+            flagbuf_valid_instruction[i] = 1; // 对应的标志位置一，表示收到了合法的指令
+        } // if (recved_flagbuf[i])
+    } // for (i = 0; i < ((UART0_RXBUF_LEN) / (FRAME_MAX_LEN)); i++)
+}
+
+
+#if 0
+// 测试用的程序：
+void __uart_buff_check(void)
+{
+    u8 i = 0;
+    u8 j = 0;
+    u8 k = 0;
+    if (test_bit)
+    {
+        test_bit = 0;
+        for (i = 0; i < (UART0_RXBUF_LEN) / (FRAME_MAX_LEN); i++)
+        {
+            for (j = 0; j < (UART0_RXBUF_LEN) / (FRAME_MAX_LEN); j++)
+            {
+                uart0_sendbyte(j + '0');
+                uart0_sendbyte('\n');
+                for (k = 0; k < FRAME_MAX_LEN; k++)
+                {
+                    printf("%2x ", (u16)uart0_recv_buf[j][k]);
+                }
+
+                printf("\n==========================\n");
+            }
+        }
+    }
+}
+#endif
+
+#if 0
             switch (uart0_recv_len[i])
             {
             case 4:
@@ -303,9 +355,10 @@ void uart0_scan_handle(void)
                     // 如果计算得出的校验和与数据帧中的校验和不一致
                     // 说明传输的数据有误
                     // uart0_sendstr("checknum err_4Bytes\n");
-                    recved_flagbuf[i] = 0;
-                    recv_frame_cnt--;
+                    // recved_flagbuf[i] = 0;
+                    // recv_frame_cnt--;
                     // memset(uart0_recv_buf[i], 0, FRAME_MAX_LEN);
+                    __flag_is_crc_or_len_err = 1;
                 }
 
                 break;
@@ -314,15 +367,15 @@ void uart0_scan_handle(void)
 
                 // 如果是五个字节的数据
                 checksum = (uart0_recv_buf[i][0] + uart0_recv_buf[i][1] + uart0_recv_buf[i][2] + uart0_recv_buf[i][3]) & 0x0F;
-
                 if (checksum != uart0_recv_buf[i][4])
                 {
                     // 如果计算得出的校验和与数据帧中的校验和不一致
                     // 说明传输的数据有误
                     // uart0_sendstr("checknum err_5Bytes\n");
-                    recved_flagbuf[i] = 0;
-                    recv_frame_cnt--;
+                    // recved_flagbuf[i] = 0;
+                    // recv_frame_cnt--;
                     // memset(uart0_recv_buf[i], 0, FRAME_MAX_LEN);
+                    __flag_is_crc_or_len_err = 1;
                 }
 
                 break;
@@ -336,24 +389,47 @@ void uart0_scan_handle(void)
                     // 如果计算得出的校验和与数据帧中的校验和不一致
                     // 说明传输的数据有误
                     // uart0_sendstr("checknum err_6Bytes\n");
-                    recved_flagbuf[i] = 0;
-                    recv_frame_cnt--;
+                    // recved_flagbuf[i] = 0;
+                    // recv_frame_cnt--;
                     // memset(uart0_recv_buf[i], 0, FRAME_MAX_LEN);
+                    __flag_is_crc_or_len_err = 1;
                 }
 
                 break;
+            case 7: // 如果是7个字节的数据
+                checksum = (uart0_recv_buf[i][0] + uart0_recv_buf[i][1] + uart0_recv_buf[i][2] + uart0_recv_buf[i][3] + uart0_recv_buf[i][4] + uart0_recv_buf[i][5]) & 0x0F;
+                if (checksum != uart0_recv_buf[i][6])
+                {
+                    // 如果计算得出的校验和与数据帧中的校验和不一致
+                    // 说明传输的数据有误
+                    // recved_flagbuf[i] = 0;
+                    // recv_frame_cnt--;
+
+                    __flag_is_crc_or_len_err = 1;
+                }
+                break;
+            case 8: // 如果是8个字节的数据
+                checksum = (uart0_recv_buf[i][0] + uart0_recv_buf[i][1] + uart0_recv_buf[i][2] + uart0_recv_buf[i][3] + uart0_recv_buf[i][4] + uart0_recv_buf[i][5] + uart0_recv_buf[i][6]) & 0x0F;
+                if (checksum != uart0_recv_buf[i][7])
+                {
+                    // 如果计算得出的校验和与数据帧中的校验和不一致
+                    // 说明传输的数据有误
+                    // recved_flagbuf[i] = 0;
+                    // recv_frame_cnt--;
+                    __flag_is_crc_or_len_err = 1;
+                }
+                break;
 
             default:
-                // 如果不是四、五或者六个字节的数据，说明接收有误，直接抛弃这一帧数据
-                // uart0_sendstr("recv cnt err\n");
-                recved_flagbuf[i] = 0;
-                recv_frame_cnt--;
+                // 如果不是四、五、六、七、八个字节的数据，说明接收有误，直接抛弃这一帧数据
+#if USE_MY_DEBUG
+                // printf("recv cnt err\n");
+                __flag_is_crc_or_len_err = 1;
+#endif
+                // recved_flagbuf[i] = 0;
+                // recv_frame_cnt--;
                 // memset(uart0_recv_buf[i], 0, FRAME_MAX_LEN);
 
                 break;
-            }
-
-            // 如果运行到这里，数据都正常
-        }
-    }
-}
+            } // switch (uart0_recv_len[i])
+#endif

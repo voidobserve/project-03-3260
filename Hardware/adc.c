@@ -20,12 +20,12 @@ void adc_pin_config(void)
     // ADC配置
     ADC_ACON1 &= ~(ADC_VREF_SEL(0x7) | ADC_EXREF_SEL(0x1)); // 清除电压选择，关闭外部参考电压
     ADC_ACON1 &= ~(ADC_INREF_SEL(0x01));                    // 关闭内部参考电压
-    
+
     // 不能使用VCCA，待修改，看看芯片最低的工作电压和实际提供的电压
-    ADC_ACON1 |= ADC_VREF_SEL(0x06) | ADC_TEN_SEL(0x3);     // 选择内部参考电压VCCA，关闭测试信号
-    ADC_ACON0 = ADC_CMP_EN(0x1) |                           // 打开ADC中的CMP使能信号
-                ADC_BIAS_EN(0x1) |                          // 打开ADC偏置电流能使信号
-                ADC_BIAS_SEL(0x1);                          // 偏置电流选择：1x
+    ADC_ACON1 |= ADC_VREF_SEL(0x06) | ADC_TEN_SEL(0x3); // 选择内部参考电压VCCA，关闭测试信号
+    ADC_ACON0 = ADC_CMP_EN(0x1) |                       // 打开ADC中的CMP使能信号
+                ADC_BIAS_EN(0x1) |                      // 打开ADC偏置电流能使信号
+                ADC_BIAS_SEL(0x1);                      // 偏置电流选择：1x
 }
 
 // 切换adc扫描的引脚
@@ -83,15 +83,19 @@ void adc_showval(void)
     adc_sel_pin(ADC_PIN_BATTERY);
     adc_sample_filter();
 
-    // 连接串口查看ADC值
-    printf("ADC_PIN_BATTERY = %d\r\n", adc_val);
+// 连接串口查看ADC值
+#if USE_MY_DEBUG
+    // printf("ADC_PIN_BATTERY = %d\r\n", adc_val);
+#endif
     delay_ms(500);
 
     adc_sel_pin(ADC_PIN_TOUCH);
     adc_sample_filter();
 
     // 连接串口查看ADC值
-    printf("ADC_PIN_TOUCH = %d\r\n", adc_val);
+#if USE_MY_DEBUG
+    // printf("ADC_PIN_TOUCH = %d\r\n", adc_val);
+#endif
     delay_ms(500);
 }
 
@@ -99,15 +103,16 @@ void adc_showval(void)
 void adc_scan(void)
 {
     adc_sel_pin(ADC_PIN_BATTERY);
-    adc_sample_filter(); // 滤波完成之后可能还会出现跳变，应该在后续加入死区判断
+    adc_sample_filter();                                // 滤波完成之后可能还会出现跳变，应该在后续加入死区判断
     fun_info.battery = (u8)((u32)adc_val * 100 / 4095); // u16的adc_val乘以100会直接溢出，这里要强转为u32
 
-#if MY_DEBUG
-    printf("ADC_PIN_BATTERY = %d\r\n", adc_val);
-    printf("battery : %d %%\n", (u16)fun_info.battery); // %d打印是两个字节，不强转会越界访问
+#if USE_MY_DEBUG
+    // 测试用：
+    // printf("ADC_PIN_BATTERY = %d\r\n", adc_val);
+    // printf("battery : %d %%\n", (u16)fun_info.battery); // %d打印是两个字节，不强转会越界访问
 #endif
 
-    get_battery = 1;
+    flag_get_battery = 1;
 
     delay_ms(10); // adc采样不能太频繁
 }

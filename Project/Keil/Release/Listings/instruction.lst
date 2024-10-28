@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   INSTRUCTION                                                       10/26/2024 17:00:26 PAGE 1   
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       10/28/2024 17:52:06 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE INSTRUCTION
@@ -11,98 +11,446 @@ line level    source
 
    1          #include "instruction.h"
    2          
-   3          // 检查接收是否正确的函数，如果接收正确，
-   4          // 根据接收到的数据中的指令，给对应的指令的标志位置一
-   5          void instruction_scan(void)
-   6          {
-   7   1          u32 i = 0;
-   8   1      
-   9   1          for (i = 0; i < (UART0_RXBUF_LEN) / (FRAME_MAX_LEN); i++)
-  10   1          {
-  11   2              if (recved_flagbuf[i]) // 如果对应的位置有合法的数据帧
-  12   2              {
-  13   3                  // 根据接收到数据中的指令，给对应的指令的标志位置一
-  14   3                  if (4 == uart0_recv_buf[i][1]) // 如果是四位长度的指令
-  15   3                  {
-  16   4                      switch (uart0_recv_buf[i][2]) // 根据不同的指令来给对应的标志位置一
-  17   4                      {
-  18   5                      case INSTRUCTION_GET_ALL_STATUS: // 获取所有功能的状态
-  19   5                          flag_get_all_status = 1;
-  20   5                          break;
-  21   5      
-  22   5                      case INSTRUCTION_GET_GEAR: // 获取挡位的状态
-  23   5                          get_gear = 1;
-  24   5                          break;
-  25   5      
-  26   5                      case INSTRUCTION_GET_BATTERY: // 获取电池电量的状态
-  27   5                          get_battery = 1;
-  28   5                          break;
-  29   5      
-  30   5                      case INSTRUCTION_GET_BARKE: // 获取刹车的状态
-  31   5                          get_brake = 1;
-  32   5                          break;
-  33   5      
-  34   5                      case INSTRUCTION_GET_LEFT_TURN: // 获取左转向灯的状态
-  35   5                          get_left_turn = 1;
-  36   5                          break;
-  37   5      
-  38   5                      case INSTRUCTION_GET_RIGHT_TURN: // 获取右转向灯的状态
-  39   5                          get_right_turn = 1;
-  40   5                          break;
-  41   5      
-  42   5                      case INSTRUCTION_GET_HIGH_BEAM: // 获取远光灯的状态
-  43   5                          get_high_beam = 1;
-  44   5                          break;
-  45   5      
-  46   5                      case INSTRUCTION_GET_ENGINE_SPEED: // 获取发动机转速
-  47   5                          get_engine_speed = 1;
+   3          #include <string.h>
+   4          
+   5          // 用bit定义，来节省空间
+   6          volatile bit flag_get_all_status = 0;    // 获取所有功能的状态
+   7          volatile bit flag_get_gear = 0;          // 获取挡位状态 / 得到了挡位的状态
+   8          volatile bit flag_get_battery = 0;       // 获取电池状态 / 得到了电池的状态（电池电量�
+             -�单位：百分比）
+   9          volatile bit flag_get_brake = 0;         // 获取刹车状态 / 得到了刹车的状态
+  10          volatile bit flag_get_left_turn = 0;     // 获取左转向灯的状态 / 得到了左转向灯的状态
+  11          volatile bit flag_get_right_turn = 0;    // 获取右转向灯的状态 / 得到了右转向灯的状态
+  12          volatile bit flag_get_high_beam = 0;     // 获取远光灯的状态 / 得到了远光灯的状态
+  13          volatile bit flag_get_engine_speed = 0;  // 获取发动机的转速 / 得到了发动机的转速
+  14          volatile bit flag_get_speed = 0;         // 获取时速 / 得到了时速
+  15          volatile bit flag_get_fuel = 0;          // 获取油量 / 得到了油量（单位：百分比）
+  16          volatile bit flag_get_temp_of_water = 0; // 获取水温 / 得到了水温
+  17          
+  18          volatile bit flag_get_total_mileage = 0;     // 获取大计里程 / 得到了大计里程
+  19          volatile bit flag_get_sub_total_mileage = 0; // 获取小计里程 / 得到了小计里程
+  20          
+  21          volatile bit flag_get_touch_key_status = 0; // 获取触摸按键的状态
+  22          volatile bit flag_alter_date = 0;           // 修改日期
+  23          volatile bit flag_alter_time = 0;           // 修改时间
+  24          
+  25          volatile bit flag_get_bat_val = 0;               // 获取电池电压
+  26          volatile bit flag_set_temp_of_water_warning = 0; // 设置水温报警
+  27          
+  28          volatile bit flag_clear_total_mileage = 0;     // 清除大计里程
+  29          volatile bit flag_clear_sub_total_mileage = 0; // 清除小计里程
+  30          
+  31          // 检查接收是否正确的函数，如果接收正确，
+  32          // 根据接收到的数据中的指令，给对应的指令的标志位置一
+  33          void instruction_scan(void)
+  34          {
+  35   1          u8 i = 0; // 注意要大于等于缓冲区能存放的指令数目
+  36   1      
+  37   1          for (i = 0; i < (UART0_RXBUF_LEN) / (FRAME_MAX_LEN); i++)
+  38   1          {
+  39   2              if (flagbuf_valid_instruction[i]) // 如果对应的位置有合法的数据帧
+  40   2              {
+  41   3                  // 根据接收到数据中的指令，给对应的指令的标志位置一
+  42   3                  // if (4 == uart0_recv_buf[i][1]) // 如果是四位长度的指令
+  43   3                  {
+  44   4                      switch (uart0_recv_buf[i][2]) // 根据不同的指令来给对应的标志位置一
+  45   4                      {
+  46   5                      case INSTRUCTION_GET_ALL_STATUS: // 获取所有功能的状态
+  47   5                          flag_get_all_status = 1;
   48   5                          break;
   49   5      
-  50   5                      case INSTRUCTION_GET_SPEED: // 获取时速
-  51   5                          flag_get_speed = 1;
+  50   5                      case INSTRUCTION_GET_GEAR: // 获取挡位的状态
+  51   5                          flag_get_gear = 1;
   52   5                          break;
-  53   5      
-C51 COMPILER V9.60.7.0   INSTRUCTION                                                       10/26/2024 17:00:26 PAGE 2   
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       10/28/2024 17:52:06 PAGE 2   
 
-  54   5                      case INSTRUCTION_GET_FUEL: // 获取油量
-  55   5                          getFuel = 1;
+  53   5      
+  54   5                      case INSTRUCTION_GET_BATTERY: // 获取电池电量的状态
+  55   5                          flag_get_battery = 1;
   56   5                          break;
   57   5      
-  58   5                      case INSTRUCTION_GET_WATER_TEMP: // 获取水温
-  59   5                          getWaterTemp = 1;
+  58   5                      case INSTRUCTION_GET_BARKE: // 获取刹车的状态
+  59   5                          flag_get_brake = 1;
   60   5                          break;
   61   5      
-  62   5                      case INSTRUCTION_GET_TOTAL_MILEAGE: // 获取大计里程
-  63   5                          getTotalMileage = 1;
+  62   5                      case INSTRUCTION_GET_LEFT_TURN: // 获取左转向灯的状态
+  63   5                          flag_get_left_turn = 1;
   64   5                          break;
   65   5      
-  66   5                      case INSTRUCTION_GET_SUBTOTAL_MILEAGE: // 获取小计里程
-  67   5                          getSubTotalMileage = 1;
+  66   5                      case INSTRUCTION_GET_RIGHT_TURN: // 获取右转向灯的状态
+  67   5                          flag_get_right_turn = 1;
   68   5                          break;
-  69   5                      }
-  70   4      
-  71   4                      if (recv_frame_cnt > 0) //
-  72   4                      {
-  73   5                          recv_frame_cnt--; // 从串口接收的数据帧数目减一，表示指令已经从�
+  69   5      
+  70   5                      case INSTRUCTION_GET_HIGH_BEAM: // 获取远光灯的状态
+  71   5                          flag_get_high_beam = 1;
+  72   5                          break;
+  73   5      
+  74   5                      case INSTRUCTION_GET_ENGINE_SPEED: // 获取发动机转速
+  75   5                          flag_get_engine_speed = 1;
+  76   5                          break;
+  77   5      
+  78   5                      case INSTRUCTION_GET_SPEED: // 获取时速
+  79   5                          flag_get_speed = 1;
+  80   5                          break;
+  81   5      
+  82   5                      case INSTRUCTION_GET_FUEL: // 获取油量
+  83   5                          flag_get_fuel = 1;
+  84   5                          break;
+  85   5      
+  86   5                      case INSTRUCTION_GET_TEMP_OF_WATER: // 获取水温
+  87   5                          flag_get_temp_of_water = 1;
+  88   5                          break;
+  89   5      
+  90   5                      case INSTRUCTION_GET_TOTAL_MILEAGE: // 获取大计里程
+  91   5                          flag_get_total_mileage = 1;
+  92   5                          break;
+  93   5      
+  94   5                      case INSTRUCTION_GET_SUBTOTAL_MILEAGE: // 获取小计里程
+  95   5                          flag_get_sub_total_mileage = 1;
+  96   5                          break;
+  97   5      
+  98   5                      case INSTRUCTION_GET_TOUCH_KEY_STATUS: // 获取触摸按键的状态
+  99   5                          flag_get_touch_key_status = 1;
+ 100   5                          break;
+ 101   5      
+ 102   5                      case INSTRUCTION_ALTER_DATE: // 修改日期
+ 103   5                          flag_alter_date = 1;
+ 104   5                          break;
+ 105   5      
+ 106   5                      case INSTRUCTION_ALTER_TIME: // 修改时间
+ 107   5                          flag_alter_time = 1;
+ 108   5                          // printf("buff:\n");
+ 109   5                          // printf("%x %x %x %x %x %x %x \n", (u32)uart0_recv_buf[i][0], (u32)uart0_recv_buf[i]
+             -[1], (u32)uart0_recv_buf[i][2], (u32)uart0_recv_buf[i][3], (u32)uart0_recv_buf[i][4], (u32)uart0_recv_buf[i][5], (u32)ua
+             -rt0_recv_buf[i][6]);
+ 110   5      
+ 111   5      #if 1 // 向串口发送整个缓冲区的数据
+ 112   5                          {
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       10/28/2024 17:52:06 PAGE 3   
+
+ 113   6                              u8 j = 0;
+ 114   6                              for (j = 0; j < (FRAME_MAX_LEN); j++)
+ 115   6                              {
+ 116   7                                  printf("%2x ", (u16)uart0_recv_buf[i][j]);
+ 117   7                              }
+ 118   6                              printf("\n==========================\n");
+ 119   6                          }
+ 120   5      
+ 121   5                          { // 测试校验和通不通过
+ 122   6                              u8 check_sum = 0;
+ 123   6                              check_sum += (uart0_recv_buf[i][0] +
+ 124   6                                            uart0_recv_buf[i][1] +
+ 125   6                                            uart0_recv_buf[i][2] +
+ 126   6                                            uart0_recv_buf[i][3] +
+ 127   6                                            uart0_recv_buf[i][4] +
+ 128   6                                            uart0_recv_buf[i][5]);
+ 129   6                              check_sum &= 0x0F;
+ 130   6                              if (check_sum == uart0_recv_buf[i][6])
+ 131   6                              {
+ 132   7                                  printf("check sum pass\n");
+ 133   7                              }
+ 134   6                              else
+ 135   6                              {
+ 136   7                                  printf("check sum err \n");
+ 137   7                              }
+ 138   6                          }
+ 139   5      
+ 140   5                          if (0)
+ 141   5                          {
+ 142   6                              u8 i = 0;
+ 143   6                              u8 j = 0;
+ 144   6                              u8 k = 0;
+ 145   6                              for (i = 0; i < (UART0_RXBUF_LEN) / (FRAME_MAX_LEN); i++)
+ 146   6                              {
+ 147   7                                  for (j = 0; j < (UART0_RXBUF_LEN) / (FRAME_MAX_LEN); j++)
+ 148   7                                  {
+ 149   8                                      uart0_sendbyte(j + '0');
+ 150   8                                      uart0_sendbyte('\n');
+ 151   8                                      for (k = 0; k < FRAME_MAX_LEN; k++)
+ 152   8                                      {
+ 153   9                                          printf("%2x ", (u16)uart0_recv_buf[j][k]);
+ 154   9                                      }
+ 155   8      
+ 156   8                                      printf("\n==========================\n");
+ 157   8                                  }
+ 158   7                              }
+ 159   6                          }
+ 160   5      
+ 161   5      #endif // 向串口发送整个缓冲区的数据
+ 162   5                          break;
+ 163   5      
+ 164   5                      case INSTRUCTION_GET_BATTERY_VAL: // 获取电池电压
+ 165   5                          flag_get_bat_val = 1;
+ 166   5                          break;
+ 167   5      
+ 168   5                      case INSTRUCTION_SET_TEMP_OF_WATER_WARNING: // 设置水温报警
+ 169   5                          flag_set_temp_of_water_warning = 1;
+ 170   5                          break;
+ 171   5      
+ 172   5                      case INSTRUCTION_CLEAR_TOTAL_MILEAGE: // 清除大计里程
+ 173   5                          flag_clear_total_mileage = 1;
+ 174   5                          break;
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       10/28/2024 17:52:06 PAGE 4   
+
+ 175   5      
+ 176   5                      case INSTRUCTION_CLEAR_SUBTOTAL_MILEAGE: // 清除小计里程
+ 177   5                          flag_clear_sub_total_mileage = 1;
+ 178   5                          break;
+ 179   5                      }
+ 180   4      
+ 181   4                      if (recv_frame_cnt > 0) //
+ 182   4                      {
+ 183   5                          recv_frame_cnt--; // 从串口接收的数据帧数目减一，表示指令已经从�
              -�冲区取出
-  74   5                      }
-  75   4      
-  76   4                      recved_flagbuf[i] = 0;
-  77   4                  } // if (4 == uart0_recv_buf[i][1])
-  78   3              } 
-  79   2          }
-  80   1      }
+ 184   5                      }
+ 185   4      
+ 186   4                      flagbuf_valid_instruction[i] = 0;            // 清空缓冲区对应的元素，表示该
+             -下标的指令已经处理
+ 187   4                      memset(uart0_recv_buf[i], 0, FRAME_MAX_LEN); // 清空缓冲区对应的元素
+ 188   4                  } // if (4 == uart0_recv_buf[i][1])
+ 189   3              }
+ 190   2          }
+ 191   1      }
+ 192          
+ 193          void instruction_handle(void)
+ 194          {
+ 195   1          if (flag_get_all_status)
+ 196   1          {
+ 197   2              // 如果要获取所有功能的状态
+ 198   2              flag_get_all_status = 0; // 清除标志位
+ 199   2      
+ 200   2      #if USE_MY_DEBUG
+ 201   2              printf(" flag_get_all_status\n");
+ 202   2      #endif
+ 203   2          }
+ 204   1      
+ 205   1          if (flag_get_gear)
+ 206   1          {
+ 207   2              // 如果要获取挡位的状态
+ 208   2              flag_get_gear = 0; //
+ 209   2      
+ 210   2      #if USE_MY_DEBUG
+ 211   2              printf(" flag_get_gear\n");
+ 212   2      #endif
+ 213   2      
+ 214   2              send_data(SEND_GEAR, fun_info.gear); // 发送当前挡位的状态
+ 215   2          }
+ 216   1      
+ 217   1          if (flag_get_battery)
+ 218   1          {
+ 219   2              // 如果要获取电池电量的状态
+ 220   2              flag_get_battery = 0;
+ 221   2      #if USE_MY_DEBUG
+ 222   2              printf(" flag_get_battery\n");
+ 223   2      #endif
+ 224   2      
+ 225   2              send_data(SEND_BATTERY, fun_info.battery); // 发送电池电量
+ 226   2          }
+ 227   1      
+ 228   1          if (flag_get_brake)
+ 229   1          {
+ 230   2              // 如果要获取获取刹车的状态
+ 231   2              flag_get_brake = 0;
+ 232   2      
+ 233   2      #if USE_MY_DEBUG
+ 234   2              printf(" flag_get_brake\n");
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       10/28/2024 17:52:06 PAGE 5   
+
+ 235   2      #endif
+ 236   2      
+ 237   2              send_data(SEND_BARKE, fun_info.brake); // 发送当前刹车的状态
+ 238   2          }
+ 239   1      
+ 240   1          if (flag_get_left_turn)
+ 241   1          {
+ 242   2              // 如果要获取左转向灯的状态
+ 243   2              flag_get_left_turn = 0;
+ 244   2      
+ 245   2      #if USE_MY_DEBUG
+ 246   2              printf(" flag_get_left_turn\n");
+ 247   2      #endif
+ 248   2      
+ 249   2              send_data(SEND_LEFT_TURN, fun_info.left_turn); // 发送当前左转向灯的状态
+ 250   2          }
+ 251   1      
+ 252   1          if (flag_get_right_turn)
+ 253   1          {
+ 254   2              // 如果要获取右转向灯的状态
+ 255   2              flag_get_right_turn = 0;
+ 256   2      
+ 257   2              printf(" flag_get_right_turn\n");
+ 258   2      
+ 259   2              send_data(SEND_RIGHT_TURN, fun_info.right_turn); // 发送当前右转向灯的状态
+ 260   2          }
+ 261   1      
+ 262   1          if (flag_get_high_beam)
+ 263   1          {
+ 264   2              // 如果要获取远光灯的状态
+ 265   2              flag_get_high_beam = 0;
+ 266   2      
+ 267   2              printf(" flag_get_high_beam\n");
+ 268   2      
+ 269   2              send_data(SEND_HIGH_BEAM, fun_info.high_beam); // 发送当前远光灯的状态
+ 270   2          }
+ 271   1      
+ 272   1          if (flag_get_engine_speed)
+ 273   1          {
+ 274   2              // 如果要获取发动机的转速
+ 275   2              flag_get_engine_speed = 0;
+ 276   2      
+ 277   2              printf(" flag_get_engine_speed \n");
+ 278   2      
+ 279   2              send_data(SEND_ENGINE_SPEED, fun_info.engine_speeed);
+ 280   2          }
+ 281   1      
+ 282   1          if (flag_get_speed)
+ 283   1          {
+ 284   2              // 如果要获取时速
+ 285   2              flag_get_speed = 0;
+ 286   2      
+ 287   2              printf(" flag_get_speed \n");
+ 288   2      
+ 289   2      #ifdef INTERNATIONAL // 使用公制单位
+ 290   2      
+ 291   2              send_data(SEND_SPEED, fun_info.speed); // 发送当前采集到的车速（时速）
+ 292   2      
+ 293   2      #endif // INTERNATIONAL 使用公制单位
+ 294   2      
+ 295   2      #ifdef IMPERIAL // 使用英制单位
+              
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       10/28/2024 17:52:06 PAGE 6   
+
+                      send_data(SEND_SPEED, fun_info.speed * 621 / 1000);
+              
+              #endif
+ 300   2          }
+ 301   1      
+ 302   1          if (flag_get_fuel)
+ 303   1          {
+ 304   2              // 如果要获取油量
+ 305   2              flag_get_fuel = 0;
+ 306   2      
+ 307   2              printf(" flag_get_fuel \n");
+ 308   2          }
+ 309   1      
+ 310   1          if (flag_get_temp_of_water)
+ 311   1          {
+ 312   2              // 如果要获取水温
+ 313   2              flag_get_temp_of_water = 0;
+ 314   2      
+ 315   2              printf(" flag_get_temp_of_water \n");
+ 316   2          }
+ 317   1      
+ 318   1          if (flag_get_total_mileage)
+ 319   1          {
+ 320   2              // 如果要获取大计里程 / 得到了大计里程新的数据
+ 321   2              flag_get_total_mileage = 0;
+ 322   2              printf(" flag_get_total_mileage \n");
+ 323   2      
+ 324   2      #ifdef INTERNATIONAL // 公制单位
+ 325   2      
+ 326   2              // 只发送百米及以上的数据
+ 327   2              send_data(SEND_TOTAL_MILEAGE, mileage_info.total_mileage / 100);
+ 328   2      
+ 329   2      #endif // INTERNATIONAL 公制单位
+ 330   2      
+ 331   2      #ifdef IMPERIAL // 英制单位
+              #if USE_MY_DEBUG
+                      printf("total mileage: %lu * 0.1 mile", mileage_info.total_mileage * 62137 / 10000000);
+              #endif // USE_MY_DEBUG
+                     // 只发送0.1英里及以上的数据
+                      send_data(SEND_TOTAL_MILEAGE, mileage_info.total_mileage * 62137 / 10000000);
+              
+              #endif // IMPERIAL 英制单位
+ 339   2          }
+ 340   1      
+ 341   1          if (flag_get_sub_total_mileage)
+ 342   1          {
+ 343   2              // 如果要获取小计里程 / 得到了小计里程新的数据
+ 344   2              flag_get_sub_total_mileage = 0;
+ 345   2              printf(" flag_get_sub_total_mileage \n");
+ 346   2      #ifdef INTERNATIONAL // 公制单位
+ 347   2      
+ 348   2              // 只发送千米及以上的数据
+ 349   2              send_data(SEND_SUBTOTAL_MILEAGE, mileage_info.subtotal_mileage / 1000);
+ 350   2      
+ 351   2      #endif // INTERNATIONAL 公制单位
+ 352   2      
+ 353   2      #ifdef IMPERIAL // 英制单位
+              #if USE_MY_DEBUG
+                      printf("sub total mileage: %lu mile", mileage_info.subtotal_mileage * 62137 / 100000000);
+              #endif // USE_MY_DEBUG
+                     // 只发送英里及以上的数据
+                      send_data(SEND_SUBTOTAL_MILEAGE, mileage_info.subtotal_mileage * 62137 / 100000000);
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       10/28/2024 17:52:06 PAGE 7   
+
+              
+              #endif // IMPERIAL 英制单位
+ 361   2          }
+ 362   1      
+ 363   1          if (flag_get_touch_key_status)
+ 364   1          {
+ 365   2              // 如果要获取触摸按键的状态 / 得到了触摸按键的状态
+ 366   2              flag_get_touch_key_status = 0;
+ 367   2              printf(" flag_get_touch_key_status \n");
+ 368   2          }
+ 369   1      
+ 370   1          if (flag_alter_date)
+ 371   1          {
+ 372   2              // 如果要修改日期
+ 373   2              flag_alter_date = 0;
+ 374   2              printf(" flag_alter_date \n");
+ 375   2          }
+ 376   1      
+ 377   1          if (flag_alter_time)
+ 378   1          {
+ 379   2              // 如果要修改时间
+ 380   2              flag_alter_time = 0;
+ 381   2              printf(" flag_alter_time \n");
+ 382   2          }
+ 383   1      
+ 384   1          if (flag_get_bat_val)
+ 385   1          {
+ 386   2              // 如果要获取电池电压
+ 387   2              flag_get_bat_val = 0;
+ 388   2              printf(" flag_get_bat_val \n");
+ 389   2          }
+ 390   1      
+ 391   1          if (flag_set_temp_of_water_warning)
+ 392   1          {
+ 393   2              // 如果要设置水温报警
+ 394   2              flag_set_temp_of_water_warning = 0;
+ 395   2              printf(" flag_set_temp_of_water_warning \n");
+ 396   2          }
+ 397   1      
+ 398   1          if (flag_clear_total_mileage)
+ 399   1          {
+ 400   2              // 如果要清除大计里程
+ 401   2              flag_clear_total_mileage = 0;
+ 402   2              printf(" flag_clear_total_mileage \n");
+ 403   2          }
+ 404   1      
+ 405   1          if (flag_clear_sub_total_mileage)
+ 406   1          {
+ 407   2              // 如果要清除小计里程
+ 408   2              flag_clear_sub_total_mileage = 0;
+ 409   2              printf(" flag_clear_sub_total_mileage \n");
+ 410   2          }
+ 411   1      }
+*** WARNING C294 IN LINE 142 OF ..\..\User\instruction.c: unreachable code
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    271    ----
-   CONSTANT SIZE    =   ----    ----
+   CODE SIZE        =   1074    ----
+   CONSTANT SIZE    =    527    ----
    XDATA SIZE       =   ----       4
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       10/28/2024 17:52:06 PAGE 8   
+
    IDATA SIZE       =   ----    ----
-   BIT SIZE         =   ----    ----
+   BIT SIZE         =     20    ----
 END OF MODULE INFORMATION.
 
 
-C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

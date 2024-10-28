@@ -27,7 +27,7 @@ void pin_level_scan(void)
         if (OFF == fun_info.brake)
         {
             // 如果之前刹车是关闭的
-            get_brake = 1;
+            flag_get_brake = 1;
             fun_info.brake = ON;
         }
         else
@@ -43,7 +43,7 @@ void pin_level_scan(void)
         if (ON == fun_info.brake)
         {
             fun_info.brake = OFF;
-            get_brake = 1;
+            flag_get_brake = 1;
         }
     }
 
@@ -54,7 +54,7 @@ void pin_level_scan(void)
         {
             // 如果上一次扫描时远光灯是关闭的
             fun_info.left_turn = ON;
-            get_left_turn = 1;
+            flag_get_left_turn = 1;
         }
     }
     else
@@ -63,7 +63,7 @@ void pin_level_scan(void)
         {
             // 如果上一次扫描时远光灯是开启的
             fun_info.left_turn = OFF;
-            get_left_turn = 1;
+            flag_get_left_turn = 1;
         }
     }
 
@@ -75,7 +75,7 @@ void pin_level_scan(void)
         {
             // 如果上一次扫描时右转向灯是关闭的
             fun_info.right_turn = ON;
-            get_right_turn = 1;
+            flag_get_right_turn = 1;
         }
     }
     else
@@ -84,7 +84,7 @@ void pin_level_scan(void)
         {
             // 如果上一次扫描时右转向灯是开启的
             fun_info.right_turn = OFF;
-            get_right_turn = 1;
+            flag_get_right_turn = 1;
         }
     }
 
@@ -97,7 +97,7 @@ void pin_level_scan(void)
         {
             // 如果上一次扫描时远光灯是关闭的
             fun_info.high_beam = ON;
-            get_high_beam = 1;
+            flag_get_high_beam = 1;
         }
     }
     else
@@ -106,7 +106,7 @@ void pin_level_scan(void)
         {
             // 如果上一次扫描时远光灯是开启的
             fun_info.high_beam = OFF;
-            get_high_beam = 1;
+            flag_get_high_beam = 1;
         }
     }
 
@@ -117,7 +117,7 @@ void pin_level_scan(void)
         {
             // 如果上一次扫描时的挡位不是空挡
             fun_info.gear = GEAR_NEUTRAL;
-            get_gear = 1;
+            flag_get_gear = 1;
         }
     }
     else if (0 == P07)
@@ -126,7 +126,7 @@ void pin_level_scan(void)
         {
             // 如果上一次扫描时的挡位不是一档
             fun_info.gear = GEAR_FIRST;
-            get_gear = 1;
+            flag_get_gear = 1;
         }
     }
     else if (0 == P10)
@@ -135,7 +135,7 @@ void pin_level_scan(void)
         {
             // 如果上一次扫描时的挡位不是二档
             fun_info.gear = GEAR_SECOND;
-            get_gear = 1;
+            flag_get_gear = 1;
         }
     }
     else if (0 == P13)
@@ -144,7 +144,7 @@ void pin_level_scan(void)
         {
             // 如果上一次扫描时的挡位不是三档
             fun_info.gear = GEAR_THIRD;
-            get_gear = 1;
+            flag_get_gear = 1;
         }
     }
     else if (0 == P14)
@@ -153,7 +153,7 @@ void pin_level_scan(void)
         {
             // 如果上一次扫描时的挡位不是四档
             fun_info.gear = GEAR_FOURTH;
-            get_gear = 1;
+            flag_get_gear = 1;
         }
     }
     else if (0 == P27)
@@ -162,7 +162,7 @@ void pin_level_scan(void)
         {
             // 如果上一次扫描时的挡位不是五档
             fun_info.gear = GEAR_FIFTH;
-            get_gear = 1;
+            flag_get_gear = 1;
         }
     }
     else if (0 == P30)
@@ -172,7 +172,7 @@ void pin_level_scan(void)
         {
             // 如果上一次扫描时的挡位不是六档
             fun_info.gear = GEAR_SIXTH;
-            get_gear = 1;
+            flag_get_gear = 1;
         }
     }
 }

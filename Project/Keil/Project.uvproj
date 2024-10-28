@@ -467,11 +467,6 @@
               <FilePath>..\..\User\my_config.h</FilePath>
             </File>
             <File>
-              <FileName>instruction_scan.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\instruction_scan.c</FilePath>
-            </File>
-            <File>
               <FileName>fun_info.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\fun_info.c</FilePath>

@@ -109,9 +109,10 @@ void speed_scan(void)
         ((cur_speed < last_speed) && (last_speed - cur_speed > 2)))
     {
 // 如果本次采集到的数据与上一次采集到的数据差值超过了1，可以直接发送出去
-#if MY_DEBUG
-        printf("%lu km/h\n", cur_speed);
-#endif
+
+        // 测试用：
+        // printf("%lu km/h\n", cur_speed);
+
         last_speed = cur_speed;
 
         fun_info.speed = cur_speed;
@@ -155,9 +156,9 @@ void speed_scan(void)
 
         if (cnt >= 2)
         {
-#if MY_DEBUG
-            printf("%lu km/h\n", cur_speed);
-#endif
+            // 测试用：
+            // printf("%lu km/h\n", cur_speed);
+
             last_speed = cur_speed;
 
             fun_info.speed = cur_speed;
@@ -166,9 +167,9 @@ void speed_scan(void)
     }
     else if (cur_speed == 0 && last_speed != 0)
     {
-#if MY_DEBUG
-        printf("%lu km/h\n", cur_speed);
-#endif
+        // 测试用：
+        // printf("%lu km/h\n", cur_speed);
+
 
         fun_info.speed = cur_speed;
         flag_get_speed = 1;

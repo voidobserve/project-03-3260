@@ -11,7 +11,6 @@
 ".\Release\Objects\flash.obj",
 ".\Release\Objects\tk_set.obj",
 ".\Release\Objects\main.obj",
-".\Release\Objects\instruction_scan.obj",
 ".\Release\Objects\fun_info.obj",
 ".\Release\Objects\send_data.obj",
 ".\Release\Objects\pin_level_scan.obj",

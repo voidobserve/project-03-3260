@@ -29,6 +29,8 @@
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
+#if 0 // 不参与编译的程序
+
 #if DBG_PRINTF_EN
 // 重写puchar()函数
 char putchar(char c)
@@ -83,6 +85,7 @@ void user_printf(char *p_data)
         debug_putchar(*p_data++);
     }
 }
+#endif // 不参与编译的程序
   
 
 /*************************** (C) COPYRIGHT 2021 HUGE-IC ***** END OF FILE *****/

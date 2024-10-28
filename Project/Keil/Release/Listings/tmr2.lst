@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   TMR2                                                              10/26/2024 17:00:25 PAGE 1   
+C51 COMPILER V9.60.7.0   TMR2                                                              10/28/2024 17:51:21 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TMR2
@@ -62,7 +62,7 @@ line level    source
                   TMR2_CONL |= TMR_SOURCE_SEL(0x06);    // 配置定时器的时钟源，使用系统时钟（约21MHz）
               
                   __EnableIRQ(TMR2_IRQn); // 使能中断
-C51 COMPILER V9.60.7.0   TMR2                                                              10/26/2024 17:00:25 PAGE 2   
+C51 COMPILER V9.60.7.0   TMR2                                                              10/28/2024 17:51:21 PAGE 2   
 
                   IE_EA = 1;              // 打开总中断
               }
@@ -126,7 +126,7 @@ line level    source
               
                   // 退出中断设置IP，不可删除
                   __IRQnIPnPop(TMR2_IRQn);
-C51 COMPILER V9.60.7.0   TMR2                                                              10/26/2024 17:00:25 PAGE 3   
+C51 COMPILER V9.60.7.0   TMR2                                                              10/28/2024 17:51:21 PAGE 3   
 
               #endif
               }

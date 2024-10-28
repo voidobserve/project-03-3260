@@ -9,7 +9,7 @@
 // CIRCUIT_BOARD -- 电路板
 #define CIRCUIT_BOARD
 
-// #define MY_DEBUG 1
+#define USE_MY_DEBUG 1
 
 // 串口0波特率
 #define UART0_BAUDRATE      115200
@@ -24,8 +24,7 @@
 // IMPERIAL -- 英制单位
 #define  INTERNATIONAL
 
-// 是否开启自定义的打印调试功能
-#define MY_DEBUG 0
+// #define MY_DEBUG 0
 
 #define USE_TMR2 0 // 是否使用定时器2
 
@@ -40,7 +39,6 @@
 #include "tmr3.h" // 定时将总里程写入flash所需的定时器
 
 #include "instruction.h" // 扫描接收到的数据（必须要在串口0的头文件后面，串口要先接收并验证，才轮到它扫描指令）
-#include "instruction_scan.h" // 扫描是否有收到符合格式的指令
 #include "fun_info.h"         // 存放各个功能的状态信息
 
 #include "pin_level_scan.h" // 扫描引脚电平状态

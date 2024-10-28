@@ -13,6 +13,7 @@
 extern volatile u8 uart0_recv_buf[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)][FRAME_MAX_LEN];
 extern volatile u8 recved_flagbuf[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)];
 extern volatile u8 recv_frame_cnt; // 接收到的数据帧的个数
+extern volatile u8 flagbuf_valid_instruction[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)]; // 存放有合法指令的标志位数组
 
 // 串口0波特率
 #ifndef UART0_BAUDRATE

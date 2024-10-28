@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   SEND_DATA                                                         10/26/2024 17:00:26 PAGE 1   
+C51 COMPILER V9.60.7.0   SEND_DATA                                                         10/28/2024 17:51:22 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE SEND_DATA
@@ -62,7 +62,7 @@ line level    source
   51   2              uart0_sendbyte(send_data);       // 发送信息
   52   2      
   53   2              check_num = FORMAT_HEAD + 0x05 + SEND_RIGHT_TURN + (u8)send_data;
-C51 COMPILER V9.60.7.0   SEND_DATA                                                         10/26/2024 17:00:26 PAGE 2   
+C51 COMPILER V9.60.7.0   SEND_DATA                                                         10/28/2024 17:51:22 PAGE 2   
 
   54   2              check_num &= 0x0F; // 取前面的数字相加的低四位
   55   2              break;
@@ -126,7 +126,7 @@ line level    source
              - + (u8)send_data;
  113   2              check_num &= 0x0F; // 取前面的数字相加的低四位
  114   2              break;
-C51 COMPILER V9.60.7.0   SEND_DATA                                                         10/26/2024 17:00:26 PAGE 3   
+C51 COMPILER V9.60.7.0   SEND_DATA                                                         10/28/2024 17:51:22 PAGE 3   
 
  115   2      
  116   2          case SEND_SUBTOTAL_MILEAGE: // 发送小计里程

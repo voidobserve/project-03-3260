@@ -34,6 +34,8 @@
  * @param  None
  * @retval None
  */
+extern void __uart_buff_check(void);
+extern bit test_bit;
 void main(void)
 {
     // 看门狗默认打开, 复位时间2s
@@ -61,20 +63,25 @@ void main(void)
         /* 用户循环扫描函数接口 */
         // user_handle();
 
-        uart0_scan_handle(); // 检查串口接收缓冲区的数据是否符合协议,如果有正确的指令，会存到另一个缓冲区中
-        instruction_scan();   // 扫描是否有合法的指令
+        
         // 扫描状态是否变化，如果变化则更新标志位，更新状态的信息到结构体中
         // pin_level_scan();
         // speed_scan();        // 扫描当前时速
         // engine_speed_scan(); // 扫描当前发动机转速
         // adc_scan(); // adc扫描，并转换成百分比的形式发送
         // mileage_scan(); // 里程扫描（大计里程扫描+小计里程扫描）
+
+        uart0_scan_handle(); // 检查串口接收缓冲区的数据是否符合协议,如果有正确的指令，会存到另一个缓冲区中
+        instruction_scan();  // 扫描是否有合法的指令
+        // __uart_buff_check();
         instruction_handle(); // 扫描是否有对应的获取/状态更新操作
+
+        
+        
 
 
         // flash_write_test();
     }
-
 }
 
 /**

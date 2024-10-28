@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   ADC                                                               10/26/2024 17:00:25 PAGE 1   
+C51 COMPILER V9.60.7.0   ADC                                                               10/28/2024 17:51:21 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE ADC
@@ -31,12 +31,12 @@ line level    source
   20   1          // ADCÅäÖÃ
   21   1          ADC_ACON1 &= ~(ADC_VREF_SEL(0x7) | ADC_EXREF_SEL(0x1)); // Çå³ýµçÑ¹Ñ¡Ôñ£¬¹Ø±ÕÍâ²¿²Î¿¼µçÑ¹
   22   1          ADC_ACON1 &= ~(ADC_INREF_SEL(0x01));                    // ¹Ø±ÕÄÚ²¿²Î¿¼µçÑ¹
-  23   1          
+  23   1      
   24   1          // ²»ÄÜÊ¹ÓÃVCCA£¬´ýÐÞ¸Ä£¬¿´¿´Ð¾Æ¬×îµÍµÄ¹¤×÷µçÑ¹ºÍÊµ¼ÊÌá¹©µÄµçÑ¹
-  25   1          ADC_ACON1 |= ADC_VREF_SEL(0x06) | ADC_TEN_SEL(0x3);     // Ñ¡ÔñÄÚ²¿²Î¿¼µçÑ¹VCCA£¬¹Ø±Õ²âÊÔÐÅºÅ
-  26   1          ADC_ACON0 = ADC_CMP_EN(0x1) |                           // ´ò¿ªADCÖÐµÄCMPÊ¹ÄÜÐÅºÅ
-  27   1                      ADC_BIAS_EN(0x1) |                          // ´ò¿ªADCÆ«ÖÃµçÁ÷ÄÜÊ¹ÐÅºÅ
-  28   1                      ADC_BIAS_SEL(0x1);                          // Æ«ÖÃµçÁ÷Ñ¡Ôñ£º1x
+  25   1          ADC_ACON1 |= ADC_VREF_SEL(0x06) | ADC_TEN_SEL(0x3); // Ñ¡ÔñÄÚ²¿²Î¿¼µçÑ¹VCCA£¬¹Ø±Õ²âÊÔÐÅºÅ
+  26   1          ADC_ACON0 = ADC_CMP_EN(0x1) |                       // ´ò¿ªADCÖÐµÄCMPÊ¹ÄÜÐÅºÅ
+  27   1                      ADC_BIAS_EN(0x1) |                      // ´ò¿ªADCÆ«ÖÃµçÁ÷ÄÜÊ¹ÐÅºÅ
+  28   1                      ADC_BIAS_SEL(0x1);                      // Æ«ÖÃµçÁ÷Ñ¡Ôñ£º1x
   29   1      }
   30          
   31          // ÇÐ»»adcÉ¨ÃèµÄÒý½Å
@@ -62,7 +62,7 @@ line level    source
   51   1          delay_ms(1); // µÈ´ýADCÄ£¿éÅäÖÃÎÈ¶¨£¬ÐèÒªµÈ´ý20usÒÔÉÏ
   52   1      }
   53          
-C51 COMPILER V9.60.7.0   ADC                                                               10/26/2024 17:00:25 PAGE 2   
+C51 COMPILER V9.60.7.0   ADC                                                               10/28/2024 17:51:21 PAGE 2   
 
   54          // »ñÈ¡adcÖµ£¬´æ·Åµ½±äÁ¿adc_valÖÐ(adcµ¥´Î×ª»»)
   55          u16 adc_single_convert(void)
@@ -96,41 +96,47 @@ line level    source
   83   1          adc_sel_pin(ADC_PIN_BATTERY);
   84   1          adc_sample_filter();
   85   1      
-  86   1          // Á¬½Ó´®¿Ú²é¿´ADCÖµ
-  87   1          printf("ADC_PIN_BATTERY = %d\r\n", adc_val);
-  88   1          delay_ms(500);
-  89   1      
-  90   1          adc_sel_pin(ADC_PIN_TOUCH);
-  91   1          adc_sample_filter();
-  92   1      
-  93   1          // Á¬½Ó´®¿Ú²é¿´ADCÖµ
-  94   1          printf("ADC_PIN_TOUCH = %d\r\n", adc_val);
-  95   1          delay_ms(500);
-  96   1      }
-  97          
-  98          // ²âÊÔÓÃ£¬»¹Î´ÄÜÕæÕý¼ì²â£¬Ö»ÄÜ½«¼ì²âµ½µÄadÖµÖ±½Ó×ª»»³É¶ÔÓ¦µÄ°Ù·Ö±È
-  99          void adc_scan(void)
- 100          {
- 101   1          adc_sel_pin(ADC_PIN_BATTERY);
- 102   1          adc_sample_filter(); // ÂË²¨Íê³ÉÖ®ºó¿ÉÄÜ»¹»á³öÏÖÌø±ä£¬Ó¦¸ÃÔÚºóÐø¼ÓÈëËÀÇøÅÐ¶Ï
- 103   1          fun_info.battery = (u8)((u32)adc_val * 100 / 4095); // u16µÄadc_val³ËÒÔ100»áÖ±½ÓÒç³ö£¬ÕâÀïÒªÇ¿×ªÎªu32
- 104   1      
- 105   1      #if MY_DEBUG
-                  printf("ADC_PIN_BATTERY = %d\r\n", adc_val);
-                  printf("battery : %d %%\n", (u16)fun_info.battery); // %d´òÓ¡ÊÇÁ½¸ö×Ö½Ú£¬²»Ç¿×ª»áÔ½½ç·ÃÎÊ
-              #endif
- 109   1      
- 110   1          get_battery = 1;
- 111   1      
- 112   1          delay_ms(10); // adc²ÉÑù²»ÄÜÌ«Æµ·±
- 113   1      }
+  86   1      // Á¬½Ó´®¿Ú²é¿´ADCÖµ
+  87   1      #if USE_MY_DEBUG
+  88   1          // printf("ADC_PIN_BATTERY = %d\r\n", adc_val);
+  89   1      #endif
+  90   1          delay_ms(500);
+  91   1      
+  92   1          adc_sel_pin(ADC_PIN_TOUCH);
+  93   1          adc_sample_filter();
+  94   1      
+  95   1          // Á¬½Ó´®¿Ú²é¿´ADCÖµ
+  96   1      #if USE_MY_DEBUG
+  97   1          // printf("ADC_PIN_TOUCH = %d\r\n", adc_val);
+  98   1      #endif
+  99   1          delay_ms(500);
+ 100   1      }
+ 101          
+ 102          // ²âÊÔÓÃ£¬»¹Î´ÄÜÕæÕý¼ì²â£¬Ö»ÄÜ½«¼ì²âµ½µÄadÖµÖ±½Ó×ª»»³É¶ÔÓ¦µÄ°Ù·Ö±È
+ 103          void adc_scan(void)
+ 104          {
+ 105   1          adc_sel_pin(ADC_PIN_BATTERY);
+ 106   1          adc_sample_filter();                                // ÂË²¨Íê³ÉÖ®ºó¿ÉÄÜ»¹»á³öÏÖÌø±ä£¬Ó¦¸ÃÔÚºóÐø¼ÓÈëËÀÇ
+             -øÅÐ¶Ï
+ 107   1          fun_info.battery = (u8)((u32)adc_val * 100 / 4095); // u16µÄadc_val³ËÒÔ100»áÖ±½ÓÒç³ö£¬ÕâÀïÒªÇ¿×ªÎªu32
+ 108   1      
+ 109   1      #if USE_MY_DEBUG
+ 110   1          // ²âÊÔÓÃ£º
+ 111   1          // printf("ADC_PIN_BATTERY = %d\r\n", adc_val);
+ 112   1          // printf("battery : %d %%\n", (u16)fun_info.battery); // %d´òÓ¡ÊÇÁ½¸ö×Ö½Ú£¬²»Ç¿×ª»áÔ½½ç·ÃÎÊ
+ 113   1      #endif
+ 114   1      
+C51 COMPILER V9.60.7.0   ADC                                                               10/28/2024 17:51:21 PAGE 3   
 
+ 115   1          flag_get_battery = 1;
+ 116   1      
+ 117   1          delay_ms(10); // adc²ÉÑù²»ÄÜÌ«Æµ·±
+ 118   1      }
 
-C51 COMPILER V9.60.7.0   ADC                                                               10/26/2024 17:00:25 PAGE 3   
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    309    ----
-   CONSTANT SIZE    =     44    ----
+   CODE SIZE        =    261    ----
+   CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =      2       5
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----

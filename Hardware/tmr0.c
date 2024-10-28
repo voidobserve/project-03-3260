@@ -1,9 +1,12 @@
 #include "tmr0.h"
 
-#define TMR0_CNT_TIME 152 // 152 * 0.65625us Ô¼µÈÓÚ100us
+// #define TMR0_CNT_TIME 152 // 152 * 0.65625us Ô¼µÈÓÚ100us
+// ¶¨Ê±Æ÷¶¨Ê±ÖÜÆÚ (µ¥Î»:Hz)
+// ÖÜÆÚÖµ = ÏµÍ³Ê±ÖÓ / ¶¨Ê±Æ÷·ÖÆµ / ÆµÂÊ - 1
+#define TMR0_PERIOD (SYSCLK / 128 / 1000 - 1) // 1000Hz,1ms
 
 // volatile bit tmr0_flag = 0; // tmr0ÖÐ¶Ï·þÎñº¯ÊýÖÐ»áÖÃÎ»µÄ±êÖ¾Î»
-volatile u32 tmr0_cnt = 0;            // ¶¨Ê±Æ÷TMR0µÄ¼ÆÊýÖµ£¨Ã¿´ÎÔÚÖÐ¶Ï·þÎñº¯ÊýÖÐ»á¼ÓÒ»£©
+volatile u32 tmr0_cnt = 0; // ¶¨Ê±Æ÷TMR0µÄ¼ÆÊýÖµ£¨Ã¿´ÎÔÚÖÐ¶Ï·þÎñº¯ÊýÖÐ»á¼ÓÒ»£©
 
 /**
  * @brief ÅäÖÃ¶¨Ê±Æ÷TMR0
@@ -11,32 +14,26 @@ volatile u32 tmr0_cnt = 0;            // ¶¨Ê±Æ÷TMR0µÄ¼ÆÊýÖµ£¨Ã¿´ÎÔÚÖÐ¶Ï·þÎñº¯ÊýÖ
 void tmr0_config(void)
 {
     __SetIRQnIP(TMR0_IRQn, TMR0_IQn_CFG); // ÉèÖÃÖÐ¶ÏÓÅÏÈ¼¶£¨TMR0£©
+    __DisableIRQ(TMR0_IRQn);              // ½ûÓÃ¶¨Ê±Æ÷ÖÐ¶Ï
+    IE_EA = 1;                            // ´ò¿ª×ÜÖÐ¶Ï
+
+    // Çå³ýTMR0µÄ¼ÆÊýÖµ
+    TMR0_CNTL = 0;
+    TMR0_CNTH = 0;
 
     TMR0_CONL &= ~TMR_PRESCALE_SEL(0x03); // Çå³ýTMR0µÄÔ¤·ÖÆµÅäÖÃ¼Ä´æÆ÷
-    // ÅäÖÃTMR0µÄÔ¤·ÖÆµ£¬Îª32·ÖÆµ£¬¼´21MHz / 32 = 0.65625MHz£¬Ô¼0.67us¼ÆÊýÒ»´Î
-    // £¨Êµ¼Ê²âÊÔºÍ¼ÆËãµÃ³öÕâ¸öÏµÍ³Ê±ÖÓÊÇ21MHzµÄ£¬µ«ÊÇ»¹ÊÇÓÐÐ©Îó²î£¬²»ÊÇ×¼È·µÄ21MHz£©
-    TMR0_CONL |= TMR_PRESCALE_SEL(0x05);
+    TMR0_CONL |= TMR_PRESCALE_SEL(0x07); // ÅäÖÃÔ¤·ÖÆµ¼Ä´æÆ÷,128·ÖÆµ
     TMR0_CONL &= ~TMR_MODE_SEL(0x03); // Çå³ýTMR0µÄÄ£Ê½ÅäÖÃ¼Ä´æÆ÷
     TMR0_CONL |= TMR_MODE_SEL(0x01);  // ÅäÖÃTMR0µÄÄ£Ê½Îª¼ÆÊýÆ÷Ä£Ê½£¬×îºó¶ÔÏµÍ³Ê±ÖÓµÄÂö³å½øÐÐ¼ÆÊý
 
     TMR0_CONH &= ~TMR_PRD_PND(0x01); // Çå³ýTMR0µÄ¼ÆÊý±êÖ¾Î»£¬±íÊ¾Î´Íê³É¼ÆÊý
     TMR0_CONH |= TMR_PRD_IRQ_EN(1);  // Ê¹ÄÜTMR0µÄ¼ÆÊýÖÐ¶Ï
 
-    // ÅäÖÃTMR0µÄ¼ÆÊýÖÜÆÚ
-    TMR0_PRL = (unsigned char)(TMR0_CNT_TIME % 255);
-    TMR0_PRH = (unsigned char)(TMR0_CNT_TIME / 255);
-
-    // Çå³ýTMR0µÄ¼ÆÊýÖµ
-    TMR0_CNTL = 0;
-    TMR0_CNTH = 0;
+    TMR0_PRH = TMR_PERIOD_VAL_H((TMR0_PERIOD >> 8) & 0xFF); // ÖÜÆÚÖµ
+    TMR0_PRL = TMR_PERIOD_VAL_L((TMR0_PERIOD >> 0) & 0xFF);
 
     TMR0_CONL &= ~(TMR_SOURCE_SEL(0x07)); // Çå³ýTMR0µÄÊ±ÖÓÔ´ÅäÖÃ¼Ä´æÆ÷
-    // TMR0_CONL |= TMR_SOURCE_SEL(0x07); // ÅäÖÃTMR0µÄÊ±ÖÓÔ´£¬Ê¹ÓÃÏµÍ³Ê±ÖÓ
     TMR0_CONL |= TMR_SOURCE_SEL(0x05); // ÅäÖÃTMR0µÄÊ±ÖÓÔ´£¬²»ÓÃÈÎºÎÊ±ÖÓ
-                                       // __EnableIRQ(TMR0_IRQn);			   // Ê¹ÄÜÖÐ¶Ï
-
-    __DisableIRQ(TMR0_IRQn); // ½ûÓÃÖÐ¶Ï
-    IE_EA = 1;               // ´ò¿ª×ÜÖÐ¶Ï
 }
 
 /**

@@ -55,7 +55,7 @@ void mileage_scan(void)
         {
             // 发送数据的操作，可以先置标志位
             // 要注意发送的是五位的整数、一位的小数、单位为KM的数据
-            getTotalMileage = 1;
+            flag_get_total_mileage = 1;
         }
     }
 
@@ -69,7 +69,7 @@ void mileage_scan(void)
         {
             // 发送数据的操作，可以先置标志位
             // 要注意发送的是四位的、单位为KM的数据
-            getSubTotalMileage = 1;
+            flag_get_sub_total_mileage = 1;
         }
     }
 
@@ -118,7 +118,7 @@ void mileage_scan(void)
             // 发送数据的操作，可以先置标志位
             // 要注意发送的是五位的整数、一位的小数、单位为英里的数据
 
-            getTotalMileage = 1;
+            flag_get_total_mileage = 1;
         }
     }
 
@@ -132,7 +132,7 @@ void mileage_scan(void)
         {
             // 发送数据的操作，可以先置标志位
             // 要注意发送的是四位的、单位为英里的数据
-            getSubTotalMileage = 1;
+            flag_get_sub_total_mileage = 1;
         }
     }
 

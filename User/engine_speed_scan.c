@@ -81,7 +81,7 @@ void engine_speed_scan(void)
     // printf("rpm: %lu\n", rpm);
 
     fun_info.engine_speeed = rpm;
-    get_engine_speed = 1;
+    flag_get_engine_speed = 1;
 }
 
 #ifdef DEVELOPMENT_BOARD

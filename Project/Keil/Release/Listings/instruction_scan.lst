@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   INSTRUCTION_SCAN                                                  10/26/2024 17:00:25 PAGE 1   
+C51 COMPILER V9.60.7.0   INSTRUCTION_SCAN                                                  10/28/2024 08:59:11 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE INSTRUCTION_SCAN
@@ -13,208 +13,16 @@ line level    source
    2          // 或者是当某一个功能的状态有更新，发送对应的数据
    3          #include "instruction_scan.h"
    4          
-   5          // 用bit定义，来节省空间
-   6          volatile bit flag_get_all_status = 0;   // 获取所有功能的状态
-   7          volatile bit get_gear = 0;        // 获取挡位状态 / 得到了挡位的状态
-   8          volatile bit get_battery = 0;     // 获取电池状态 / 得到了电池的状态（电池电量，单位：百分比）
-   9          volatile bit get_brake = 0;       // 获取刹车状态 / 得到了刹车的状态
-  10          volatile bit get_left_turn = 0;    // 获取左转向灯的状态 / 得到了左转向灯的状态
-  11          volatile bit get_right_turn = 0;   // 获取右转向灯的状态 / 得到了右转向灯的状态
-  12          volatile bit get_high_beam = 0;    // 获取远光灯的状态 / 得到了远光灯的状态
-  13          volatile bit get_engine_speed = 0; // 获取发动机的转速 / 得到了发动机的转速
-  14          volatile bit flag_get_speed = 0;       // 获取时速 / 得到了时速
-  15          volatile bit getFuel = 0;        // 获取油量 / 得到了油量（单位：百分比）
-  16          volatile bit getWaterTemp = 0;   // 获取水温 / 得到了水温
-  17          
-  18          volatile bit getTotalMileage = 0;    // 获取大计里程 / 得到了大计里程
-  19          volatile bit getSubTotalMileage = 0; // 获取小计里程 / 得到了小计里程
-  20          
-  21          void instruction_handle(void)
-  22          {
-  23   1          if (flag_get_all_status)
-  24   1          {
-  25   2              // 如果要获取所有功能的状态
-  26   2              flag_get_all_status = 0; // 清除标志位
-  27   2      
-  28   2      #if MY_DEBUG
-                      printf("get_all_status\n");
-              #endif
-  31   2          }
-  32   1      
-  33   1          if (get_gear)
-  34   1          {
-  35   2              // 如果要获取挡位的状态
-  36   2              get_gear = 0; //
-  37   2      
-  38   2      #if MY_DEBUG
-                      printf("get_gear\n");
-              #endif
-  41   2      
-  42   2              send_data(SEND_GEAR, fun_info.gear); // 发送当前挡位的状态
-  43   2          }
-  44   1      
-  45   1          if (get_battery)
-  46   1          {
-  47   2              // 如果要获取电池电量的状态
-  48   2              get_battery = 0;
-  49   2      
-  50   2              send_data(SEND_BATTERY, fun_info.battery); // 发送电池电量
-  51   2      
-  52   2      #if MY_DEBUG
-                      printf("get_battery\n");
-C51 COMPILER V9.60.7.0   INSTRUCTION_SCAN                                                  10/26/2024 17:00:25 PAGE 2   
-
-              #endif
-  55   2          }
-  56   1      
-  57   1          if (get_brake)
-  58   1          {
-  59   2              // 如果要获取获取刹车的状态
-  60   2              get_brake = 0;
-  61   2      
-  62   2      #if MY_DEBUG
-                      printf("get_brake\n");
-              #endif
-  65   2      
-  66   2              send_data(SEND_BARKE, fun_info.brake); // 发送当前刹车的状态
-  67   2          }
-  68   1      
-  69   1          if (get_left_turn)
-  70   1          {
-  71   2              // 如果要获取左转向灯的状态
-  72   2              get_left_turn = 0;
-  73   2      
-  74   2      #if MY_DEBUG
-                      printf("get_left_turn\n");
-              #endif
-  77   2      
-  78   2              send_data(SEND_LEFT_TURN, fun_info.left_turn); // 发送当前左转向灯的状态
-  79   2          }
-  80   1      
-  81   1          if (get_right_turn)
-  82   1          {
-  83   2              // 如果要获取右转向灯的状态
-  84   2              get_right_turn = 0;
-  85   2      
-  86   2              // uart0_sendstr("get_right_turn\n");
-  87   2      
-  88   2              send_data(SEND_RIGHT_TURN, fun_info.right_turn); // 发送当前右转向灯的状态
-  89   2          }
-  90   1      
-  91   1          if (get_high_beam)
-  92   1          {
-  93   2              // 如果要获取远光灯的状态
-  94   2              get_high_beam = 0;
-  95   2      
-  96   2              // uart0_sendstr("get_high_beam\n");
-  97   2      
-  98   2              send_data(SEND_HIGH_BEAM, fun_info.high_beam); // 发送当前远光灯的状态
-  99   2          }
- 100   1      
- 101   1          if (get_engine_speed)
- 102   1          {
- 103   2              // 如果要获取发动机的转速
- 104   2              get_engine_speed = 0;
- 105   2      
- 106   2              // uart0_sendstr("get_engine_speed\n");
- 107   2      
- 108   2              send_data(SEND_ENGINE_SPEED, fun_info.engine_speeed);
- 109   2          }
- 110   1      
- 111   1          if (flag_get_speed)
- 112   1          {
- 113   2              // 如果要获取时速
- 114   2              flag_get_speed = 0;
- 115   2      
-C51 COMPILER V9.60.7.0   INSTRUCTION_SCAN                                                  10/26/2024 17:00:25 PAGE 3   
-
- 116   2              // uart0_sendstr("get_speed\n");
- 117   2      
- 118   2      #ifdef INTERNATIONAL // 使用公制单位
- 119   2      
- 120   2              send_data(SEND_SPEED, fun_info.speed); // 发送当前采集到的车速（时速）
- 121   2      
- 122   2      #endif // INTERNATIONAL 使用公制单位
- 123   2      
- 124   2      #ifdef IMPERIAL // 使用英制单位
-              
-                      send_data(SEND_SPEED, fun_info.speed * 621 / 1000);
-              
-              #endif
- 129   2          }
- 130   1      
- 131   1          if (getFuel)
- 132   1          {
- 133   2              // 如果要获取油量
- 134   2              getFuel = 0;
- 135   2      
- 136   2              // uart0_sendstr("getFuel\n");
- 137   2          }
- 138   1      
- 139   1          if (getWaterTemp)
- 140   1          {
- 141   2              // 如果要获取水温
- 142   2              getWaterTemp = 0;
- 143   2      
- 144   2              // uart0_sendstr("getWaterTemp\n");
- 145   2          }
- 146   1      
- 147   1          if (getTotalMileage)
- 148   1          {
- 149   2              // 如果要获取大计里程 / 得到了大计里程新的数据
- 150   2              getTotalMileage = 0;
- 151   2      
- 152   2      #ifdef INTERNATIONAL // 公制单位
- 153   2      
- 154   2              // 只发送百米及以上的数据
- 155   2              send_data(SEND_TOTAL_MILEAGE, mileage_info.total_mileage / 100);
- 156   2      
- 157   2      #endif // INTERNATIONAL 公制单位
- 158   2      
- 159   2      #ifdef IMPERIAL // 英制单位
-              #if MY_DEBUG
-                      printf("total mileage: %lu * 0.1 mile", mileage_info.total_mileage * 62137 / 10000000);
-              #endif // MY_DEBUG
-                     // 只发送0.1英里及以上的数据
-                      send_data(SEND_TOTAL_MILEAGE, mileage_info.total_mileage * 62137 / 10000000);
-              
-              #endif // IMPERIAL 英制单位
- 167   2          }
- 168   1      
- 169   1          if (getSubTotalMileage)
- 170   1          {
- 171   2              // 如果要获取小计里程 / 得到了小计里程新的数据
- 172   2              getSubTotalMileage = 0;
- 173   2      
- 174   2      #ifdef INTERNATIONAL // 公制单位
- 175   2      
- 176   2              // 只发送千米及以上的数据
- 177   2              send_data(SEND_SUBTOTAL_MILEAGE, mileage_info.subtotal_mileage / 1000);
-C51 COMPILER V9.60.7.0   INSTRUCTION_SCAN                                                  10/26/2024 17:00:25 PAGE 4   
-
- 178   2      
- 179   2      #endif // INTERNATIONAL 公制单位
- 180   2      
- 181   2      #ifdef IMPERIAL // 英制单位
-              #if MY_DEBUG
-                      printf("sub total mileage: %lu mile", mileage_info.subtotal_mileage * 62137 / 100000000);
-              #endif // MY_DEBUG
-                     // 只发送英里及以上的数据
-                      send_data(SEND_SUBTOTAL_MILEAGE, mileage_info.subtotal_mileage * 62137 / 100000000);
-              
-              #endif // IMPERIAL 英制单位
- 189   2          }
- 190   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    333    ----
+   CODE SIZE        =   ----    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
-   BIT SIZE         =     13    ----
+   BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
 
 
