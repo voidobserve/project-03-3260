@@ -5,6 +5,13 @@
 #include "include.h" // 包含芯片官方提供的头文件
 #include "my_config.h"
 
+extern volatile u32 tmr2_cnt; // 定时器TMR2的计数值（每次在中断服务函数中会加一）
+
+extern void tmr2_config(void);
+extern void tmr2_enable(void);
+extern void tmr2_disable(void);
+
+
 #if USE_TMR2
 // 定时器TMR2的计时周期，也是中断触发周期（每隔多久触发一次中断）
 // 计时周期不能大于65535，因为TMR2存放计时周期的寄存器只有16位

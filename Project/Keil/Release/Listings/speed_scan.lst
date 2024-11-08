@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        10/28/2024 17:51:22 PAGE 1   
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/08/2024 16:31:55 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE SPEED_SCAN
@@ -62,7 +62,7 @@ line level    source
               #endif
   52   1      #ifdef CIRCUIT_BOARD
   53   1          __DisableIRQ(P0_IRQn); // 关闭P0中断
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        10/28/2024 17:51:22 PAGE 2   
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/08/2024 16:31:55 PAGE 2   
 
   54   1      #endif
   55   1          pulse_cnt = 0; // 清空脉冲计数
@@ -126,7 +126,7 @@ line level    source
  112   2      
  113   2              // 测试用：
  114   2              // printf("%lu km/h\n", cur_speed);
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        10/28/2024 17:51:22 PAGE 3   
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/08/2024 16:31:55 PAGE 3   
 
  115   2      
  116   2              last_speed = cur_speed;
@@ -190,7 +190,7 @@ line level    source
  174   2              fun_info.speed = cur_speed;
  175   2              flag_get_speed = 1;
  176   2          }
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        10/28/2024 17:51:22 PAGE 4   
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/08/2024 16:31:55 PAGE 4   
 
  177   1      }
  178          

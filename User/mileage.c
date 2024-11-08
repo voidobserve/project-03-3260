@@ -1,14 +1,6 @@
 // 里程表的源程序
 #include "mileage.h"
 
-mileage_t mileage_info = {0}; // 存放里程表的结构体变量
-
-// 里程表配置（初始化）
-void mileage_config(void)
-{
-    // 先从flash中读出里程
-    flash_read(0x00, (u8*)&mileage_info, sizeof(mileage_info));
-}
 
 // 总里程扫描
 void mileage_scan(void)
@@ -34,23 +26,23 @@ void mileage_scan(void)
         tmr3_cnt = 0;
         tmr_is_open = 0;
 
-        flash_write(0x00, (u8 *)&mileage_info, sizeof(mileage_info));
+        flash_write(0x00, (u8 *)&fun_info, sizeof(fun_info));
     }
 
     if (distance >= 1000)
     {
         // 如果走过的距离超过了1m，再进行保存
-        mileage_info.total_mileage += distance / 1000;    // 将毫米转换成米，再保存
-        mileage_info.subtotal_mileage += distance / 1000; // 将毫米转换成米，再保存
+        fun_info.total_mileage += distance / 1000;    // 将毫米转换成米，再保存
+        fun_info.subtotal_mileage += distance / 1000; // 将毫米转换成米，再保存
         distance %= 1000;                                 // 剩下的、未保存的、不满1m的数据留到下一次的保存
     }
 
-    if ((mileage_info.total_mileage - old_total_mileage) > 100)
+    if ((fun_info.total_mileage - old_total_mileage) > 100)
     {
         // 如果大计里程有变化且超过了100m
-        old_total_mileage = mileage_info.total_mileage; // 记录旧的里程
+        old_total_mileage = fun_info.total_mileage; // 记录旧的里程
 
-        // printf("total mileage: %lum\n", mileage_info.total_mileage);
+        // printf("total mileage: %lum\n", fun_info.total_mileage);
 
         {
             // 发送数据的操作，可以先置标志位
@@ -59,12 +51,12 @@ void mileage_scan(void)
         }
     }
 
-    if ((mileage_info.subtotal_mileage - old_subtotal_mileage) > 1000)
+    if ((fun_info.subtotal_mileage - old_subtotal_mileage) > 1000)
     {
         // 如果小计里程有变化且超过了1000m
-        old_subtotal_mileage = mileage_info.subtotal_mileage; // 记录旧的里程
+        old_subtotal_mileage = fun_info.subtotal_mileage; // 记录旧的里程
 
-        // printf("subtotal mileage: %lum\n", mileage_info.subtotal_mileage);
+        // printf("subtotal mileage: %lum\n", fun_info.subtotal_mileage);
 
         {
             // 发送数据的操作，可以先置标志位
@@ -96,23 +88,23 @@ void mileage_scan(void)
         tmr3_cnt = 0;
         tmr_is_open = 0;
 
-        flash_write(0x00, (u8 *)&mileage_info, sizeof(mileage_info));
+        flash_write(0x00, (u8 *)&fun_info, sizeof(fun_info));
     }
 
     if (distance >= 1000)
     {
         // 如果走过的距离超过了1m，再进行保存
-        mileage_info.total_mileage += distance / 1000;    // 将毫米转换成米，再保存
-        mileage_info.subtotal_mileage += distance / 1000; // 将毫米转换成米，再保存
+        fun_info.total_mileage += distance / 1000;    // 将毫米转换成米，再保存
+        fun_info.subtotal_mileage += distance / 1000; // 将毫米转换成米，再保存
         distance %= 1000;                                 // 剩下的、未保存的、不满1m的数据留到下一次的保存
     }
 
-    if ((mileage_info.total_mileage - old_total_mileage) > 161)
+    if ((fun_info.total_mileage - old_total_mileage) > 161)
     {
         // 如果大计里程有变化且超过了161m，约0.1英里
-        old_total_mileage = mileage_info.total_mileage; // 记录旧的里程
+        old_total_mileage = fun_info.total_mileage; // 记录旧的里程
 
-        // printf("total mileage: %lum\n", mileage_info.total_mileage);
+        // printf("total mileage: %lum\n", fun_info.total_mileage);
 
         {
             // 发送数据的操作，可以先置标志位
@@ -122,12 +114,12 @@ void mileage_scan(void)
         }
     }
 
-    if ((mileage_info.subtotal_mileage - old_subtotal_mileage) > 1610)
+    if ((fun_info.subtotal_mileage - old_subtotal_mileage) > 1610)
     {
         // 如果小计里程有变化且超过了1610m，约1英里
-        old_subtotal_mileage = mileage_info.subtotal_mileage; // 记录旧的里程
+        old_subtotal_mileage = fun_info.subtotal_mileage; // 记录旧的里程
 
-        // printf("subtotal mileage: %lum\n", mileage_info.subtotal_mileage);
+        // printf("subtotal mileage: %lum\n", fun_info.subtotal_mileage);
 
         {
             // 发送数据的操作，可以先置标志位

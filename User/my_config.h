@@ -26,15 +26,15 @@
 
 // #define MY_DEBUG 0
 
-#define USE_TMR2 0 // 是否使用定时器2
+#define USE_TMR2 0 // 是否使用定时器2(作为PWM输出)
 
 #include <stdio.h>
 #include "my_gpio.h" // 自定义的、使用到的引脚
 #include "uart0.h"
 #include "tmr0.h" // 串口检测数据超时需要使用到的定时器
-#include "tmr1.h" // 扫描霍尔传感器的IO口的脉冲需要用到的定时器
+#include "tmr1.h" // 用于扫描发动机转速的定时器
 
-#include "tmr2.h" // 测试用，P24+定时器PWM输出，给检测霍尔的引脚提供信号
+#include "tmr2.h" // 用于扫描时速的定时器
 
 #include "tmr3.h" // 定时将总里程写入flash所需的定时器
 
@@ -52,5 +52,6 @@
 
 #include "flash.h" // 用于将总里程、小计里程存入flash中
 #include "mileage.h" // 里程表的相关接口
+
 
 #endif // end file

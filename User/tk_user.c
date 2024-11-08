@@ -28,21 +28,26 @@
  */
 void user_init(void)
 {
+    fun_info_init(); // 初始化用于存放信息的变量
+
+
     tmr0_config(); // 串口检测数据超时需要使用到的定时器
-    uart0_init();
-    pin_level_scan_config();
+    uart0_config(); // 发送和接收指令使用到的串口
+    pin_level_scan_config(); // 刹车、转向灯、挡位的检测引脚配置
+
     tmr1_config(); // 检测一段时间内的脉冲个数所需的定时器
     // tmr2_pwm_config(); // 测试用的PWM
     speed_scan_config(); // 时速扫描的配置
     engine_speed_scan_config(); // 发动机转速扫描的配置
+
     tmr3_config(); // 定时将里程写入flash所需的定时器
-    mileage_config(); // 从flash中读出大计里程和小计里程数据
+
+    // mileage_init(); // 从flash中读出大计里程和小计里程数据（已经并入fun_info结构体变量中）
 
     p03_output_config(); // 输出高电平用的引脚，到时候检测ad到了一定值，再让它输出高电平，现在它一开始就是高电平
     P03 = 1;
 
     adc_pin_config();
-
 }
 
 #if 0

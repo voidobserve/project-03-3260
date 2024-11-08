@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   FLASH                                                             10/28/2024 17:51:22 PAGE 1   
+C51 COMPILER V9.60.7.0   FLASH                                                             11/08/2024 16:31:54 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE FLASH
@@ -56,13 +56,13 @@ line level    source
   45          
   46          /**
   47           * @brief  flash program
-  48           * @param  addr   : Read data address in flash
+  48           * @param  addr   : Read data address in flash 
   49           * @param  p_data : Read data to flash
   50           * @param  len    : Data length
   51           * @retval None
   52           */
   53          void flash_read(u8 addr, u8 *p_data, u8 len)
-C51 COMPILER V9.60.7.0   FLASH                                                             10/28/2024 17:51:22 PAGE 2   
+C51 COMPILER V9.60.7.0   FLASH                                                             11/08/2024 16:31:54 PAGE 2   
 
   54          {
   55   1          while (len != 0)
@@ -91,17 +91,17 @@ line level    source
   78          //     }
   79          // }
   80          
-  81          void flash_write_test(void)
-  82          {
-  83   1          mileage_t tmp[3] = {0};
-  84   1          flash_write(0x00, (u8 *)tmp, sizeof(tmp));
-  85   1      }
+  81          // void flash_write_test(void)
+  82          // {
+  83          //     mileage_t tmp[3] = {0};
+  84          //     flash_write(0x00, (u8 *)tmp, sizeof(tmp));
+  85          // }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    160    ----
-   CONSTANT SIZE    =     24    ----
-   XDATA SIZE       =   ----      34
+   CODE SIZE        =    124    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----      10
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----

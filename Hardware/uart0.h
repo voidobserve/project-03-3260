@@ -11,6 +11,7 @@
 
 // 用来存放接收的数据帧的缓冲区
 extern volatile u8 uart0_recv_buf[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)][FRAME_MAX_LEN];
+extern volatile u8 uart0_recv_len[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)];
 extern volatile u8 recved_flagbuf[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)];
 extern volatile u8 recv_frame_cnt; // 接收到的数据帧的个数
 extern volatile u8 flagbuf_valid_instruction[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)]; // 存放有合法指令的标志位数组
@@ -25,8 +26,9 @@ extern volatile u8 flagbuf_valid_instruction[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)
 #define UART0_RXBUF_LEN 256
 #endif
 
-void uart0_init(void);
+void uart0_config(void);
 void uart0_sendbyte(u8 senddata);
+void uart0_send_buff(u8* buf, u8 len); // 通过uart0发送若干数据
 // void uart0_sendbytes(u8 *buf, u32 buf_len);
 // void uart0_sendstr(u8 *str); // UART0发送字符串的函数
 

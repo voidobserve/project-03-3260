@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   ADC                                                               10/28/2024 17:51:21 PAGE 1   
+C51 COMPILER V9.60.7.0   ADC                                                               11/08/2024 16:31:54 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE ADC
@@ -62,7 +62,7 @@ line level    source
   51   1          delay_ms(1); // 等待ADC模块配置稳定，需要等待20us以上
   52   1      }
   53          
-C51 COMPILER V9.60.7.0   ADC                                                               10/28/2024 17:51:21 PAGE 2   
+C51 COMPILER V9.60.7.0   ADC                                                               11/08/2024 16:31:54 PAGE 2   
 
   54          // 获取adc值，存放到变量adc_val中(adc单次转换)
   55          u16 adc_single_convert(void)
@@ -126,7 +126,7 @@ line level    source
  112   1          // printf("battery : %d %%\n", (u16)fun_info.battery); // %d打印是两个字节，不强转会越界访问
  113   1      #endif
  114   1      
-C51 COMPILER V9.60.7.0   ADC                                                               10/28/2024 17:51:21 PAGE 3   
+C51 COMPILER V9.60.7.0   ADC                                                               11/08/2024 16:31:54 PAGE 3   
 
  115   1          flag_get_battery = 1;
  116   1      

@@ -45,7 +45,7 @@ void flash_write(u8 addr, u8 *p_data, u8 len)
 
 /**
  * @brief  flash program
- * @param  addr   : Read data address in flash
+ * @param  addr   : Read data address in flash 
  * @param  p_data : Read data to flash
  * @param  len    : Data length
  * @retval None
@@ -78,8 +78,8 @@ void flash_read(u8 addr, u8 *p_data, u8 len)
 //     }
 // }
 
-void flash_write_test(void)
-{
-    mileage_t tmp[3] = {0};
-    flash_write(0x00, (u8 *)tmp, sizeof(tmp));
-}
+// void flash_write_test(void)
+// {
+//     mileage_t tmp[3] = {0};
+//     flash_write(0x00, (u8 *)tmp, sizeof(tmp));
+// }

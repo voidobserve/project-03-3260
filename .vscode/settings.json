@@ -31,7 +31,8 @@
         "mileage.h": "c",
         "engine_speed_scan.h": "c",
         "instruction.h": "c",
-        "tk_debug.h": "c"
+        "tk_debug.h": "c",
+        "set_date_time.h": "c"
     },
     "typescript.suggest.jsdoc.generateReturns": false,
     "javascript.suggest.jsdoc.generateReturns": false

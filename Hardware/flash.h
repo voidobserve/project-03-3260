@@ -10,6 +10,6 @@ void flash_write(u8 addr, u8 *p_data, u8 len);
 void flash_read(u8 addr, u8 *p_data, u8 len);
 
 // void flash_test(void); // 测试函数，使用前需要先初始化P12
-void flash_write_test(void);
+// void flash_write_test(void);
 
 #endif

@@ -29,6 +29,16 @@ typedef struct
     u32 engine_speeed; // 发动机的转速
     u32 speed;         // 时速
 
+    u32 total_mileage; // 总里程表（大计里程，0~99999.9）
+    u32 subtotal_mileage; // 短距离里程表（小计里程，0~9999.9）
+
+    // u32 date; // 日期 4byte 年 月 日 
+    u16 year; // 年份
+    u8 month; // 月份
+    u8 day; // 日期
+
+    u32 time; // 时间 3byte 时 分 秒
+
     u8 gear;    // 挡位
     u8 battery; // 电池电量
     u8 brake;   // 刹车的状态
@@ -40,8 +50,16 @@ typedef struct
 
     u8 fuel;       // 油量
     u8 water_temp; // 水温
+
+    u8 flag_is_in_water_temp_warning; // 标志位，是否处于水温报警
+
+    
+
 } fun_info_t;
 
 extern volatile fun_info_t fun_info; // 存放所有功能状态的结构体变量
+
+extern void fun_info_init(void); // 初始化存放所有信息的结构体变量
+extern void fun_info_save(void); // 将信息写回flash
 
 #endif

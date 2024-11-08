@@ -28,6 +28,9 @@ volatile bit flag_set_temp_of_water_warning = 0; // 设置水温报警
 volatile bit flag_clear_total_mileage = 0;     // 清除大计里程
 volatile bit flag_clear_sub_total_mileage = 0; // 清除小计里程
 
+// // 存放接收到的设置水温报警的指令中，对应的操作，默认为无操作
+// volatile u8 operation_set_temp_of_water_warning = OPERATION_SET_TEMP_OF_WATER_WARNING_NONE;
+
 // 检查接收是否正确的函数，如果接收正确，
 // 根据接收到的数据中的指令，给对应的指令的标志位置一
 void instruction_scan(void)
@@ -101,6 +104,15 @@ void instruction_scan(void)
 
                 case INSTRUCTION_ALTER_DATE: // 修改日期
                     flag_alter_date = 1;
+                    // fun_info.date = ((u32)uart0_recv_buf[i][3] << 24) + /* 年 */
+                    //                 ((u32)uart0_recv_buf[i][4] << 16) +
+                    //                 ((u32)uart0_recv_buf[i][5] << 8) + /* 月 */
+                    //                 ((u32)uart0_recv_buf[i][6] << 0);  /* 日 */
+                    fun_info.year = ((u16)uart0_recv_buf[i][3] << 8) +
+                                    (u16)uart0_recv_buf[i][4];
+                    fun_info.month = uart0_recv_buf[i][5];
+                    fun_info.day = uart0_recv_buf[i][6];
+
                     break;
 
                 case INSTRUCTION_ALTER_TIME: // 修改时间
@@ -167,6 +179,7 @@ void instruction_scan(void)
 
                 case INSTRUCTION_SET_TEMP_OF_WATER_WARNING: // 设置水温报警
                     flag_set_temp_of_water_warning = 1;
+
                     break;
 
                 case INSTRUCTION_CLEAR_TOTAL_MILEAGE: // 清除大计里程
@@ -183,7 +196,9 @@ void instruction_scan(void)
                     recv_frame_cnt--; // 从串口接收的数据帧数目减一，表示指令已经从缓冲区取出
                 }
 
-                flagbuf_valid_instruction[i] = 0;            // 清空缓冲区对应的元素，表示该下标的指令已经处理
+                flagbuf_valid_instruction[i] = 0; // 清空缓冲区对应的元素，表示该下标的指令已经处理
+                uart0_recv_len[i] = 0;
+                recved_flagbuf[i] = 0;
                 memset(uart0_recv_buf[i], 0, FRAME_MAX_LEN); // 清空缓冲区对应的元素
             } // if (4 == uart0_recv_buf[i][1])
         }
@@ -200,6 +215,8 @@ void instruction_handle(void)
 #if USE_MY_DEBUG
         printf(" flag_get_all_status\n");
 #endif
+
+        // 获取所有功能的状态，需要把这些功能对应的状态都发送出去
     }
 
     if (flag_get_gear)
@@ -324,16 +341,16 @@ void instruction_handle(void)
 #ifdef INTERNATIONAL // 公制单位
 
         // 只发送百米及以上的数据
-        send_data(SEND_TOTAL_MILEAGE, mileage_info.total_mileage / 100);
+        send_data(SEND_TOTAL_MILEAGE, fun_info.total_mileage / 100);
 
 #endif // INTERNATIONAL 公制单位
 
 #ifdef IMPERIAL // 英制单位
 #if USE_MY_DEBUG
-        printf("total mileage: %lu * 0.1 mile", mileage_info.total_mileage * 62137 / 10000000);
+        printf("total mileage: %lu * 0.1 mile", fun_info.total_mileage * 62137 / 10000000);
 #endif // USE_MY_DEBUG
        // 只发送0.1英里及以上的数据
-        send_data(SEND_TOTAL_MILEAGE, mileage_info.total_mileage * 62137 / 10000000);
+        send_data(SEND_TOTAL_MILEAGE, fun_info.total_mileage * 62137 / 10000000);
 
 #endif // IMPERIAL 英制单位
     }
@@ -346,16 +363,16 @@ void instruction_handle(void)
 #ifdef INTERNATIONAL // 公制单位
 
         // 只发送千米及以上的数据
-        send_data(SEND_SUBTOTAL_MILEAGE, mileage_info.subtotal_mileage / 1000);
+        send_data(SEND_SUBTOTAL_MILEAGE, fun_info.subtotal_mileage / 1000);
 
 #endif // INTERNATIONAL 公制单位
 
 #ifdef IMPERIAL // 英制单位
 #if USE_MY_DEBUG
-        printf("sub total mileage: %lu mile", mileage_info.subtotal_mileage * 62137 / 100000000);
+        printf("sub total mileage: %lu mile", fun_info.subtotal_mileage * 62137 / 100000000);
 #endif // USE_MY_DEBUG
        // 只发送英里及以上的数据
-        send_data(SEND_SUBTOTAL_MILEAGE, mileage_info.subtotal_mileage * 62137 / 100000000);
+        send_data(SEND_SUBTOTAL_MILEAGE, fun_info.subtotal_mileage * 62137 / 100000000);
 
 #endif // IMPERIAL 英制单位
     }
@@ -372,6 +389,11 @@ void instruction_handle(void)
         // 如果要修改日期
         flag_alter_date = 0;
         printf(" flag_alter_date \n");
+
+        // printf("year %d month %d day %d \n", fun_info.date >> 16, ((fun_info.date >> 8) & 0xFF), (fun_info.date & 0xFF));
+        printf("year %d month %d day %d \n", (u16)fun_info.year, (u16)fun_info.month, (u16)fun_info.day);
+
+        fun_info_save(); // 将日期信息写回flash
     }
 
     if (flag_alter_time)
@@ -393,6 +415,8 @@ void instruction_handle(void)
         // 如果要设置水温报警
         flag_set_temp_of_water_warning = 0;
         printf(" flag_set_temp_of_water_warning \n");
+
+        //  发送当前水温报警的状态
     }
 
     if (flag_clear_total_mileage)

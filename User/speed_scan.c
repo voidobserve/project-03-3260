@@ -16,20 +16,6 @@ volatile u32 distance = 0;         // ´æ·ÅÃ¿´ÎÉ¨ÃèÊ±×ß¹ıµÄÂ·³Ì£¨µ¥Î»£ººÁÃ×£©-->Ó
 // Ê±ËÙÉ¨ÃèµÄÅäÖÃ
 void speed_scan_config(void)
 {
-#ifdef DEVELOPMENT_BOARD
-    // Ê¹ÓÃIOÖĞ¶ÏÀ´¶ÔÂö³å¼ÆÊı
-    __SetIRQnIP(P1_IRQn, P1_IQn_CFG); // ÉèÖÃÖĞ¶ÏÓÅÏÈ¼¶
-    __EnableIRQ(P1_IRQn);             // Ê¹ÄÜP1ÖĞ¶Ï
-    IE_EA = 1;                        // Ê¹ÄÜ×Ü¿ª¹Ø
-
-    P1_MD0 &= ~GPIO_P13_MODE_SEL(0x3); // ÊäÈëÄ£Ê½
-    P1_PD |= GPIO_P13_PULL_PD(0x1);    // ÅäÖÃÎªÏÂÀ­
-    P1_IMK |= GPIO_P13_IRQ_MASK(0x1);  // Ê¹ÄÜIOÖĞ¶Ï
-    P1_TRG0 &= ~GPIO_P13_TRG_SEL(0x3);
-    P1_TRG0 |= GPIO_P13_TRG_SEL(0x2); // ÅäÖÃÉÏÉıÑØ´¥·¢
-#endif
-
-#ifdef CIRCUIT_BOARD
     // Ê¹ÓÃIOÖĞ¶ÏÀ´¶ÔÂö³å¼ÆÊı
     __SetIRQnIP(P0_IRQn, P0_IQn_CFG); // ÉèÖÃÖĞ¶ÏÓÅÏÈ¼¶
     __EnableIRQ(P0_IRQn);             // Ê¹ÄÜP1ÖĞ¶Ï
@@ -40,51 +26,57 @@ void speed_scan_config(void)
     P0_IMK |= GPIO_P02_IRQ_MASK(0x1);  // Ê¹ÄÜIOÖĞ¶Ï
     P0_TRG0 &= ~GPIO_P02_TRG_SEL(0x3);
     P0_TRG0 |= GPIO_P02_TRG_SEL(0x2); // ÅäÖÃÉÏÉıÑØ´¥·¢
-#endif
 }
 
-// ¹Ø±ÕËÙ¶ÈÉ¨ÃèµÄÏà¹ØÖĞ¶Ï£¬Çå¿ÕÏà¹ØµÄ¼ÆÊı
-static void speed_scan_disable(void)
-{
-#ifdef DEVELOPMENT_BOARD
-    __DisableIRQ(P1_IRQn); // ¹Ø±ÕP1ÖĞ¶Ï
-#endif
-#ifdef CIRCUIT_BOARD
-    __DisableIRQ(P0_IRQn); // ¹Ø±ÕP0ÖĞ¶Ï
-#endif
-    pulse_cnt = 0; // Çå¿ÕÂö³å¼ÆÊı
-    tmr1_disable();
-    tmr1_cnt = 0;
-}
+// // ¹Ø±ÕËÙ¶ÈÉ¨ÃèµÄÏà¹ØÖĞ¶Ï£¬Çå¿ÕÏà¹ØµÄ¼ÆÊı
+// static void speed_scan_disable(void)
+// {
 
-// ¿ªÆôËÙ¶ÈÉ¨ÃèÏà¹ØµÄÖĞ¶Ï
-static void speed_scan_enable(void)
-{
-    pulse_cnt = 0;
-    tmr1_cnt = 0;
-#ifdef DEVELOPMENT_BOARD
-    __EnableIRQ(P1_IRQn); // Ê¹ÄÜP1ÖĞ¶Ï
-#endif
-#ifdef CIRCUIT_BOARD
-    __EnableIRQ(P0_IRQn); // Ê¹ÄÜP0ÖĞ¶Ï
-#endif
+//     __DisableIRQ(P0_IRQn); // ¹Ø±ÕP0ÖĞ¶Ï
 
-    tmr1_enable();
-}
+//     pulse_cnt = 0; // Çå¿ÕÂö³å¼ÆÊı
+//     tmr1_disable();
+//     tmr1_cnt = 0;
+// }
+
+// // ¿ªÆôËÙ¶ÈÉ¨ÃèÏà¹ØµÄÖĞ¶Ï
+// static void speed_scan_enable(void)
+// {
+//     pulse_cnt = 0;
+//     tmr1_cnt = 0;
+
+//     __EnableIRQ(P0_IRQn); // Ê¹ÄÜP0ÖĞ¶Ï
+
+//     tmr1_enable();
+// }
 
 // »ñÈ¡Ã¿Ğ¡Ê±×ß¹ı¶àÉÙºÁÃ×
-static u32 get_speed_mm_per_hour(void)
-{
-    u32 tmp = 0;
-    speed_scan_enable();
-    while (tmr1_cnt < 2500)
-        ;                                           // µÈ´ı250ms
-    tmp = pulse_cnt * MM_PER_TURN / PULSE_PER_TURN; // 250ms×ß¹ıÀ´¶àÉÙºÁÃ×
-    distance += tmp;                                // ´æ·Å×ß¹ıµÄ¾àÀë£¬µ¥Î»£ººÁÃ×(ÒòÎªÃ»ÓĞÊ¹ÓÃ¸¡µãÀàĞÍ,ĞèÒªÀÛ¼Ó,·ñÔòºóĞøÍ³¼ÆÀï³ÌÊ±¾Í»á¶ªÊ§Êı¾İ)
-    speed_scan_disable();
-    tmp *= 14400; // ¼ÆËãµÃ³ö1Ğ¡Ê±×ß¹ıµÄºÁÃ×     // tmp = tmp * 4 * 3600;
-    return tmp;
-}
+// static u32 get_speed_mm_per_hour(void)
+// {
+//     // u32 tmp = 0;
+//     // speed_scan_enable();
+//     // while (tmr1_cnt < 2500)
+//     //     ;                                           // µÈ´ı250ms
+//     // tmp = pulse_cnt * MM_PER_TURN / PULSE_PER_TURN; // 250ms×ß¹ıÀ´¶àÉÙºÁÃ×
+//     // distance += tmp;                                // ´æ·Å×ß¹ıµÄ¾àÀë£¬µ¥Î»£ººÁÃ×(ÒòÎªÃ»ÓĞÊ¹ÓÃ¸¡µãÀàĞÍ,ĞèÒªÀÛ¼Ó,·ñÔòºóĞøÍ³¼ÆÀï³ÌÊ±¾Í»á¶ªÊ§Êı¾İ)
+//     // speed_scan_disable();
+//     // tmp *= 14400; // ¼ÆËãµÃ³ö1Ğ¡Ê±×ß¹ıµÄºÁÃ×     // tmp = tmp * 4 * 3600;
+//     // return tmp;
+
+//     u32 tmp = 0;
+//     if (tmr2_cnt >= 2500) // Èç¹û¾­¹ıÁË250ms
+//     {
+//         // ¼ÆËã250msÄÚ×ß¹ıÁË¶àÉÙºÁÃ×
+//         tmp = pulse_cnt *MM_PER_TURN / PULSE_PER_TURN
+//                                            distance += tmp; // ´æ·Å×ß¹ıµÄ¾àÀë£¬µ¥Î»£ººÁÃ×(ÒòÎªÃ»ÓĞÊ¹ÓÃ¸¡µãÀàĞÍ,ĞèÒªÀÛ¼Ó,·ñÔòºóĞøÍ³¼ÆÀï³ÌÊ±¾Í»á¶ªÊ§Êı¾İ)
+//         // ¼ÆËãµÃ³ö1Ğ¡Ê±ÄÜ×ß¹ı¶àÉÙºÁÃ×
+//         // tmp = tmp * 4 * 3600;
+//         tmp *= 14400;
+
+//         pulse_cnt = 0;
+//         tmr2_cnt = 0;
+//     }
+// }
 
 // ²É¼¯Ò»´ÎËÙ¶ÈÊı¾İ
 static u32 get_speed(void)
@@ -95,109 +87,111 @@ static u32 get_speed(void)
     return speed_km_per_hour / 1000000;
 #endif
 
-    return (get_speed_mm_per_hour() / 1000000);
+    return (get_speed_mm_per_hour() / 1000000); // »»Ëã³É km
 }
 
 // ËÙ¶ÈÉ¨Ãèº¯Êı£¬ÒÑ¾­ÑéÖ¤¿ÉÒÔÊ¹ÓÃ
 void speed_scan(void)
 {
-    static u32 last_speed = 0;   // ¼ÇÂ¼ÉÏÒ»´Î²É¼¯µ½µÄËÙ¶È
-    u32 cur_speed = get_speed(); // µ±Ç°²É¼¯µÄËÙ¶È
-    // printf("--------%lu km/h\n", cur_speed);
+    static u32 last_speed = 0; // ¼ÇÂ¼ÉÏÒ»´Î²É¼¯µ½µÄËÙ¶È
 
-    if (((cur_speed > last_speed) && (cur_speed - last_speed > 2)) ||
-        ((cur_speed < last_speed) && (last_speed - cur_speed > 2)))
+    static u8 scan_cnt = 0; // É¨Ãè´ÎÊı£¬ÓÃÔÚ¶à´Î¼ì²âËÙ¶ÈµÄ¹¦ÄÜÖĞ£¬ÒÔÈ·±£ËÙ¶ÈÈ·ÊµÔÚ±ä»¯
+
+    u32 cur_speed = 0;
+    u32 tmp = 0;
+
+    if (tmr2_cnt >= 1000) // Èç¹û¾­¹ıÁË100ms
     {
-// Èç¹û±¾´Î²É¼¯µ½µÄÊı¾İÓëÉÏÒ»´Î²É¼¯µ½µÄÊı¾İ²îÖµ³¬¹ıÁË1£¬¿ÉÒÔÖ±½Ó·¢ËÍ³öÈ¥
+        // ¼ÆËã1000msÄÚ×ß¹ıÁË¶àÉÙºÁÃ×
+        tmp = pulse_cnt * MM_PER_TURN / PULSE_PER_TURN;
+        distance += tmp; // ´æ·Å×ß¹ıµÄ¾àÀë£¬µ¥Î»£ººÁÃ×(ÒòÎªÃ»ÓĞÊ¹ÓÃ¸¡µãÀàĞÍ,ĞèÒªÀÛ¼Ó,·ñÔòºóĞøÍ³¼ÆÀï³ÌÊ±¾Í»á¶ªÊ§Êı¾İ)
+        // ¼ÆËãµÃ³ö1Ğ¡Ê±ÄÜ×ß¹ı¶àÉÙºÁÃ×
+        // tmp = tmp * 4 * 3600;
+        tmp *= 14400;
 
-        // ²âÊÔÓÃ£º
-        // printf("%lu km/h\n", cur_speed);
+        cur_speed = tmp / 1000000; // »»Ëã³É km/hµÄµ¥Î»
 
-        last_speed = cur_speed;
+        // u32 cur_speed = get_speed(); // µ±Ç°²É¼¯µÄËÙ¶È
+        // printf("--------%lu km/h\n", cur_speed);
 
-        fun_info.speed = cur_speed;
-        flag_get_speed = 1;
-    }
-    else if (((cur_speed > last_speed) && (cur_speed - last_speed < 2)) ||
-             ((cur_speed < last_speed) && (last_speed - cur_speed < 2)))
-    {
-        // Èç¹û±¾´Î²É¼¯µ½µÄÊı¾İÓëÉÏÒ»´Î²É¼¯µ½µÄÊı¾İ²îÖµÖ»ÓĞ1£¬ÔÙ²É¼¯¼¸´Î
-        u8 cnt = 0;
+        pulse_cnt = 0; // Çå³ıÂö³å¼ÆÊı
+        tmr2_cnt = 0;  // Çå³ı¶¨Ê±Æ÷¼ÆÊı
 
-        if ((cur_speed > last_speed) && (cur_speed - last_speed < 2))
-        {
-            // Èç¹û²âµÃËÙ¶ÈÊÇÔö¼ÓµÄ£¬ÒªÈ·¶¨ËüÊÇÕæµÄÔÚ¼ÓËÙ
-            u8 i = 0;
-
-            for (i = 0; i < 3; i++)
+#if 0
+        { // ±È¶Ô¶à´Î¼ì²âµ½µÄËÙ¶È£¬È·ÈÏËÙ¶ÈÊÇÔÚ±ä»¯µÄ£¬²Å¸üĞÂĞÅÏ¢
+            if (((cur_speed > last_speed) && (cur_speed - last_speed > 2)) ||
+                ((cur_speed < last_speed) && (last_speed - cur_speed > 2)))
             {
-                cur_speed = get_speed();
+                // Èç¹û±¾´Î²É¼¯µ½µÄÊı¾İÓëÉÏÒ»´Î²É¼¯µ½µÄÊı¾İ²îÖµ³¬¹ıÁË1£¬¿ÉÒÔÖ±½Ó·¢ËÍ³öÈ¥
+
+                // ²âÊÔÓÃ£º
+                // printf("%lu km/h\n", cur_speed);
+
+                last_speed = cur_speed;
+
+                fun_info.speed = cur_speed;
+                flag_get_speed = 1;
+            }
+            else if (((cur_speed > last_speed) && (cur_speed - last_speed < 2)) ||
+                     ((cur_speed < last_speed) && (last_speed - cur_speed < 2)))
+            {
+                // Èç¹û±¾´Î²É¼¯µ½µÄÊı¾İÓëÉÏÒ»´Î²É¼¯µ½µÄÊı¾İ²îÖµÖ»ÓĞ1£¬ÔÙ²É¼¯¼¸´Î
+                u8 cnt = 0;
 
                 if ((cur_speed > last_speed) && (cur_speed - last_speed < 2))
                 {
-                    cnt++;
-                }
-            }
-        }
-        else if ((cur_speed < last_speed) && (last_speed - cur_speed < 2))
-        {
-            // Èç¹û²âµÃËÙ¶ÈÊÇ¼õÉÙµÄ£¬ÒªÈ·¶¨ËüÊÇÕæµÄÔÚ¼õËÙ
-            u8 i = 0;
-            for (i = 0; i < 3; i++)
-            {
-                cur_speed = get_speed();
+                    // Èç¹û²âµÃËÙ¶ÈÊÇÔö¼ÓµÄ£¬ÒªÈ·¶¨ËüÊÇÕæµÄÔÚ¼ÓËÙ
+                    u8 i = 0;
 
-                if ((cur_speed < last_speed) && (last_speed - cur_speed < 2))
+                    for (i = 0; i < 3; i++)
+                    {
+                        cur_speed = get_speed();
+
+                        if ((cur_speed > last_speed) && (cur_speed - last_speed < 2))
+                        {
+                            cnt++;
+                        }
+                    }
+                }
+                else if ((cur_speed < last_speed) && (last_speed - cur_speed < 2))
                 {
-                    cnt++;
+                    // Èç¹û²âµÃËÙ¶ÈÊÇ¼õÉÙµÄ£¬ÒªÈ·¶¨ËüÊÇÕæµÄÔÚ¼õËÙ
+                    u8 i = 0;
+                    for (i = 0; i < 3; i++)
+                    {
+                        cur_speed = get_speed();
+
+                        if ((cur_speed < last_speed) && (last_speed - cur_speed < 2))
+                        {
+                            cnt++;
+                        }
+                    }
+                }
+
+                if (cnt >= 2)
+                {
+                    // ²âÊÔÓÃ£º
+                    // printf("%lu km/h\n", cur_speed);
+
+                    last_speed = cur_speed;
+
+                    fun_info.speed = cur_speed;
+                    flag_get_speed = 1;
                 }
             }
-        }
+            else if (cur_speed == 0 && last_speed != 0)
+            {
+                // ²âÊÔÓÃ£º
+                // printf("%lu km/h\n", cur_speed);
 
-        if (cnt >= 2)
-        {
-            // ²âÊÔÓÃ£º
-            // printf("%lu km/h\n", cur_speed);
-
-            last_speed = cur_speed;
-
-            fun_info.speed = cur_speed;
-            flag_get_speed = 1;
-        }
-    }
-    else if (cur_speed == 0 && last_speed != 0)
-    {
-        // ²âÊÔÓÃ£º
-        // printf("%lu km/h\n", cur_speed);
-
-
-        fun_info.speed = cur_speed;
-        flag_get_speed = 1;
-    }
-}
-
-#ifdef DEVELOPMENT_BOARD
-// P1ÖĞ¶Ï·şÎñº¯Êı
-void P1_IRQHandler(void) interrupt P1_IRQn
-{
-    // Px_PND¼Ä´æÆ÷Ğ´ÈÎºÎÖµ¶¼»áÇå±êÖ¾Î»
-    u8 p1_pnd = P1_PND;
-
-    // ½øÈëÖĞ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ı
-    __IRQnIPnPush(P1_IRQn);
-    // ---------------- ÓÃ»§º¯Êı´¦Àí -------------------
-    if (p1_pnd & GPIO_P13_IRQ_PNG(0x1))
-    {
-        pulse_cnt++;
-    }
-    P1_PND = p1_pnd; // ÇåP1ÖĞ¶Ï±êÖ¾Î»
-    // -------------------------------------------------
-    // ÍË³öÖĞ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ı
-    __IRQnIPnPop(P1_IRQn);
-}
+                fun_info.speed = cur_speed;
+                flag_get_speed = 1;
+            }
+        } // ±È¶Ô¶à´Î¼ì²âµ½µÄËÙ¶È£¬È·ÈÏËÙ¶ÈÊÇÔÚ±ä»¯µÄ£¬²Å¸üĞÂĞÅÏ¢
 #endif
+    }
+}
 
-#ifdef CIRCUIT_BOARD
 // P0ÖĞ¶Ï·şÎñº¯Êı
 void P0_IRQHandler(void) interrupt P0_IRQn
 {
@@ -216,4 +210,3 @@ void P0_IRQHandler(void) interrupt P0_IRQn
     // ÍË³öÖĞ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ı
     __IRQnIPnPop(P0_IRQn);
 }
-#endif

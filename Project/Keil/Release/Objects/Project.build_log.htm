@@ -22,12 +22,29 @@ Dialog DLL:      TP51.DLL V2.60.1.0
  
 <h2>Project:</h2>
 D:\BaiduSyncdisk\A_WorkSt\Aworkst\2024-05-项目3-泰芯3260-摩托车仪表项目\code\project-03-3260\Project\Keil\Project.uvproj
-Project File Date:  10/28/2024
+Project File Date:  11/08/2024
 
 <h2>Output:</h2>
 Build target 'Target 1'
+compiling system.c...
+compiling my_gpio.c...
+compiling tmr0.c...
+compiling tmr1.c...
+compiling tmr2.c...
+compiling tmr3.c...
+compiling uart0.c...
+compiling adc.c...
+compiling flash.c...
+compiling tk_set.c...
+compiling main.c...
+compiling fun_info.c...
+compiling send_data.c...
+compiling pin_level_scan.c...
+compiling speed_scan.c...
+compiling tk_user.c...
+compiling engine_speed_scan.c...
+compiling mileage.c...
 compiling instruction.c...
-..\..\User\instruction.c(142): warning C294: unreachable code
 linking...
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?OUTPUT_PIN_INIT?MY_GPIO
@@ -40,15 +57,21 @@ linking...
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?P26_OUTPUT_CONFIG?MY_GPIO
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
-    SEGMENT: ?PR?__UART_BUFF_CHECK?UART0
+    SEGMENT: ?PR?TMR2_CONFIG?TMR2
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?TMR2_ENABLE?TMR2
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?TMR2_DISABLE?TMR2
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_UART0_SEND_BUFF?UART0
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?UART0_SCAN_HANDLE?UART0
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_UART_CLEAR_SINGLE_INSTRUCTION?UART0
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?ADC_SHOWVAL?ADC
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?ADC_SCAN?ADC
-*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
-    SEGMENT: ?PR?_FLASH_ERASE_SECTOR?FLASH
-*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
-    SEGMENT: ?PR?FLASH_WRITE_TEST?FLASH
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?TK_PARAM_INIT?TK_SET
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
@@ -60,11 +83,15 @@ linking...
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?MILEAGE_SCAN?MILEAGE
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?INSTRUCTION_SCAN?INSTRUCTION
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?INSTRUCTION_HANDLE?INSTRUCTION
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?__TK_SCAN?TK_LIB
-Program Size: data=79.3 xdata=1262 code=13251
+Program Size: data=79.2 xdata=1265 code=13286
 creating hex file from ".\Release\Objects\Project"...
-".\Release\Objects\Project" - 0 Error(s), 17 Warning(s).
-Build Time Elapsed:  00:00:00
+".\Release\Objects\Project" - 0 Error(s), 21 Warning(s).
+Build Time Elapsed:  00:00:02
 </pre>
 </body>
 </html>
