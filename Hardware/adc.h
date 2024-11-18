@@ -1,8 +1,8 @@
 #ifndef __ADC_H
 #define __ADC_H
 
-#include "include.h" // Ê¹ÓÃĞ¾Æ¬¹Ù·½Ìá¹©µÄÍ·ÎÄ¼ş
-#include "my_config.h" // °üº¬×Ô¶¨ÒåµÄÍ·ÎÄ¼ş
+#include "include.h" // ä½¿ç”¨èŠ¯ç‰‡å®˜æ–¹æä¾›çš„å¤´æ–‡ä»¶
+#include "my_config.h" // åŒ…å«è‡ªå®šä¹‰çš„å¤´æ–‡ä»¶
 
 extern u16 adc_val;
 // extern bit adc_done_flag;

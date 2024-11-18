@@ -1,37 +1,37 @@
 #ifndef __UART0_H
 #define __UART0_H
 
-#include "include.h" // Ê¹ÓÃĞ¾Æ¬¹Ù·½Ìá¹©µÄÍ·ÎÄ¼ş
-#include "my_config.h" // °üº¬×Ô¶¨ÒåµÄÍ·ÎÄ¼ş
+#include "include.h" // ä½¿ç”¨èŠ¯ç‰‡å®˜æ–¹æä¾›çš„å¤´æ–‡ä»¶
+#include "my_config.h" // åŒ…å«è‡ªå®šä¹‰çš„å¤´æ–‡ä»¶
 
-// ¶¨ÒåÒ»Ö¡×î´óµÄ³¤¶È
+// å®šä¹‰ä¸€å¸§æœ€å¤§çš„é•¿åº¦
 #ifndef FRAME_MAX_LEN
 #define FRAME_MAX_LEN 10
 #endif // FRAME_MAX_LEN
 
-// ÓÃÀ´´æ·Å½ÓÊÕµÄÊı¾İÖ¡µÄ»º³åÇø
+// ç”¨æ¥å­˜æ”¾æ¥æ”¶çš„æ•°æ®å¸§çš„ç¼“å†²åŒº
 extern volatile u8 uart0_recv_buf[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)][FRAME_MAX_LEN];
 extern volatile u8 uart0_recv_len[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)];
 extern volatile u8 recved_flagbuf[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)];
-extern volatile u8 recv_frame_cnt; // ½ÓÊÕµ½µÄÊı¾İÖ¡µÄ¸öÊı
-extern volatile u8 flagbuf_valid_instruction[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)]; // ´æ·ÅÓĞºÏ·¨Ö¸ÁîµÄ±êÖ¾Î»Êı×é
+extern volatile u8 recv_frame_cnt; // æ¥æ”¶åˆ°çš„æ•°æ®å¸§çš„ä¸ªæ•°
+extern volatile u8 flagbuf_valid_instruction[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)]; // å­˜æ”¾æœ‰åˆæ³•æŒ‡ä»¤çš„æ ‡å¿—ä½æ•°ç»„
 
-// ´®¿Ú0²¨ÌØÂÊ
+// ä¸²å£0æ³¢ç‰¹ç‡
 #ifndef UART0_BAUDRATE
 #define UART0_BAUDRATE 115200
 #endif // UART0_BAUDRATE
 
-// ´®¿Ú0½ÓÊÕ»º³åÇøµÄ´óĞ¡
+// ä¸²å£0æ¥æ”¶ç¼“å†²åŒºçš„å¤§å°
 #ifndef UART0_RXBUF_LEN
 #define UART0_RXBUF_LEN 256
 #endif
 
 void uart0_config(void);
 void uart0_sendbyte(u8 senddata);
-void uart0_send_buff(u8* buf, u8 len); // Í¨¹ıuart0·¢ËÍÈô¸ÉÊı¾İ
+void uart0_send_buff(u8* buf, u8 len); // é€šè¿‡uart0å‘é€è‹¥å¹²æ•°æ®
 // void uart0_sendbytes(u8 *buf, u32 buf_len);
-// void uart0_sendstr(u8 *str); // UART0·¢ËÍ×Ö·û´®µÄº¯Êı
+// void uart0_sendstr(u8 *str); // UART0å‘é€å­—ç¬¦ä¸²çš„å‡½æ•°
 
-void uart0_scan_handle(void); // ¼ìÑé´®¿Ú½ÓÊÕ»º³åÇøµÄÊı¾İÊÇ·ñ·ûºÏÖ¸ÁîµÄº¯Êı
+void uart0_scan_handle(void); // æ£€éªŒä¸²å£æ¥æ”¶ç¼“å†²åŒºçš„æ•°æ®æ˜¯å¦ç¬¦åˆæŒ‡ä»¤çš„å‡½æ•°
 
 #endif

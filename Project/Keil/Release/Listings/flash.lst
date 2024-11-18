@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   FLASH                                                             11/08/2024 16:31:54 PAGE 1   
+C51 COMPILER V9.60.7.0   FLASH                                                             11/18/2024 17:39:07 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE FLASH
@@ -9,10 +9,10 @@ COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\Hardware\flash.c LARGE OPT
 
 line level    source
 
-   1          // Ğ¾Æ¬ÄÚ²¿µÄflashÏà¹Ø²Ù×÷µÄÔ´³ÌĞò
+   1          // èŠ¯ç‰‡å†…éƒ¨çš„flashç›¸å…³æ“ä½œçš„æºç¨‹åº
    2          #include "flash.h"
    3          
-   4          #define FLASH_START_ADDR (0x00) // ÆğÊ¼µØÖ·128byte¶ÔÆë
+   4          #define FLASH_START_ADDR (0x00) // èµ·å§‹åœ°å€128byteå¯¹é½
    5          
    6          /**
    7           * @brief  flash erase sector
@@ -23,11 +23,11 @@ line level    source
   12          {
   13   1          FLASH_ADDR = 0x3F;
   14   1          FLASH_ADDR = addr;
-  15   1          FLASH_PASSWORD = FLASH_PASSWORD(0xB9); // Ğ´Èë²Ù×÷ÃÜÂë
-  16   1          FLASH_CON = FLASH_SER_TRG(0x1);        // ´¥·¢ÉÈÇø²Á³ı
+  15   1          FLASH_PASSWORD = FLASH_PASSWORD(0xB9); // å†™å…¥æ“ä½œå¯†ç 
+  16   1          FLASH_CON = FLASH_SER_TRG(0x1);        // è§¦å‘æ‰‡åŒºæ“¦é™¤
   17   1      
   18   1          while (!(FLASH_STA & FLASH_SER_FLG(0x1)))
-  19   1              ; // µÈ´ıÉÈÇø²Á³ı¿ÕÏĞ
+  19   1              ; // ç­‰å¾…æ‰‡åŒºæ“¦é™¤ç©ºé—²
   20   1      }
   21          
   22          /**
@@ -45,10 +45,10 @@ line level    source
   34   1          while (len >= 1)
   35   1          {
   36   2              while (!(FLASH_STA & FLASH_PROG_FLG(0x1)))
-  37   2                  ; // µÈ´ıÉÕÂ¼¿ÕÏĞ
+  37   2                  ; // ç­‰å¾…çƒ§å½•ç©ºé—²
   38   2              FLASH_DATA = *(p_data++);
-  39   2              FLASH_PASSWORD = FLASH_PASSWORD(0xB9); // Ğ´Èë²Ù×÷ÃÜÂë
-  40   2              FLASH_CON = FLASH_PROG_TRG(0x1);       // ´¥·¢ÉÕÂ¼
+  39   2              FLASH_PASSWORD = FLASH_PASSWORD(0xB9); // å†™å…¥æ“ä½œå¯†ç 
+  40   2              FLASH_CON = FLASH_PROG_TRG(0x1);       // è§¦å‘çƒ§å½•
   41   2      
   42   2              len -= 1;
   43   2          }
@@ -62,7 +62,7 @@ line level    source
   51           * @retval None
   52           */
   53          void flash_read(u8 addr, u8 *p_data, u8 len)
-C51 COMPILER V9.60.7.0   FLASH                                                             11/08/2024 16:31:54 PAGE 2   
+C51 COMPILER V9.60.7.0   FLASH                                                             11/18/2024 17:39:07 PAGE 2   
 
   54          {
   55   1          while (len != 0)
@@ -72,17 +72,17 @@ line level    source
   59   2          }
   60   1      }
   61          
-  62          // // ²âÊÔº¯Êı£¬²âÊÔÄÜ¹»ÊµÏÖflashµÄ¶ÁĞ´
-  63          // // Ê¹ÓÃÇ°ĞèÒªÏÈ³õÊ¼»¯P12
+  62          // // æµ‹è¯•å‡½æ•°ï¼Œæµ‹è¯•èƒ½å¤Ÿå®ç°flashçš„è¯»å†™
+  63          // // ä½¿ç”¨å‰éœ€è¦å…ˆåˆå§‹åŒ–P12
   64          // void flash_test(void)
   65          // {
   66          //     unsigned int device_addr = 0x12345678;
   67          //     unsigned int buf = 0;
   68          
   69          //     flash_erase_sector(0x00);
-  70          //     // Ğ´ÈëÊı¾İ
+  70          //     // å†™å…¥æ•°æ®
   71          //     flash_write(0x00, (unsigned char *)&device_addr, sizeof(device_addr));
-  72          //     // ¶ÁÈ¡Êı¾İ
+  72          //     // è¯»å–æ•°æ®
   73          //     flash_read(0x00, (unsigned char *)&buf, sizeof(buf));
   74          
   75          //     if ((const unsigned int)0x12345678 == buf)

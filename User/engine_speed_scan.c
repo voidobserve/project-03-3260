@@ -1,28 +1,28 @@
 #include "engine_speed_scan.h"
 
-// ·¢¶¯»úÃ¿×ªÒ»È¦£¬ÄÜ¼ì²âµ½µÄÂö³å¸öÊı
+// å‘åŠ¨æœºæ¯è½¬ä¸€åœˆï¼Œèƒ½æ£€æµ‹åˆ°çš„è„‰å†²ä¸ªæ•°
 #ifndef ENGINE_PULSE_PER_TURN
 #define ENGINE_PULSE_PER_TURN 16
 #endif
 
-static volatile u32 pulse_cnt = 0; // Âö³å¼ÆÊıÖµ
+static volatile u32 pulse_cnt = 0; // è„‰å†²è®¡æ•°å€¼
 
-// ·¢¶¯»ú×ªËÙµÄÏà¹ØÅäÖÃ
+// å‘åŠ¨æœºè½¬é€Ÿçš„ç›¸å…³é…ç½®
 void engine_speed_scan_config(void)
 {
-    // Ê¹ÓÃIOÖĞ¶ÏÀ´¶ÔÂö³å¼ÆÊı
-    __SetIRQnIP(P1_IRQn, P1_IQn_CFG); // ÉèÖÃÖĞ¶ÏÓÅÏÈ¼¶
-    __EnableIRQ(P1_IRQn);             // Ê¹ÄÜP1ÖĞ¶Ï
-    IE_EA = 1;                        // Ê¹ÄÜ×Ü¿ª¹Ø
+    // ä½¿ç”¨IOä¸­æ–­æ¥å¯¹è„‰å†²è®¡æ•°
+    __SetIRQnIP(P1_IRQn, P1_IQn_CFG); // è®¾ç½®ä¸­æ–­ä¼˜å…ˆçº§
+    __EnableIRQ(P1_IRQn);             // ä½¿èƒ½P1ä¸­æ–­
+    IE_EA = 1;                        // ä½¿èƒ½æ€»å¼€å…³
 
-    P1_MD0 &= ~GPIO_P12_MODE_SEL(0x3); // ÊäÈëÄ£Ê½
-    P1_PD |= GPIO_P12_PULL_PD(0x1);    // ÅäÖÃÎªÏÂÀ­
-    P1_IMK |= GPIO_P12_IRQ_MASK(0x1);  // Ê¹ÄÜIOÖĞ¶Ï
+    P1_MD0 &= ~GPIO_P12_MODE_SEL(0x3); // è¾“å…¥æ¨¡å¼
+    P1_PD |= GPIO_P12_PULL_PD(0x1);    // é…ç½®ä¸ºä¸‹æ‹‰
+    P1_IMK |= GPIO_P12_IRQ_MASK(0x1);  // ä½¿èƒ½IOä¸­æ–­
     P1_TRG0 &= ~GPIO_P12_TRG_SEL(0x3);
-    P1_TRG0 |= GPIO_P12_TRG_SEL(0x2); // ÅäÖÃÉÏÉıÑØ´¥·¢
+    P1_TRG0 |= GPIO_P12_TRG_SEL(0x2); // é…ç½®ä¸Šå‡æ²¿è§¦å‘
 }
 
-// »ñÈ¡·¢¶¯»úÃ¿·ÖÖÓ×ªËÙ
+// è·å–å‘åŠ¨æœºæ¯åˆ†é’Ÿè½¬é€Ÿ
 // static u32 get_engine_speed_rpm(void)
 // {
 //     // return (get_turns_per_250ms() * 4 * 60);
@@ -31,20 +31,18 @@ void engine_speed_scan_config(void)
 //     pulse_cnt = 0;
 //     tmr1_cnt = 0;
 //     tmr1_enable();
-//     __EnableIRQ(P1_IRQn); // Ê¹ÄÜÖĞ¶Ï
-
+//     __EnableIRQ(P1_IRQn); // ä½¿èƒ½ä¸­æ–­
 
 //     while (tmr1_cnt < 2500)
 //     {
-//     }; // µÈ´ı250ms
+//     }; // ç­‰å¾…250ms
 
-//     // ¼ÆËã³öÃ¿min(250ms * 4 * 60 == 1min)×ªÁË¶àÉÙÈ¦
+//     // è®¡ç®—å‡ºæ¯min(250ms * 4 * 60 == 1min)è½¬äº†å¤šå°‘åœˆ
 //     tmp = pulse_cnt * 240 / ENGINE_PULSE_PER_TURN;
 
 //     tmr1_disable();
 
-
-//     __DisableIRQ(P1_IRQn); // ½ûÓÃÖĞ¶Ï
+//     __DisableIRQ(P1_IRQn); // ç¦ç”¨ä¸­æ–­
 
 //     tmr1_cnt = 0;
 //     pulse_cnt = 0;
@@ -52,7 +50,7 @@ void engine_speed_scan_config(void)
 //     return tmp;
 // }
 
-// ·¢¶¯»ú×ªËÙÉ¨Ãè
+// å‘åŠ¨æœºè½¬é€Ÿæ‰«æ
 void engine_speed_scan(void)
 {
     // u32 rpm = get_engine_speed_rpm();
@@ -60,42 +58,42 @@ void engine_speed_scan(void)
 
     // fun_info.engine_speeed = rpm;
     // flag_get_engine_speed = 1;
-    
+
     u32 rpm = 0;
-    
-    if (tmr1_cnt >= 2500) // Èç¹ûÒÑ¾­¹ıÁË250ms
+
+    if (tmr1_cnt >= 2500) // å¦‚æœå·²ç»è¿‡äº†250ms
     {
+        // ä¸‹é¢æ˜¯æ ¹æ®250msæ£€æµ‹åˆ°çš„è„‰å†²ä¸ªæ•°æ¥è®¡ç®—å‡ºæ¯åˆ†é’Ÿçš„è½¬é€Ÿ
         // 250ms * 4 * 60 == 1min
-        // ÏÂÃæÊÇ¸ù¾İ250ms¼ì²âµ½µÄÂö³å¸öÊıÀ´¼ÆËã³öÃ¿·ÖÖÓµÄ×ªËÙ
-        rpm = pulse_cnt * 240 / ENGINE_PULSE_PER_TURN; 
+        rpm = pulse_cnt * 240 / ENGINE_PULSE_PER_TURN; // è®¡ç®—å¾—å‡º1minçš„è½¬é€Ÿ
 
-        tmr1_cnt = 0;
+        tmr1_cnt = 0; 
         pulse_cnt = 0;
-        fun_info.engine_speeed = rpm;
+        fun_info.engine_speeed = rpm; //
+#if USE_MY_DEBUG
         printf("engine speed %lu rpm\n", rpm);
-        // flag_get_engine_speed = 1; // ¶à¾Ã¸üĞÂÒ»´Î×´Ì¬»¹Î´È·¶¨
+#endif
+        // flag_get_engine_speed = 1; // å¤šä¹…æ›´æ–°ä¸€æ¬¡çŠ¶æ€è¿˜æœªç¡®å®š
     }
-
 }
 
-
-// P1ÖĞ¶Ï·şÎñº¯Êı
+// P1ä¸­æ–­æœåŠ¡å‡½æ•°
 void P1_IRQHandler(void) interrupt P1_IRQn
 {
-    // Px_PND¼Ä´æÆ÷Ğ´ÈÎºÎÖµ¶¼»áÇå±êÖ¾Î»
+    // Px_PNDå¯„å­˜å™¨å†™ä»»ä½•å€¼éƒ½ä¼šæ¸…æ ‡å¿—ä½
     u8 p1_pnd = P1_PND;
 
-    // ½øÈëÖĞ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ı
+    // è¿›å…¥ä¸­æ–­è®¾ç½®IPï¼Œä¸å¯åˆ é™¤
     __IRQnIPnPush(P1_IRQn);
-    // ---------------- ÓÃ»§º¯Êı´¦Àí -------------------
+    // ---------------- ç”¨æˆ·å‡½æ•°å¤„ç† -------------------
 
     if (p1_pnd & GPIO_P12_IRQ_PNG(0x1))
     {
         pulse_cnt++;
     }
-    P1_PND = p1_pnd; // ÇåP1ÖĞ¶Ï±êÖ¾Î»
+    P1_PND = p1_pnd; // æ¸…P1ä¸­æ–­æ ‡å¿—ä½
 
     // -------------------------------------------------
-    // ÍË³öÖĞ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ı
+    // é€€å‡ºä¸­æ–­è®¾ç½®IPï¼Œä¸å¯åˆ é™¤
     __IRQnIPnPop(P1_IRQn);
 }

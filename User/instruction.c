@@ -117,60 +117,10 @@ void instruction_scan(void)
 
                 case INSTRUCTION_ALTER_TIME: // 修改时间
                     flag_alter_time = 1;
-                    // printf("buff:\n");
-                    // printf("%x %x %x %x %x %x %x \n", (u32)uart0_recv_buf[i][0], (u32)uart0_recv_buf[i][1], (u32)uart0_recv_buf[i][2], (u32)uart0_recv_buf[i][3], (u32)uart0_recv_buf[i][4], (u32)uart0_recv_buf[i][5], (u32)uart0_recv_buf[i][6]);
-
-#if 0 // 测试用的程序
-                    {
-                        u8 j = 0;
-                        for (j = 0; j < (FRAME_MAX_LEN); j++)
-                        {
-                            printf("%2x ", (u16)uart0_recv_buf[i][j]);
-                        }
-                        printf("\n==========================\n");
-                    }
-
-                    { // 测试校验和通不通过
-                        u8 check_sum = 0;
-                        check_sum += (uart0_recv_buf[i][0] +
-                                      uart0_recv_buf[i][1] +
-                                      uart0_recv_buf[i][2] +
-                                      uart0_recv_buf[i][3] +
-                                      uart0_recv_buf[i][4] +
-                                      uart0_recv_buf[i][5]);
-                        check_sum &= 0x0F;
-                        if (check_sum == uart0_recv_buf[i][6])
-                        {
-                            printf("check sum pass\n");
-                        }
-                        else
-                        {
-                            printf("check sum err \n");
-                        }
-                    }
-
-                    if (0)
-                    {
-                        u8 i = 0;
-                        u8 j = 0;
-                        u8 k = 0;
-                        for (i = 0; i < (UART0_RXBUF_LEN) / (FRAME_MAX_LEN); i++)
-                        {
-                            for (j = 0; j < (UART0_RXBUF_LEN) / (FRAME_MAX_LEN); j++)
-                            {
-                                uart0_sendbyte(j + '0');
-                                uart0_sendbyte('\n');
-                                for (k = 0; k < FRAME_MAX_LEN; k++)
-                                {
-                                    printf("%2x ", (u16)uart0_recv_buf[j][k]);
-                                }
-
-                                printf("\n==========================\n");
-                            }
-                        }
-                    }
-
-#endif // 向串口发送整个缓冲区的数据
+                    // 例：A5 07 2F 0D 37 18 07
+                    fun_info.time_hour = uart0_recv_buf[i][3];
+                    fun_info.time_min = uart0_recv_buf[i][4];
+                    fun_info.time_sec = uart0_recv_buf[i][5];
                     break;
 
                 case INSTRUCTION_GET_BATTERY_VAL: // 获取电池电压
@@ -217,6 +167,25 @@ void instruction_handle(void)
 #endif
 
         // 获取所有功能的状态，需要把这些功能对应的状态都发送出去
+        send_data(SEND_GEAR, fun_info.gear);                         // 1. 发送当前挡位的状态
+        send_data(SEND_BATTERY, fun_info.battery);                   // 2. 发送电池电量
+        send_data(SEND_BARKE, fun_info.brake);                       // 3. 发送当前刹车的状态
+        send_data(SEND_LEFT_TURN, fun_info.left_turn);               // 4. 发送当前左转向灯的状态
+        send_data(SEND_RIGHT_TURN, fun_info.right_turn);             // 5. 发送当前右转向灯的状态
+        send_data(SEND_HIGH_BEAM, fun_info.high_beam);               // 6. 发送当前远光灯的状态
+        send_data(SEND_ENGINE_SPEED, fun_info.engine_speeed);        // 7. 发送发动机转速
+        send_data(SEND_SPEED, fun_info.speed);                       // 8. 发送当前采集到的车速（时速）
+        send_data(SEND_FUEL, fun_info.fuel);                         // 9. 发送当前油量(单位：百分比)
+        send_data(SEND_WATER_TEMP, fun_info.water_temp);             // 10. 发送当前采集的水温
+#ifdef USE_INTERNATIONAL                                             // 公制单位
+        send_data(SEND_TOTAL_MILEAGE, fun_info.total_mileage / 100); // 11. 发送大计里程（只发送百米及以上的数据）
+        send_data(SEND_SUBTOTAL_MILEAGE, fun_info.subtotal_mileage / 100); // 12. 发送小计里程(只发送百米及以上的数据)
+#endif // USE_INTERNATIONAL 公制单位
+        // 13. 发送触摸按键的状态
+        // 14. 发送当前日期
+        // 15. 发送当前时间
+        // 16. 发送当前的电池电压
+        // 17. 发送当前的水温报警状态
     }
 
     if (flag_get_gear)
@@ -303,13 +272,13 @@ void instruction_handle(void)
 
         printf(" flag_get_speed \n");
 
-#ifdef INTERNATIONAL // 使用公制单位
+#ifdef USE_INTERNATIONAL // 使用公制单位
 
         send_data(SEND_SPEED, fun_info.speed); // 发送当前采集到的车速（时速）
 
-#endif // INTERNATIONAL 使用公制单位
+#endif // USE_INTERNATIONAL 使用公制单位
 
-#ifdef IMPERIAL // 使用英制单位
+#ifdef USE_IMPERIAL // 使用英制单位
 
         send_data(SEND_SPEED, fun_info.speed * 621 / 1000);
 
@@ -321,15 +290,21 @@ void instruction_handle(void)
         // 如果要获取油量
         flag_get_fuel = 0;
 
+#if USE_MY_DEBUG
         printf(" flag_get_fuel \n");
+#endif
+
+        send_data(SEND_FUEL, fun_info.fuel);
     }
 
     if (flag_get_temp_of_water)
     {
         // 如果要获取水温
         flag_get_temp_of_water = 0;
-
+#if USE_MY_DEBUG
         printf(" flag_get_temp_of_water \n");
+#endif
+        send_data(SEND_WATER_TEMP, fun_info.water_temp);
     }
 
     if (flag_get_total_mileage)
@@ -338,21 +313,21 @@ void instruction_handle(void)
         flag_get_total_mileage = 0;
         printf(" flag_get_total_mileage \n");
 
-#ifdef INTERNATIONAL // 公制单位
+#ifdef USE_INTERNATIONAL // 公制单位
 
         // 只发送百米及以上的数据
         send_data(SEND_TOTAL_MILEAGE, fun_info.total_mileage / 100);
 
-#endif // INTERNATIONAL 公制单位
+#endif // USE_INTERNATIONAL 公制单位
 
-#ifdef IMPERIAL // 英制单位
+#ifdef USE_IMPERIAL // 英制单位
 #if USE_MY_DEBUG
         printf("total mileage: %lu * 0.1 mile", fun_info.total_mileage * 62137 / 10000000);
 #endif // USE_MY_DEBUG
        // 只发送0.1英里及以上的数据
         send_data(SEND_TOTAL_MILEAGE, fun_info.total_mileage * 62137 / 10000000);
 
-#endif // IMPERIAL 英制单位
+#endif // USE_IMPERIAL 英制单位
     }
 
     if (flag_get_sub_total_mileage)
@@ -360,21 +335,21 @@ void instruction_handle(void)
         // 如果要获取小计里程 / 得到了小计里程新的数据
         flag_get_sub_total_mileage = 0;
         printf(" flag_get_sub_total_mileage \n");
-#ifdef INTERNATIONAL // 公制单位
+#ifdef USE_INTERNATIONAL // 公制单位
 
-        // 只发送千米及以上的数据
-        send_data(SEND_SUBTOTAL_MILEAGE, fun_info.subtotal_mileage / 1000);
+        // 只发送百米及以上的数据
+        send_data(SEND_SUBTOTAL_MILEAGE, fun_info.subtotal_mileage / 100);
 
-#endif // INTERNATIONAL 公制单位
+#endif // USE_INTERNATIONAL 公制单位
 
-#ifdef IMPERIAL // 英制单位
+#ifdef USE_IMPERIAL // 英制单位
 #if USE_MY_DEBUG
         printf("sub total mileage: %lu mile", fun_info.subtotal_mileage * 62137 / 100000000);
 #endif // USE_MY_DEBUG
        // 只发送英里及以上的数据
         send_data(SEND_SUBTOTAL_MILEAGE, fun_info.subtotal_mileage * 62137 / 100000000);
 
-#endif // IMPERIAL 英制单位
+#endif // USE_IMPERIAL 英制单位
     }
 
     if (flag_get_touch_key_status)
@@ -388,9 +363,8 @@ void instruction_handle(void)
     {
         // 如果要修改日期
         flag_alter_date = 0;
-        printf(" flag_alter_date \n");
 
-        // printf("year %d month %d day %d \n", fun_info.date >> 16, ((fun_info.date >> 8) & 0xFF), (fun_info.date & 0xFF));
+        printf(" flag_alter_date \n");
         printf("year %d month %d day %d \n", (u16)fun_info.year, (u16)fun_info.month, (u16)fun_info.day);
 
         fun_info_save(); // 将日期信息写回flash
@@ -400,7 +374,13 @@ void instruction_handle(void)
     {
         // 如果要修改时间
         flag_alter_time = 0;
+
+#if USE_MY_DEBUG
         printf(" flag_alter_time \n");
+        printf("hour %d min %d sec %d \n", (u16)fun_info.time_hour, (u16)fun_info.time_min, (u16)fun_info.time_sec);
+#endif
+
+        fun_info_save(); // 将时间信息写回flash
     }
 
     if (flag_get_bat_val)
@@ -423,13 +403,23 @@ void instruction_handle(void)
     {
         // 如果要清除大计里程
         flag_clear_total_mileage = 0;
+        fun_info.total_mileage = 0;
+        distance = 0;
+        fun_info_save(); // 将信息写回flash
+#if USE_MY_DEBUG
         printf(" flag_clear_total_mileage \n");
+#endif
     }
 
     if (flag_clear_sub_total_mileage)
     {
         // 如果要清除小计里程
         flag_clear_sub_total_mileage = 0;
+        fun_info.subtotal_mileage = 0;
+        distance = 0;
+        fun_info_save(); // 将信息写回flash
+#if USE_MY_DEBUG
         printf(" flag_clear_sub_total_mileage \n");
+#endif
     }
 }

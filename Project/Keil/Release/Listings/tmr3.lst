@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   TMR3                                                              11/08/2024 16:31:54 PAGE 1   
+C51 COMPILER V9.60.7.0   TMR3                                                              11/18/2024 17:39:06 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TMR3
@@ -9,127 +9,95 @@ COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\Hardware\tmr3.c LARGE OPTI
 
 line level    source
 
-   1          // ¶¨Ê±Æ÷TMR3µÄÇý¶¯Ô´ÎÄ¼þ
+   1          // å®šæ—¶å™¨TMR3çš„é©±åŠ¨æºæ–‡ä»¶
    2          #include "tmr3.h"
    3          
-   4          // ¶¨Ê±Æ÷TMR3µÄ¼ÆÊ±ÖÜÆÚ£¬Ò²ÊÇÖÐ¶Ï´¥·¢ÖÜÆÚ£¨Ã¿¸ô¶à¾Ã´¥·¢Ò»´ÎÖÐ¶Ï£©
-   5          // ¼ÆÊ±ÖÜÆÚ²»ÄÜ´óÓÚ65535£¬ÒòÎªTMR3´æ·Å¼ÆÊ±ÖÜÆÚµÄ¼Ä´æÆ÷Ö»ÓÐ16Î»
-   6          // 0.65625 * 15238 Ô¼µÈÓÚ 10000£¬¼´¶¨Ê±Æ÷Ã¿ 10000us£¨10ms£© ´¥·¢Ò»´ÎÖÐ¶Ï
-   7          // Êµ¼ÊÉÏ»¹ÐèÒªµ÷Õû£¬ËüµÄÊ±ÖÓ²»ÊÇºÜ×¼È·£¬ÒòÎª²»ÊÇ¾§ÕñÌá¹©µÄ£¬¶øÊÇRCÕñµ´Ìá¹©µÄ
-   8          // #define TMR3_CNT_TIME ((15100))
-   9          
-  10          #define TMR3_CNT_TIME 15200 // 15200 * 0.65625us Ô¼µÈÓÚ10000us£¬10ms
-  11          
-  12          volatile u32 tmr3_cnt = 0; // ¶¨Ê±Æ÷TMR3µÄ¼ÆÊýÖµ£¨Ã¿´ÎÔÚÖÐ¶Ï·þÎñº¯ÊýÖÐ»á¼ÓÒ»£©
-  13          // volatile bit tmr3_flag = 0; // tmr3ÖÐ¶Ï·þÎñº¯ÊýÖÐ»áÖÃÎ»µÄ±êÖ¾Î»
-  14          
-  15          // ¶¨Ê±Æ÷TMR3µÄ³õÊ¼»¯£¨³õÊ¼»¯Íê³Éºó£¬Ä¬ÈÏÊÇ¹Ø±ÕµÄ£©
-  16          void tmr3_config(void)
-  17          {
-  18   1          __SetIRQnIP(TMR3_IRQn, TMR3_IQn_CFG); // ÉèÖÃÖÐ¶ÏÓÅÏÈ¼¶£¨TMR3£©
-  19   1      
-  20   1          TMR3_CONL &= ~TMR_PRESCALE_SEL(0x07); // Çå³ýTMR3µÄÔ¤·ÖÆµÅäÖÃ¼Ä´æÆ÷
-  21   1          // ÅäÖÃTMR3µÄÔ¤·ÖÆµ£¬Îª32·ÖÆµ£¬¼´21MHz / 32 = 0.65625MHz£¬Ô¼0.65625us¼ÆÊýÒ»´Î
-  22   1          // £¨Êµ¼Ê²âÊÔºÍ¼ÆËãµÃ³öÕâ¸öÏµÍ³Ê±ÖÓÊÇ21MHzµÄ£¬µ«ÊÇ»¹ÊÇÓÐÐ©Îó²î£©
-  23   1          TMR3_CONL |= TMR_PRESCALE_SEL(0x05);
-  24   1          TMR3_CONL &= ~TMR_MODE_SEL(0x03); // Çå³ýTMR3µÄÄ£Ê½ÅäÖÃ¼Ä´æÆ÷
-  25   1          TMR3_CONL |= TMR_MODE_SEL(0x01);  // ÅäÖÃTMR3µÄÄ£Ê½Îª¼ÆÊýÆ÷Ä£Ê½£¬×îºó¶ÔÏµÍ³Ê±ÖÓµÄÂö³å½øÐÐ¼ÆÊý
-  26   1      
-  27   1          TMR3_CONH &= ~TMR_PRD_PND(0x01); // Çå³ýTMR3µÄ¼ÆÊý±êÖ¾Î»£¬±íÊ¾Î´Íê³É¼ÆÊý
-  28   1          TMR3_CONH |= TMR_PRD_IRQ_EN(1);  // Ê¹ÄÜTMR3µÄ¼ÆÊýÖÐ¶Ï
-  29   1      
-  30   1          __DisableIRQ(TMR3_IRQn); // ½ûÓÃÖÐ¶Ï
-  31   1      
-  32   1          // ÅäÖÃTMR3µÄ¼ÆÊýÖÜÆÚ
-  33   1          TMR3_PRL = (unsigned char)(TMR3_CNT_TIME % 255);
-  34   1          TMR3_PRH = (unsigned char)(TMR3_CNT_TIME / 255);
-  35   1      
-  36   1          // Çå³ýTMR3µÄ¼ÆÊýÖµ
-  37   1          TMR3_CNTL = 0;
-  38   1          TMR3_CNTH = 0;
-  39   1      
-  40   1          TMR3_CONL &= ~(TMR_SOURCE_SEL(0x07)); // Çå³ýTMR3µÄÊ±ÖÓÔ´ÅäÖÃ¼Ä´æÆ÷
-  41   1          // TMR3_CONL |= TMR_SOURCE_SEL(0x07); // ÅäÖÃTMR3µÄÊ±ÖÓÔ´£¬Ê¹ÓÃÏµÍ³Ê±ÖÓ
-  42   1          TMR3_CONL |= TMR_SOURCE_SEL(0x05); // ÅäÖÃTMR3µÄÊ±ÖÓÔ´£¬²»ÓÃÈÎºÎÊ±ÖÓ
-  43   1          // __EnableIRQ(TMR3_IRQn);                     // Ê¹ÄÜÖÐ¶Ï
-  44   1          IE_EA = 1; // ´ò¿ª×ÜÖÐ¶Ï
-  45   1      }
-  46          
-  47          // ¿ªÆô¶¨Ê±Æ÷TMR3£¬¿ªÊ¼¼ÆÊ±
-  48          void tmr3_enable(void)
-  49          {
-  50   1          // ÖØÐÂ¸øTMR3ÅäÖÃÊ±ÖÓ
-  51   1          TMR3_CONL &= ~(TMR_SOURCE_SEL(0x07)); // Çå³ý¶¨Ê±Æ÷µÄÊ±ÖÓÔ´ÅäÖÃ¼Ä´æÆ÷
-  52   1          TMR3_CONL |= TMR_SOURCE_SEL(0x06);    // ÅäÖÃ¶¨Ê±Æ÷µÄÊ±ÖÓÔ´£¬Ê¹ÓÃÏµÍ³Ê±ÖÓ£¨Ô¼21MHz£©
-  53   1      
-C51 COMPILER V9.60.7.0   TMR3                                                              11/08/2024 16:31:54 PAGE 2   
+   4          // å®šæ—¶å™¨å®šæ—¶å‘¨æœŸ (å•ä½:Hz)
+   5          // å‘¨æœŸå€¼ = ç³»ç»Ÿæ—¶é’Ÿ / å®šæ—¶å™¨åˆ†é¢‘ / é¢‘çŽ‡ - 1
+   6          #define TMR3_PERIOD (SYSCLK / 128 / 1000 - 1) // 1000Hz,1ms
+   7          
+   8          volatile u32 tmr3_cnt = 0; // å®šæ—¶å™¨TMR3çš„è®¡æ•°å€¼ï¼ˆæ¯æ¬¡åœ¨ä¸­æ–­æœåŠ¡å‡½æ•°ä¸­ä¼šåŠ ä¸€ï¼‰
+   9          // volatile bit tmr3_flag = 0; // tmr3ä¸­æ–­æœåŠ¡å‡½æ•°ä¸­ä¼šç½®ä½çš„æ ‡å¿—ä½
+  10          
+  11          // å®šæ—¶å™¨TMR3çš„åˆå§‹åŒ–ï¼ˆåˆå§‹åŒ–å®ŒæˆåŽï¼Œé»˜è®¤æ˜¯å…³é—­çš„ï¼‰
+  12          void tmr3_config(void)
+  13          {
+  14   1          __SetIRQnIP(TMR3_IRQn, TMR3_IQn_CFG); // è®¾ç½®ä¸­æ–­ä¼˜å…ˆçº§ï¼ˆTMR3ï¼‰
+  15   1          __DisableIRQ(TMR3_IRQn); // ç¦ç”¨ä¸­æ–­
+  16   1          IE_EA = 1; // æ‰“å¼€æ€»ä¸­æ–­
+  17   1      
+  18   1              // æ¸…é™¤TMR3çš„è®¡æ•°å€¼
+  19   1          TMR3_CNTL = 0;
+  20   1          TMR3_CNTH = 0;
+  21   1      
+  22   1      
+  23   1          TMR3_CONL &= ~TMR_PRESCALE_SEL(0x07); // æ¸…é™¤TMR3çš„é¢„åˆ†é¢‘é…ç½®å¯„å­˜å™¨
+  24   1          TMR3_CONL |= TMR_PRESCALE_SEL(0x07);// é…ç½®é¢„åˆ†é¢‘å¯„å­˜å™¨,128åˆ†é¢‘
+  25   1          TMR3_CONL &= ~TMR_MODE_SEL(0x03); // æ¸…é™¤TMR3çš„æ¨¡å¼é…ç½®å¯„å­˜å™¨
+  26   1          TMR3_CONL |= TMR_MODE_SEL(0x01);  // é…ç½®TMR3çš„æ¨¡å¼ä¸ºè®¡æ•°å™¨æ¨¡å¼ï¼Œæœ€åŽå¯¹ç³»ç»Ÿæ—¶é’Ÿçš„è
+             -„‰å†²è¿›è¡Œè®¡æ•°
+  27   1      
+  28   1          TMR3_CONH &= ~TMR_PRD_PND(0x01); // æ¸…é™¤TMR3çš„è®¡æ•°æ ‡å¿—ä½ï¼Œè¡¨ç¤ºæœªå®Œæˆè®¡æ•°
+  29   1          TMR3_CONH |= TMR_PRD_IRQ_EN(1);  // ä½¿èƒ½TMR3çš„è®¡æ•°ä¸­æ–­
+  30   1      
+  31   1          // é…ç½®TMR3çš„è®¡æ•°å‘¨æœŸ
+  32   1          TMR3_PRH = TMR_PERIOD_VAL_H((TMR3_PERIOD >> 8) & 0xFF); // å‘¨æœŸå€¼
+  33   1          TMR3_PRL = TMR_PERIOD_VAL_L((TMR3_PERIOD >> 0) & 0xFF);
+  34   1      
+  35   1          TMR3_CONL &= ~(TMR_SOURCE_SEL(0x07)); // æ¸…é™¤TMR3çš„æ—¶é’Ÿæºé…ç½®å¯„å­˜å™¨
+  36   1          TMR3_CONL |= TMR_SOURCE_SEL(0x05); // é…ç½®TMR3çš„æ—¶é’Ÿæºï¼Œä¸ç”¨ä»»ä½•æ—¶é’Ÿ
+  37   1      }
+  38          
+  39          // å¼€å¯å®šæ—¶å™¨TMR3ï¼Œå¼€å§‹è®¡æ—¶
+  40          void tmr3_enable(void)
+  41          {
+  42   1          // é‡æ–°ç»™TMR3é…ç½®æ—¶é’Ÿ
+  43   1          TMR3_CONL &= ~(TMR_SOURCE_SEL(0x07)); // æ¸…é™¤å®šæ—¶å™¨çš„æ—¶é’Ÿæºé…ç½®å¯„å­˜å™¨
+  44   1          TMR3_CONL |= TMR_SOURCE_SEL(0x06);    // é…ç½®å®šæ—¶å™¨çš„æ—¶é’Ÿæºï¼Œä½¿ç”¨ç³»ç»Ÿæ—¶é’Ÿï¼ˆçº¦21MHzï¼
+             -‰
+  45   1      
+  46   1          __EnableIRQ(TMR3_IRQn); // ä½¿èƒ½ä¸­æ–­
+  47   1          IE_EA = 1;              // æ‰“å¼€æ€»ä¸­æ–­
+  48   1      }
+  49          
+  50          // å…³é—­å®šæ—¶å™¨ï¼Œæ¸…ç©ºè®¡æ•°å€¼
+  51          void tmr3_disable(void)
+C51 COMPILER V9.60.7.0   TMR3                                                              11/18/2024 17:39:06 PAGE 2   
 
-  54   1          __EnableIRQ(TMR3_IRQn); // Ê¹ÄÜÖÐ¶Ï
-  55   1          IE_EA = 1;              // ´ò¿ª×ÜÖÐ¶Ï
-  56   1      }
-  57          
-  58          // ¹Ø±Õ¶¨Ê±Æ÷£¬Çå¿Õ¼ÆÊýÖµ
-  59          void tmr3_disable(void)
-  60          {
-  61   1          // ²»¸ø¶¨Ê±Æ÷Ìá¹©Ê±ÖÓ£¬ÈÃËüÍ£Ö¹¼ÆÊý
-  62   1          TMR3_CONL &= ~(TMR_SOURCE_SEL(0x07)); // Çå³ý¶¨Ê±Æ÷µÄÊ±ÖÓÔ´ÅäÖÃ¼Ä´æÆ÷
-  63   1          TMR3_CONL |= TMR_SOURCE_SEL(0x05);    // ÅäÖÃ¶¨Ê±Æ÷µÄÊ±ÖÓÔ´£¬²»ÓÃÈÎºÎÊ±ÖÓ
-  64   1      
-  65   1          // Çå³ý¶¨Ê±Æ÷µÄ¼ÆÊýÖµ
-  66   1          TMR3_CNTL = 0;
-  67   1          TMR3_CNTH = 0;
-  68   1      
-  69   1          __DisableIRQ(TMR3_IRQn); // ¹Ø±ÕÖÐ¶Ï£¨²»Ê¹ÄÜÖÐ¶Ï£©
-  70   1      }
-  71          
-  72          // TMR3ÖÐ¶Ï·þÎñº¯Êý
-  73          void TIMR3_IRQHandler(void) interrupt TMR3_IRQn
-  74          {
-  75   1      #if 1 // ¶¨Ê±Æ÷µÄ¶¨Ê±ÖÐ¶Ï
-  76   1          // ½øÈëÖÐ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ý
-  77   1          __IRQnIPnPush(TMR3_IRQn);
+  52          {
+  53   1          // ä¸ç»™å®šæ—¶å™¨æä¾›æ—¶é’Ÿï¼Œè®©å®ƒåœæ­¢è®¡æ•°
+  54   1          TMR3_CONL &= ~(TMR_SOURCE_SEL(0x07)); // æ¸…é™¤å®šæ—¶å™¨çš„æ—¶é’Ÿæºé…ç½®å¯„å­˜å™¨
+  55   1          TMR3_CONL |= TMR_SOURCE_SEL(0x05);    // é…ç½®å®šæ—¶å™¨çš„æ—¶é’Ÿæºï¼Œä¸ç”¨ä»»ä½•æ—¶é’Ÿ
+  56   1      
+  57   1          // æ¸…é™¤å®šæ—¶å™¨çš„è®¡æ•°å€¼
+  58   1          TMR3_CNTL = 0;
+  59   1          TMR3_CNTH = 0;
+  60   1      
+  61   1          __DisableIRQ(TMR3_IRQn); // å…³é—­ä¸­æ–­ï¼ˆä¸ä½¿èƒ½ä¸­æ–­ï¼‰
+  62   1      }
+  63          
+  64          // TMR3ä¸­æ–­æœåŠ¡å‡½æ•°
+  65          void TIMR3_IRQHandler(void) interrupt TMR3_IRQn
+  66          {
+  67   1          // è¿›å…¥ä¸­æ–­è®¾ç½®IPï¼Œä¸å¯åˆ é™¤
+  68   1          __IRQnIPnPush(TMR3_IRQn);
+  69   1      
+  70   1          // ---------------- ç”¨æˆ·å‡½æ•°å¤„ç† -------------------
+  71   1          // å‘¨æœŸä¸­æ–­
+  72   1          if (TMR3_CONH & TMR_PRD_PND(0x1))
+  73   1          {
+  74   2              TMR3_CONH |= TMR_PRD_PND(0x1); // æ¸…é™¤pending
+  75   2      
+  76   2              tmr3_cnt++; 
+  77   2          }
   78   1      
-  79   1          // ---------------- ÓÃ»§º¯Êý´¦Àí -------------------
-  80   1          // ÖÜÆÚÖÐ¶Ï
-  81   1          if (TMR3_CONH & TMR_PRD_PND(0x1))
-  82   1          {
-  83   2              TMR3_CONH |= TMR_PRD_PND(0x1); // Çå³ýpending
-  84   2      
-  85   2              tmr3_cnt++; 
-  86   2          }
-  87   1      
-  88   1          // ÍË³öÖÐ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ý
-  89   1          __IRQnIPnPop(TMR3_IRQn);
-  90   1      #endif
-  91   1      
-  92   1      #if 0 // ¶¨Ê±Æ÷µÄÊäÈë²¶»ñÖÐ¶Ï
-              
-                  // ½øÈëÖÐ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ý
-                  __IRQnIPnPush(TMR3_IRQn);
-              
-                  // ---------------- ÓÃ»§º¯Êý´¦Àí -------------------
-              
-                  if (TMR3_CONH & TMR_CAP_PND(0x1))
-                  {
-                      TMR3_CONH |= TMR_CAP_PND(0x1); // Çå³ýpending
-              
-                      tmr3_cap_val    = ((TMR3_PWMH << 8) | TMR3_PWML); // ¶ÁÈ¡²¶»ñµÄÖµ
-                      tmr3_cnt++; // Âö³å¼ÆÊýÖµ¼ÓÒ»
-              
-                      TMR_ALLCON = TMR3_CNT_CLR(0x1); // Çå³ý¼ÆÊýÖµ
-                  }
-              
-                  // ÍË³öÖÐ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ý
-                  __IRQnIPnPop(TMR3_IRQn);
-              
-              #endif
- 113   1      }
+  79   1          // é€€å‡ºä¸­æ–­è®¾ç½®IPï¼Œä¸å¯åˆ é™¤
+  80   1          __IRQnIPnPop(TMR3_IRQn);
+  81   1      }
 
-
-C51 COMPILER V9.60.7.0   TMR3                                                              11/08/2024 16:31:54 PAGE 3   
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    187    ----
+   CODE SIZE        =    189    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =      4    ----
    PDATA SIZE       =   ----    ----

@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   FUN_INFO                                                          11/08/2024 16:31:54 PAGE 1   
+C51 COMPILER V9.60.7.0   FUN_INFO                                                          11/18/2024 17:39:07 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE FUN_INFO
@@ -11,15 +11,15 @@ line level    source
 
    1          #include "fun_info.h" 
    2          
-   3          volatile fun_info_t fun_info = {0}; // ╢Ф╥екЫсп╧╕дэв╢л╛╣д╫А╧╧лЕ╠Да©
+   3          volatile fun_info_t fun_info = {0}; // Е╜≤Ф■╬Ф┴─Ф°┴Е┼÷Х┐╫Г┼╤Ф─│Г └Г╩⌠Ф·└Д╫⌠Е▐≤И┤▐
    4          
-   5          // ЁУй╪╩╞╢Ф╥екЫсппео╒╣д╫А╧╧лЕ╠Да©
+   5          // Е┬²Е╖▀Е▄√Е╜≤Ф■╬Ф┴─Ф°┴Д©║Ф│╞Г └Г╩⌠Ф·└Д╫⌠Е▐≤И┤▐
    6          void fun_info_init(void)
    7          {
    8   1          flash_read(0x00, (u8*)&fun_info, sizeof(fun_info));
    9   1      }
   10          
-  11          // ╠ё╢Ф ╢Ф╥еаккЫсппео╒╣д╫А╧╧лЕ╠Да©ё╛п╢хКflashжп
+  11          // Д©²Е╜≤ Е╜≤Ф■╬Д╨├Ф┴─Ф°┴Д©║Ф│╞Г └Г╩⌠Ф·└Д╫⌠Е▐≤И┤▐О╪▄Е├≥Е┘╔flashД╦╜
   12          void fun_info_save(void)
   13          {
   14   1          flash_erase_sector(0x00);
@@ -30,7 +30,7 @@ line level    source
 MODULE INFORMATION:   STATIC OVERLAYABLE
    CODE SIZE        =     39    ----
    CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =     33    ----
+   XDATA SIZE       =     32    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----

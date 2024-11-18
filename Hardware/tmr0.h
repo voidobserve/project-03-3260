@@ -1,12 +1,12 @@
 #ifndef __TMR0_H
 #define __TMR0_H
 
-#include "include.h" // Ê¹ÓÃĞ¾Æ¬¹Ù·½Ìá¹©µÄÍ·ÎÄ¼ş
+#include "include.h" // ä½¿ç”¨èŠ¯ç‰‡å®˜æ–¹æä¾›çš„å¤´æ–‡ä»¶
 
-#include "my_config.h" // °üº¬×Ô¶¨ÒåµÄÍ·ÎÄ¼ş
+#include "my_config.h" // åŒ…å«è‡ªå®šä¹‰çš„å¤´æ–‡ä»¶
 
-// extern volatile bit tmr0_flag; // tmr0ÖĞ¶Ï·şÎñº¯ÊıÖĞ»áÖÃÎ»µÄ±êÖ¾Î»
-extern volatile u32 tmr0_cnt;            // ¶¨Ê±Æ÷TMR0µÄ¼ÆÊıÖµ£¨Ã¿´ÎÔÚÖĞ¶Ï·şÎñº¯ÊıÖĞ»á¼ÓÒ»£©
+// extern volatile bit tmr0_flag; // tmr0ä¸­æ–­æœåŠ¡å‡½æ•°ä¸­ä¼šç½®ä½çš„æ ‡å¿—ä½
+extern volatile u32 tmr0_cnt;            // å®šæ—¶å™¨TMR0çš„è®¡æ•°å€¼ï¼ˆæ¯æ¬¡åœ¨ä¸­æ–­æœåŠ¡å‡½æ•°ä¸­ä¼šåŠ ä¸€ï¼‰
 
 void tmr0_config(void);
 void tmr0_enable(void);

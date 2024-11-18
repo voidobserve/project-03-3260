@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   MILEAGE                                                           11/08/2024 16:31:55 PAGE 1   
+C51 COMPILER V9.60.7.0   MILEAGE                                                           11/18/2024 17:39:08 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MILEAGE
@@ -9,148 +9,150 @@ COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\mileage.c LARGE OPTIM
 
 line level    source
 
-   1          // ��̱���Դ����
+   1          // 里程表的源程序
    2          #include "mileage.h"
    3          
-   4          
-   5          // �����ɨ��
-   6          void mileage_scan(void)
-   7          {
-   8   1      #ifdef INTERNATIONAL // ���Ƶ�λ
-   9   1      
-  10   1          static u32 old_total_mileage = 0;    // ������¼�ɵĴ����̵ı���
-  11   1          static u32 old_subtotal_mileage = 0; // ������¼�ɵ�С����̵ı���
-  12   1      
-  13   1          static bit tmr_is_open = 0; // ��ʱ���Ƿ�򿪵ı�־λ
-  14   1      
-  15   1          if (0 == tmr_is_open)
+   4          // 总里程扫描
+   5          void mileage_scan(void)
+   6          {
+   7   1      #ifdef USE_INTERNATIONAL // 公制单位
+   8   1      
+   9   1          static u32 old_total_mileage = 0;    // 用来记录旧的大计里程的变量
+  10   1          static u32 old_subtotal_mileage = 0; // 用来记录旧的小计里程的变量
+  11   1      
+  12   1          static bit flag_tmr_is_open = 0; // 定时器是否打开的标志位
+  13   1      
+  14   1          // 打开定时器
+  15   1          if (0 == flag_tmr_is_open)
   16   1          {
-  17   2              tmr_is_open = 1;
+  17   2              flag_tmr_is_open = 1;
   18   2              tmr3_cnt = 0;
   19   2              tmr3_enable();
   20   2          }
   21   1      
-  22   1          if (tmr3_cnt >= 3000)
+  22   1          if (tmr3_cnt >= 30000) // 30000 ms -- 30s
   23   1          {
-  24   2              // ÿ30s�������̺�С�����д��flash
-  25   2              tmr3_disable();
+  24   2              // 每30s将大计里程和小计里程写入flash
+  25   2              // tmr3_disable();
   26   2              tmr3_cnt = 0;
-  27   2              tmr_is_open = 0;
+  27   2              // flag_tmr_is_open = 0;
   28   2      
-  29   2              flash_write(0x00, (u8 *)&fun_info, sizeof(fun_info));
-  30   2          }
-  31   1      
-  32   1          if (distance >= 1000)
-  33   1          {
-  34   2              // ����߹��ľ��볬����1m���ٽ��б���
-  35   2              fun_info.total_mileage += distance / 1000;    // ������ת�����ף��ٱ���
-  36   2              fun_info.subtotal_mileage += distance / 1000; // ������ת�����ף��ٱ���
-  37   2              distance %= 1000;                                 // ʣ�µġ�δ����ġ�����1m������������һ�εı��
-             -�
-  38   2          }
-  39   1      
-  40   1          if ((fun_info.total_mileage - old_total_mileage) > 100)
-  41   1          {
-  42   2              // ����������б仯�ҳ�����100m
-  43   2              old_total_mileage = fun_info.total_mileage; // ��¼�ɵ����
-  44   2      
-  45   2              // printf("total mileage: %lum\n", fun_info.total_mileage);
-  46   2      
-  47   2              {
-  48   3                  // �������ݵĲ������������ñ�־λ
-  49   3                  // Ҫע�ⷢ�͵�����λ��������һλ��С������λΪKM������
-  50   3                  flag_get_total_mileage = 1;
-  51   3              }
-  52   2          }
-C51 COMPILER V9.60.7.0   MILEAGE                                                           11/08/2024 16:31:55 PAGE 2   
+  29   2              // flash_write(0x00, (u8 *)&fun_info, sizeof(fun_info));
+  30   2              fun_info_save(); // 将 fun_info 写回flash
+  31   2          }
+  32   1      
+  33   1          if (distance >= 1000)
+  34   1          {
+  35   2              // 如果走过的距离超过了1m，再进行保存
+  36   2              fun_info.total_mileage += distance / 1000;    // 将毫米转换成米，再保存
+  37   2              fun_info.subtotal_mileage += distance / 1000; // 将毫米转换成米，再保存
+  38   2              distance -= 1000;                             // 剩下的、未保存的、不满1m的数据留�
+             -�下一次再保存
+  39   2          }
+  40   1      
+  41   1          if ((fun_info.total_mileage - old_total_mileage) > 100)
+  42   1          {
+  43   2              // 如果大计里程有变化且超过了100m
+  44   2              old_total_mileage = fun_info.total_mileage; // 记录旧的里程
+  45   2      
+  46   2              // printf("total mileage: %lum\n", fun_info.total_mileage);
+  47   2      
+  48   2              {
+  49   3                  // 发送数据的操作，可以先置标志位
+  50   3                  // 要注意发送的是五位的整数、一位的小数、单位为KM的数据
+  51   3                  flag_get_total_mileage = 1;
+  52   3              }
+C51 COMPILER V9.60.7.0   MILEAGE                                                           11/18/2024 17:39:08 PAGE 2   
 
-  53   1      
-  54   1          if ((fun_info.subtotal_mileage - old_subtotal_mileage) > 1000)
-  55   1          {
-  56   2              // ���С������б仯�ҳ�����1000m
-  57   2              old_subtotal_mileage = fun_info.subtotal_mileage; // ��¼�ɵ����
-  58   2      
-  59   2              // printf("subtotal mileage: %lum\n", fun_info.subtotal_mileage);
-  60   2      
-  61   2              {
-  62   3                  // �������ݵĲ������������ñ�־λ
-  63   3                  // Ҫע�ⷢ�͵�����λ�ġ���λΪKM������
-  64   3                  flag_get_sub_total_mileage = 1;
-  65   3              }
-  66   2          }
-  67   1      
-  68   1      #endif // INTERNATIONAL ���Ƶ�λ
-  69   1      
-  70   1      #ifdef IMPERIAL // Ӣ�Ƶ�λ
+  53   2          }
+  54   1      
+  55   1          if ((fun_info.subtotal_mileage - old_subtotal_mileage) > 1000)
+  56   1          {
+  57   2              // 如果小计里程有变化且超过了1000m
+  58   2              old_subtotal_mileage = fun_info.subtotal_mileage; // 记录旧的里程
+  59   2      
+  60   2              // printf("subtotal mileage: %lum\n", fun_info.subtotal_mileage);
+  61   2      
+  62   2              {
+  63   3                  // 发送数据的操作，可以先置标志位
+  64   3                  // 要注意发送的是四位的、一位小数、单位为KM的数据
+  65   3                  flag_get_sub_total_mileage = 1;
+  66   3              }
+  67   2          }
+  68   1      
+  69   1      #endif // INTERNATIONAL 公制单位
+  70   1      
+  71   1      #ifdef USE_IMPERIAL // 英制单位
               
-                  static u32 old_total_mileage = 0;    // ������¼�ɵĴ����̵ı���
-                  static u32 old_subtotal_mileage = 0; // ������¼�ɵ�С����̵ı���
+                  static u32 old_total_mileage = 0;    // 用来记录旧的大计里程的变量
+                  static u32 old_subtotal_mileage = 0; // 用来记录旧的小计里程的变量
               
-                  static bit tmr_is_open = 0; // ��ʱ���Ƿ�򿪵ı�־λ
+                  static bit flag_tmr_is_open = 0; // 定时器是否打开的标志位
               
-                  if (0 == tmr_is_open)
+                  if (0 == flag_tmr_is_open)
                   {
-                      tmr_is_open = 1;
+                      flag_tmr_is_open = 1;
                       tmr3_cnt = 0;
                       tmr3_enable();
                   }
               
-                  if (tmr3_cnt >= 3000)
+                  if (tmr3_cnt >= 30000) // 30000 ms
                   {
-                      // ÿ30s�������̺�С�����д��flash
+                      // 每30s将大计里程和小计里程写入flash
                       tmr3_disable();
                       tmr3_cnt = 0;
-                      tmr_is_open = 0;
+                      flag_tmr_is_open = 0;
               
-                      flash_write(0x00, (u8 *)&fun_info, sizeof(fun_info));
+                      // flash_write(0x00, (u8 *)&fun_info, sizeof(fun_info));
+                      fun_info_save();
                   }
               
                   if (distance >= 1000)
                   {
-                      // ����߹��ľ��볬����1m���ٽ��б���
-                      fun_info.total_mileage += distance / 1000;    // ������ת�����ף��ٱ���
-                      fun_info.subtotal_mileage += distance / 1000; // ������ת�����ף��ٱ���
-                      distance %= 1000;                                 // ʣ�µġ�δ����ġ�����1m������������һ�εı��
-             -�
+                      // 如果走过的距离超过了1m，再进行保存
+                      fun_info.total_mileage += distance / 1000;    // 将毫米转换成米，再保存
+                      fun_info.subtotal_mileage += distance / 1000; // 将毫米转换成米，再保存
+                      distance -= 1000;                             // 剩下的、未保存的、不满1m的数据留�
+             -�下一次的保存
                   }
               
                   if ((fun_info.total_mileage - old_total_mileage) > 161)
                   {
-                      // ����������б仯�ҳ�����161m��Լ0.1Ӣ��
-                      old_total_mileage = fun_info.total_mileage; // ��¼�ɵ����
+                      // 如果大计里程有变化且超过了161m，约0.1英里
+                      old_total_mileage = fun_info.total_mileage; // 记录旧的里程
               
                       // printf("total mileage: %lum\n", fun_info.total_mileage);
               
                       {
-                          // �������ݵĲ������������ñ�־λ
-                          // Ҫע�ⷢ�͵�����λ��������һλ��С������λΪӢ�������
+                          // 发送数据的操作，可以先置标志位
+                          // 要注意发送的是五位的整数、一位的小数、单位为英里的数据
+C51 COMPILER V9.60.7.0   MILEAGE                                                           11/18/2024 17:39:08 PAGE 3   
+
               
                           flag_get_total_mileage = 1;
-C51 COMPILER V9.60.7.0   MILEAGE                                                           11/08/2024 16:31:55 PAGE 3   
-
                       }
                   }
               
                   if ((fun_info.subtotal_mileage - old_subtotal_mileage) > 1610)
                   {
-                      // ���С������б仯�ҳ�����1610m��Լ1Ӣ��
-                      old_subtotal_mileage = fun_info.subtotal_mileage; // ��¼�ɵ����
+                      // 如果小计里程有变化且超过了1610m，约1英里
+                      old_subtotal_mileage = fun_info.subtotal_mileage; // 记录旧的里程
               
                       // printf("subtotal mileage: %lum\n", fun_info.subtotal_mileage);
               
                       {
-                          // �������ݵĲ������������ñ�־λ
-                          // Ҫע�ⷢ�͵�����λ�ġ���λΪӢ�������
+                          // 发送数据的操作，可以先置标志位
+                          // 要注意发送的是四位的、单位为英里的数据
                           flag_get_sub_total_mileage = 1;
                       }
                   }
               
-              #endif // IMPERIAL Ӣ�Ƶ�λ
- 132   1      }
+              #endif // USE_IMPERIAL 英制单位
+ 134   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    296    ----
+   CODE SIZE        =    276    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =      8    ----
    PDATA SIZE       =   ----    ----

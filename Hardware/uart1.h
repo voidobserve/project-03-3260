@@ -1,11 +1,11 @@
 #ifndef __UART1_H
 #define __UART1_H
 
-#include "include.h" // Ê¹ÓÃĞ¾Æ¬¹Ù·½Ìá¹©µÄÍ·ÎÄ¼ş
+#include "include.h" // ä½¿ç”¨èŠ¯ç‰‡å®˜æ–¹æä¾›çš„å¤´æ–‡ä»¶
 
-#include "my_config.h" // °üº¬×Ô¶¨ÒåµÄÍ·ÎÄ¼ş
+#include "my_config.h" // åŒ…å«è‡ªå®šä¹‰çš„å¤´æ–‡ä»¶
 
-// ´®¿Ú1²¨ÌØÂÊ
+// ä¸²å£1æ³¢ç‰¹ç‡
 #ifndef UART1_BAUDRATE
 #define UART1_BAUDRATE  460800
 #endif // UART1_BAUDRATE
@@ -14,7 +14,7 @@ void uart1_init(void);
 void uart1_sendbyte(u8 senddata);
 void uart1_sendbytes(u8 *buf, u32 buf_len);
 
-// ²»ÄÜÊ¹ÓÃUART1+DMAÀ´½ÓÊÕ²»¶¨³¤µÄÊı¾İ£¬ÕâÀïµÄ´úÂë²»ÄÜÓÃ
+// ä¸èƒ½ä½¿ç”¨UART1+DMAæ¥æ¥æ”¶ä¸å®šé•¿çš„æ•°æ®ï¼Œè¿™é‡Œçš„ä»£ç ä¸èƒ½ç”¨
 void uart1_dma_recv_scan(void);
 
 #endif

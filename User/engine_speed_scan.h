@@ -1,10 +1,10 @@
 #ifndef __ENGINE_SPEED_SCAN_H
 #define __ENGINE_SPEED_SCAN_H
 
-#include "include.h"   // Ê¹ÓÃĞ¾Æ¬¹Ù·½Ìá¹©µÄÍ·ÎÄ¼ş
-#include "my_config.h" // °üº¬×Ô¶¨ÒåµÄÍ·ÎÄ¼ş
+#include "include.h"   // ä½¿ç”¨èŠ¯ç‰‡å®˜æ–¹æä¾›çš„å¤´æ–‡ä»¶
+#include "my_config.h" // åŒ…å«è‡ªå®šä¹‰çš„å¤´æ–‡ä»¶
 
-void engine_speed_scan_config(void); // ·¢¶¯»ú×ªËÙÉ¨ÃèµÄÅäÖÃ
-void engine_speed_scan(void); // ·¢¶¯»ú×ªËÙÉ¨Ãè
+void engine_speed_scan_config(void); // å‘åŠ¨æœºè½¬é€Ÿæ‰«æçš„é…ç½®
+void engine_speed_scan(void); // å‘åŠ¨æœºè½¬é€Ÿæ‰«æ
 
 #endif

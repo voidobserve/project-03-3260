@@ -10,7 +10,7 @@
  *
  * <h2><center>&copy; COPYRIGHT 2021 HUGE-IC</center></h2>
  *
- * ��Ȩ˵����������
+ * 版权说明后续补上
  *
  ******************************************************************************
  */
@@ -34,66 +34,64 @@
  * @param  None
  * @retval None
  */
-// extern u32 test_val; // ������
+// extern u32 test_val; // 测试用
 
-// enum 
+// enum
 // {
-//     CUR_SCAN_ENGINE_SPEED, // ��ǰҪɨ�������ٶ�
-//     CUR_SCAN_SPEED, // ��ǰҪɨ��ʱ��
+//     CUR_SCAN_ENGINE_SPEED, // 当前要扫描引擎速度
+//     CUR_SCAN_SPEED, // 当前要扫描时速
 // }
 
 void main(void)
 {
-    // ���Ź�Ĭ�ϴ�, ��λʱ��2s
+    // 看门狗默认打开, 复位时间2s
     system_init();
 
-    WDT_KEY = WDT_KEY_VAL(0xDD); //  �رտ��Ź�
+    WDT_KEY = WDT_KEY_VAL(0xDD); //  关闭看门狗
 
-    // �ر�HCK��HDA�ĵ��Թ���
-    WDT_KEY = 0x55;  // ���д����
-    IO_MAP &= ~0x01; // �������Ĵ�����ֵ��ʵ�ֹر�HCK��HDA���ŵĵ��Թ��ܣ����ӳ�䣩
+    // 关闭HCK和HDA的调试功能
+    WDT_KEY = 0x55;  // 解除写保护
+    IO_MAP &= ~0x01; // 清除这个寄存器的值，实现关闭HCK和HDA引脚的调试功能（解除映射）
     WDT_KEY = 0xBB;
 
-    /* �û������ʼ���ӿ� */
+    /* 用户代码初始化接口 */
     user_init();
 
-    // �����ã�һ�ϵ��ӡflash�д�ŵ���Ϣ
+    // 测试用，一上电打印flash中存放的信息
     printf("year %d month %d day %d \n", (u16)fun_info.year, (u16)fun_info.month, (u16)fun_info.day);
 
-
-    /* ������ʼ�� */
+    /* 按键初始化 */
     // tk_param_init();
 
-    /* ϵͳ��ѭ�� */
+    /* 系统主循环 */
     while (1)
     {
-        /* ����ɨ�躯�� */
-        // __tk_scan(); // ʹ���˿�����Ľӿڣ���Դ�⣩
+        /* 按键扫描函数 */
+        // __tk_scan(); // 使用了库里面的接口（闭源库）
 
-        /* �û�ѭ��ɨ�躯���ӿ� */
+        /* 用户循环扫描函数接口 */
         // user_handle();
 
-        // ɨ��״̬�Ƿ�仯������仯����±�־λ������״̬����Ϣ���ṹ����
+        // 扫描状态是否变化，如果变化则更新标志位，更新状态的信息到结构体中
         // pin_level_scan();
-        // speed_scan();        // ɨ�赱ǰʱ��
-        // engine_speed_scan(); // ɨ�赱ǰ������ת��
-        // adc_scan(); // adcɨ�裬��ת���ɰٷֱȵ���ʽ����
-        // mileage_scan(); // ���ɨ�裨������ɨ��+С�����ɨ�裩
+        // speed_scan();        // 扫描当前时速
+        // engine_speed_scan(); // 扫描当前发动机转速
+        // adc_scan(); // adc扫描，并转换成百分比的形式发送
+        // mileage_scan(); // 里程扫描（大计里程扫描+小计里程扫描）
 
-        // 1. ���� �Ӵ��ڽ���ָ��Ƿ��ܹ���ȷʶ��
-        // {
-        //     uart0_scan_handle();  // ��鴮�ڽ��ջ������������Ƿ����Э��,�������ȷ��ָ���浽��һ����������
-        //     instruction_scan();   // ɨ���Ƿ��кϷ���ָ��
-        //     instruction_handle(); // ɨ���Ƿ��ж�Ӧ�Ļ�ȡ/״̬���²���
-        // }
-
-
-        // 2. ���� ʱ�ٺͷ�������ת�ٵ�ɨ�裬���Ҳ���������ѭ��
+        // 1. 测试 从串口接收指令，是否能够正确识别
         {
-
+            uart0_scan_handle();  // 检查串口接收缓冲区的数据是否符合协议,如果有正确的指令，会存到另一个缓冲区中
+            instruction_scan();   // 扫描是否有合法的指令
+            instruction_handle(); // 扫描是否有对应的获取/状态更新操作
         }
 
-
+        // 2. 测试 时速和发动机的转速的扫描，并且不会阻塞主循环
+        {
+            engine_speed_scan(); // 检测发动机转速
+            speed_scan(); // 检测时速
+            mileage_scan(); // 检测大计里程和小计里程
+        }
     }
 }
 

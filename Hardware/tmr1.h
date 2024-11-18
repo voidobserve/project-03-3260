@@ -1,14 +1,14 @@
 #ifndef __TMR1_H
 #define __TMR1_H
 
-#include "include.h"   // Ê¹ÓÃĞ¾Æ¬¹Ù·½Ìá¹©µÄÍ·ÎÄ¼ş
-#include "my_config.h" // °üº¬×Ô¶¨ÒåµÄÍ·ÎÄ¼ş
+#include "include.h"   // ä½¿ç”¨èŠ¯ç‰‡å®˜æ–¹æä¾›çš„å¤´æ–‡ä»¶
+#include "my_config.h" // åŒ…å«è‡ªå®šä¹‰çš„å¤´æ–‡ä»¶
 
-// extern volatile bit tmr1_flag; // TMR1ÖĞ¶Ï·şÎñº¯ÊıÖĞ»áÖÃÎ»µÄ±êÖ¾Î»
-extern volatile u32 tmr1_cnt;  // ¶¨Ê±Æ÷TMR1µÄ¼ÆÊıÖµ£¨Ã¿´ÎÔÚÖĞ¶Ï·şÎñº¯ÊıÖĞ»á¼ÓÒ»£©
+// extern volatile bit tmr1_flag; // TMR1ä¸­æ–­æœåŠ¡å‡½æ•°ä¸­ä¼šç½®ä½çš„æ ‡å¿—ä½
+extern volatile u32 tmr1_cnt;  // å®šæ—¶å™¨TMR1çš„è®¡æ•°å€¼ï¼ˆæ¯æ¬¡åœ¨ä¸­æ–­æœåŠ¡å‡½æ•°ä¸­ä¼šåŠ ä¸€ï¼‰
 
-void tmr1_config(void);  // ÅäÖÃ¶¨Ê±Æ÷£¨³õÊ¼»¯£©
-void tmr1_enable(void);  // ¿ªÆô¶¨Ê±Æ÷
-void tmr1_disable(void); // ¹Ø±Õ¶¨Ê±Æ÷£¬Çå³ıÓ²¼şµÄ¼ÆÊıÖµ
+void tmr1_config(void);  // é…ç½®å®šæ—¶å™¨ï¼ˆåˆå§‹åŒ–ï¼‰
+void tmr1_enable(void);  // å¼€å¯å®šæ—¶å™¨
+void tmr1_disable(void); // å…³é—­å®šæ—¶å™¨ï¼Œæ¸…é™¤ç¡¬ä»¶çš„è®¡æ•°å€¼
 
 #endif

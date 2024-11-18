@@ -1,31 +1,14 @@
-// ¶¨Ê±Æ÷TMR2µÄÇı¶¯Í·ÎÄ¼ş
+// å®šæ—¶å™¨TMR2çš„é©±åŠ¨å¤´æ–‡ä»¶
 #ifndef __TMR2_H
 #define __TMR2_H
 
-#include "include.h" // °üº¬Ğ¾Æ¬¹Ù·½Ìá¹©µÄÍ·ÎÄ¼ş
+#include "include.h" // åŒ…å«èŠ¯ç‰‡å®˜æ–¹æä¾›çš„å¤´æ–‡ä»¶
 #include "my_config.h"
 
-extern volatile u32 tmr2_cnt; // ¶¨Ê±Æ÷TMR2µÄ¼ÆÊıÖµ£¨Ã¿´ÎÔÚÖĞ¶Ï·şÎñº¯ÊıÖĞ»á¼ÓÒ»£©
+extern volatile u32 tmr2_cnt; // å®šæ—¶å™¨TMR2çš„è®¡æ•°å€¼ï¼ˆæ¯æ¬¡åœ¨ä¸­æ–­æœåŠ¡å‡½æ•°ä¸­ä¼šåŠ ä¸€ï¼‰
 
 extern void tmr2_config(void);
 extern void tmr2_enable(void);
 extern void tmr2_disable(void);
-
-
-#if USE_TMR2
-// ¶¨Ê±Æ÷TMR2µÄ¼ÆÊ±ÖÜÆÚ£¬Ò²ÊÇÖĞ¶Ï´¥·¢ÖÜÆÚ£¨Ã¿¸ô¶à¾Ã´¥·¢Ò»´ÎÖĞ¶Ï£©
-// ¼ÆÊ±ÖÜÆÚ²»ÄÜ´óÓÚ65535£¬ÒòÎªTMR2´æ·Å¼ÆÊ±ÖÜÆÚµÄ¼Ä´æÆ÷Ö»ÓĞ16Î»
-// ÏÖÔÚÈÃ¶¨Ê±Æ÷TMR2Ã¿5ms´¥·¢Ò»´ÎÖĞ¶Ï
-#define TMR2_CNT_TIME ((7619)) // 5000us / 0.65625us == 7462£¬ÕâÀïµ÷ÊÔµÃ³öÊÇ7500£¬×î½Ó½ü5ms
-
-// extern volatile unsigned char tmr2_flag; // tmr2ÖĞ¶Ï·şÎñº¯ÊıÖĞ»áÖÃÎ»µÄ±êÖ¾Î»
-extern volatile u32 tmr2_cnt; // ¶¨Ê±Æ÷TMR2µÄ¼ÆÊıÖµ£¨Ã¿´ÎÔÚÖĞ¶Ï·şÎñº¯ÊıÖĞ»á¼ÓÒ»£©
-
-void tmr2_config(void); // ¶¨Ê±Æ÷tmr2µÄ³õÊ¼»¯
-void tmr2_pwm_config(void);
-
-void tmr2_enable(void);  // ¿ªÆô¶¨Ê±Æ÷TMR2£¬¿ªÊ¼¼ÆÊ±
-void tmr2_disable(void); // ¹Ø±Õ¶¨Ê±Æ÷TMR2£¬Çå¿Õ¼ÆÊıÖµ
-#endif                   // USE_TMR2
 
 #endif

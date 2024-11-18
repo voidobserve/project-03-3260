@@ -1,19 +1,21 @@
 #ifndef __MILEAGE_H
 #define __MILEAGE_H
 
-#include "include.h"   // Ê¹ÓÃĞ¾Æ¬¹Ù·½Ìá¹©µÄÍ·ÎÄ¼ş
-#include "my_config.h" // °üº¬×Ô¶¨ÒåµÄÍ·ÎÄ¼ş
+#include "include.h"   // ä½¿ç”¨èŠ¯ç‰‡å®˜æ–¹æä¾›çš„å¤´æ–‡ä»¶
+#include "my_config.h" // åŒ…å«è‡ªå®šä¹‰çš„å¤´æ–‡ä»¶
 
-// ¶¨Òå´æ·ÅÀï³ÌµÄ½á¹¹Ìå
+// å®šä¹‰å­˜æ”¾é‡Œç¨‹çš„ç»“æ„ä½“
 // typedef struct 
 // {
-//     u32 total_mileage; // ×ÜÀï³Ì±í£¨´ó¼ÆÀï³Ì£¬0~99999.9£©
-//     u32 subtotal_mileage; // ¶Ì¾àÀëÀï³Ì±í£¨Ğ¡¼ÆÀï³Ì£¬0~9999£©
+//     u32 total_mileage; // æ€»é‡Œç¨‹è¡¨ï¼ˆå¤§è®¡é‡Œç¨‹ï¼Œ0~99999.9ï¼‰
+//     u32 subtotal_mileage; // çŸ­è·ç¦»é‡Œç¨‹è¡¨ï¼ˆå°è®¡é‡Œç¨‹ï¼Œ0~9999ï¼‰
 // }mileage_t;
 
-// extern mileage_t mileage_info; // ´æ·ÅÀï³Ì±íµÄ½á¹¹Ìå±äÁ¿
+// extern mileage_t mileage_info; // å­˜æ”¾é‡Œç¨‹è¡¨çš„ç»“æ„ä½“å˜é‡
 
 // void mileage_init(void);
-void mileage_scan(void); // Àï³ÌÉ¨Ãè£¨´ó¼ÆÀï³ÌÉ¨Ãè+Ğ¡¼ÆÀï³ÌÉ¨Ãè£©
+
+
+void mileage_scan(void); // é‡Œç¨‹æ‰«æï¼ˆå¤§è®¡é‡Œç¨‹æ‰«æ+å°è®¡é‡Œç¨‹æ‰«æï¼‰
 
 #endif

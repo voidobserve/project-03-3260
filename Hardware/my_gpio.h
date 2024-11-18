@@ -1,38 +1,38 @@
-// GPIOÅäÖÃµÄÍ·ÎÄ¼ş
+// GPIOé…ç½®çš„å¤´æ–‡ä»¶
 #ifndef __MY_GPIO_H
 #define __MY_GPIO_H
 
-#include "include.h" // °üº¬Ğ¾Æ¬¹Ù·½Ìá¹©µÄÍ·ÎÄ¼ş
+#include "include.h" // åŒ…å«èŠ¯ç‰‡å®˜æ–¹æä¾›çš„å¤´æ–‡ä»¶
 
-// ¿ª·¢°åÉÏÓëLEDÕı¼«Á¬½ÓµÄÒı½Å
+// å¼€å‘æ¿ä¸Šä¸LEDæ­£æè¿æ¥çš„å¼•è„š
 #define LED6 P01
 #define LED7 P26
 
-// p11¡¢p12ÔÚ¿ª·¢°åÉÏ×÷Îª´®¿ÚÊ¹ÓÃ
+// p11ã€p12åœ¨å¼€å‘æ¿ä¸Šä½œä¸ºä¸²å£ä½¿ç”¨
 void p11_output_config(void);
-void p12_output_config(void); // P12ÅäÖÃÎªÊä³öÄ£Ê½
+void p12_output_config(void); // P12é…ç½®ä¸ºè¾“å‡ºæ¨¡å¼
 
-// void p01_output_config(void); // P01Á¬½Óµ½ÁË¿ª·¢°åµÄLED6µÄÕı¼«
-// void p26_output_config(void); // P26Á¬½Óµ½ÁË¿ª·¢°åµÄLED7µÄÕı¼«P26ÅäÖÃÎªÊä³öÄ£Ê½
+// void p01_output_config(void); // P01è¿æ¥åˆ°äº†å¼€å‘æ¿çš„LED6çš„æ­£æ
+// void p26_output_config(void); // P26è¿æ¥åˆ°äº†å¼€å‘æ¿çš„LED7çš„æ­£æP26é…ç½®ä¸ºè¾“å‡ºæ¨¡å¼
 void p03_output_config(void);
 
-void p06_input_config(void); // p06ÅäÖÃ³ÉÊäÈëÉÏÀ­Ä£Ê½
-void p07_input_config(void); // p07ÅäÖÃ³ÉÊäÈëÉÏÀ­Ä£Ê½
+void p06_input_config(void); // p06é…ç½®æˆè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
+void p07_input_config(void); // p07é…ç½®æˆè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
 
-void p10_input_config(void); // p10ÅäÖÃ³ÉÊäÈëÉÏÀ­Ä£Ê½
-void p13_input_config(void); // p13ÅäÖÃ³ÉÊäÈëÉÏÀ­Ä£Ê½
-void p14_input_config(void); // p14ÅäÖÃ³ÉÊäÈëÉÏÀ­Ä£Ê½
-// void p17_input_config(void); // p17ÅäÖÃ³ÉÊäÈëÉÏÀ­Ä£Ê½
+void p10_input_config(void); // p10é…ç½®æˆè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
+void p13_input_config(void); // p13é…ç½®æˆè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
+void p14_input_config(void); // p14é…ç½®æˆè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
+// void p17_input_config(void); // p17é…ç½®æˆè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
 
-void p21_input_config(void); // p21ÅäÖÃ³ÉÊäÈëÉÏÀ­Ä£Ê½
-void p22_input_config(void); // p22ÅäÖÃ³ÉÊäÈëÉÏÀ­Ä£Ê½
-void p23_input_config(void); // p23ÅäÖÃ³ÉÊäÈëÉÏÀ­Ä£Ê½
+void p21_input_config(void); // p21é…ç½®æˆè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
+void p22_input_config(void); // p22é…ç½®æˆè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
+void p23_input_config(void); // p23é…ç½®æˆè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
 
-void p25_input_config(void);// p25ÅäÖÃ³ÉÊäÈëÉÏÀ­Ä£Ê½
+void p25_input_config(void);// p25é…ç½®æˆè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
 
-void p27_input_config(void); // p27ÅäÖÃ³ÉÊäÈëÉÏÀ­Ä£Ê½
+void p27_input_config(void); // p27é…ç½®æˆè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
 
-void p30_input_config(void); // p30ÅäÖÃ³ÉÊäÈëÉÏÀ­Ä£Ê½
-// void p31_input_config(void); // p31ÅäÖÃ³ÉÊäÈëÉÏÀ­Ä£Ê½
+void p30_input_config(void); // p30é…ç½®æˆè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
+// void p31_input_config(void); // p31é…ç½®æˆè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
 
 #endif

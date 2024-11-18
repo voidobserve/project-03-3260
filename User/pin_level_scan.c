@@ -2,44 +2,44 @@
 
 void pin_level_scan_config(void)
 {
-    p21_input_config(); // Ô¶¹âµÆ×´Ì¬¶ÔÓ¦µÄÒı½Å
-    p22_input_config(); // ÓÒ×ªÏòµÆ×´Ì¬¶ÔÓ¦µÄÒı½Å
-    p23_input_config(); // É²³µ×´Ì¬¶ÔÓ¦µÄÒı½Å
-    p25_input_config(); // ×ó×ªÏòµÆ×´Ì¬¶ÔÓ¦µÄÒı½Å
+    p21_input_config(); // è¿œå…‰ç¯çŠ¶æ€å¯¹åº”çš„å¼•è„š
+    p22_input_config(); // å³è½¬å‘ç¯çŠ¶æ€å¯¹åº”çš„å¼•è„š
+    p23_input_config(); // åˆ¹è½¦çŠ¶æ€å¯¹åº”çš„å¼•è„š
+    p25_input_config(); // å·¦è½¬å‘ç¯çŠ¶æ€å¯¹åº”çš„å¼•è„š
 
-    p30_input_config(); // 6µµ¶ÔÓ¦µÄÒı½Å
-    p27_input_config(); // 5µµ¶ÔÓ¦µÄÒı½Å
-    p14_input_config(); // 4µµ¶ÔÓ¦µÄÒı½Å
-    p13_input_config(); // 3µµ¶ÔÓ¦µÄÒı½Å
-    p10_input_config(); // 2µµ¶ÔÓ¦µÄÒı½Å
-    p07_input_config(); // 1µµ¶ÔÓ¦µÄÒı½Å
-    p06_input_config(); // ¿Õµ²¶ÔÓ¦µÄÒı½Å
+    p30_input_config(); // 6æ¡£å¯¹åº”çš„å¼•è„š
+    p27_input_config(); // 5æ¡£å¯¹åº”çš„å¼•è„š
+    p14_input_config(); // 4æ¡£å¯¹åº”çš„å¼•è„š
+    p13_input_config(); // 3æ¡£å¯¹åº”çš„å¼•è„š
+    p10_input_config(); // 2æ¡£å¯¹åº”çš„å¼•è„š
+    p07_input_config(); // 1æ¡£å¯¹åº”çš„å¼•è„š
+    p06_input_config(); // ç©ºæŒ¡å¯¹åº”çš„å¼•è„š
 }
 
-// Òı½ÅµçÆ½É¨Ãè£¬¶¼ÊÇµÍµçÆ½ÓĞĞ§
+// å¼•è„šç”µå¹³æ‰«æï¼Œéƒ½æ˜¯ä½ç”µå¹³æœ‰æ•ˆ
 void pin_level_scan(void)
 {
     if (P23 == 0)
     {
-        // Èç¹û É²³µ
+        // å¦‚æœ åˆ¹è½¦
 
         // printf("P23 == 0\n");
         if (OFF == fun_info.brake)
         {
-            // Èç¹ûÖ®Ç°É²³µÊÇ¹Ø±ÕµÄ
+            // å¦‚æœä¹‹å‰åˆ¹è½¦æ˜¯å…³é—­çš„
             flag_get_brake = 1;
             fun_info.brake = ON;
         }
         else
         {
-            // Èç¹ûÉ²³µÔÚÉÏÒ»´ÎÉ¨ÃèÊ±¾ÍÊÇ¿ªÆôµÄ
-            // ²»ÓÃ¸üĞÂ×´Ì¬
+            // å¦‚æœåˆ¹è½¦åœ¨ä¸Šä¸€æ¬¡æ‰«ææ—¶å°±æ˜¯å¼€å¯çš„
+            // ä¸ç”¨æ›´æ–°çŠ¶æ€
         }
     }
     else
     {
-        // Èç¹ûÏÖÔÚÉ²³µÊÇ¹Ø±ÕµÄ£¬¿´¿´ÉÏÒ»´ÎÉ¨ÃèÊ±É²³µÊÇ·ñ¿ªÆô£¬
-        // Èç¹ûÉÏÒ»´ÎÉ¨ÃèÊ±ÊÇ¿ªÆôµÄ£¬Òª·¢ËÍÉ²³µ¹Ø±ÕµÄĞÅÏ¢
+        // å¦‚æœç°åœ¨åˆ¹è½¦æ˜¯å…³é—­çš„ï¼Œçœ‹çœ‹ä¸Šä¸€æ¬¡æ‰«ææ—¶åˆ¹è½¦æ˜¯å¦å¼€å¯ï¼Œ
+        // å¦‚æœä¸Šä¸€æ¬¡æ‰«ææ—¶æ˜¯å¼€å¯çš„ï¼Œè¦å‘é€åˆ¹è½¦å…³é—­çš„ä¿¡æ¯
         if (ON == fun_info.brake)
         {
             fun_info.brake = OFF;
@@ -49,10 +49,10 @@ void pin_level_scan(void)
 
     if (P25 == 0)
     {
-        // Èç¹û ×ó×ªÏòµÆ¿ªÆô
+        // å¦‚æœ å·¦è½¬å‘ç¯å¼€å¯
         if (OFF == fun_info.left_turn)
         {
-            // Èç¹ûÉÏÒ»´ÎÉ¨ÃèÊ±Ô¶¹âµÆÊÇ¹Ø±ÕµÄ
+            // å¦‚æœä¸Šä¸€æ¬¡æ‰«ææ—¶è¿œå…‰ç¯æ˜¯å…³é—­çš„
             fun_info.left_turn = ON;
             flag_get_left_turn = 1;
         }
@@ -61,7 +61,7 @@ void pin_level_scan(void)
     {
         if (ON == fun_info.left_turn)
         {
-            // Èç¹ûÉÏÒ»´ÎÉ¨ÃèÊ±Ô¶¹âµÆÊÇ¿ªÆôµÄ
+            // å¦‚æœä¸Šä¸€æ¬¡æ‰«ææ—¶è¿œå…‰ç¯æ˜¯å¼€å¯çš„
             fun_info.left_turn = OFF;
             flag_get_left_turn = 1;
         }
@@ -69,11 +69,11 @@ void pin_level_scan(void)
 
     if (P22 == 0)
     {
-        // Èç¹û ÓÒ×ªÏòµÆ¿ªÆô
+        // å¦‚æœ å³è½¬å‘ç¯å¼€å¯
         // printf("P22 == 0\n");
         if (OFF == fun_info.right_turn)
         {
-            // Èç¹ûÉÏÒ»´ÎÉ¨ÃèÊ±ÓÒ×ªÏòµÆÊÇ¹Ø±ÕµÄ
+            // å¦‚æœä¸Šä¸€æ¬¡æ‰«ææ—¶å³è½¬å‘ç¯æ˜¯å…³é—­çš„
             fun_info.right_turn = ON;
             flag_get_right_turn = 1;
         }
@@ -82,7 +82,7 @@ void pin_level_scan(void)
     {
         if (ON == fun_info.right_turn)
         {
-            // Èç¹ûÉÏÒ»´ÎÉ¨ÃèÊ±ÓÒ×ªÏòµÆÊÇ¿ªÆôµÄ
+            // å¦‚æœä¸Šä¸€æ¬¡æ‰«ææ—¶å³è½¬å‘ç¯æ˜¯å¼€å¯çš„
             fun_info.right_turn = OFF;
             flag_get_right_turn = 1;
         }
@@ -90,12 +90,12 @@ void pin_level_scan(void)
 
     if (P21 == 0)
     {
-        // Èç¹û Ô¶¹âµÆ¿ªÆô
+        // å¦‚æœ è¿œå…‰ç¯å¼€å¯
         // printf("P21 == 0\n");
 
         if (OFF == fun_info.high_beam)
         {
-            // Èç¹ûÉÏÒ»´ÎÉ¨ÃèÊ±Ô¶¹âµÆÊÇ¹Ø±ÕµÄ
+            // å¦‚æœä¸Šä¸€æ¬¡æ‰«ææ—¶è¿œå…‰ç¯æ˜¯å…³é—­çš„
             fun_info.high_beam = ON;
             flag_get_high_beam = 1;
         }
@@ -104,18 +104,18 @@ void pin_level_scan(void)
     {
         if (ON == fun_info.high_beam)
         {
-            // Èç¹ûÉÏÒ»´ÎÉ¨ÃèÊ±Ô¶¹âµÆÊÇ¿ªÆôµÄ
+            // å¦‚æœä¸Šä¸€æ¬¡æ‰«ææ—¶è¿œå…‰ç¯æ˜¯å¼€å¯çš„
             fun_info.high_beam = OFF;
             flag_get_high_beam = 1;
         }
     }
 
-    // ÒÔ×îµÍµ²Î»ÓÅÏÈ£¬µ±×îµÍµµÓĞĞÅºÅÊ±£¬²»¹ÜÆäËûµ²Î»µÄĞÅºÅ£¬Ö±½ÓÒÔ×îµÍµµµÄÎªÖ÷
+    // ä»¥æœ€ä½æŒ¡ä½ä¼˜å…ˆï¼Œå½“æœ€ä½æ¡£æœ‰ä¿¡å·æ—¶ï¼Œä¸ç®¡å…¶ä»–æŒ¡ä½çš„ä¿¡å·ï¼Œç›´æ¥ä»¥æœ€ä½æ¡£çš„ä¸ºä¸»
     if (0 == P06)
     {
         if (GEAR_NEUTRAL != fun_info.gear)
         {
-            // Èç¹ûÉÏÒ»´ÎÉ¨ÃèÊ±µÄµ²Î»²»ÊÇ¿Õµ²
+            // å¦‚æœä¸Šä¸€æ¬¡æ‰«ææ—¶çš„æŒ¡ä½ä¸æ˜¯ç©ºæŒ¡
             fun_info.gear = GEAR_NEUTRAL;
             flag_get_gear = 1;
         }
@@ -124,7 +124,7 @@ void pin_level_scan(void)
     {
         if (GEAR_FIRST != fun_info.gear)
         {
-            // Èç¹ûÉÏÒ»´ÎÉ¨ÃèÊ±µÄµ²Î»²»ÊÇÒ»µµ
+            // å¦‚æœä¸Šä¸€æ¬¡æ‰«ææ—¶çš„æŒ¡ä½ä¸æ˜¯ä¸€æ¡£
             fun_info.gear = GEAR_FIRST;
             flag_get_gear = 1;
         }
@@ -133,7 +133,7 @@ void pin_level_scan(void)
     {
         if (GEAR_SECOND != fun_info.gear)
         {
-            // Èç¹ûÉÏÒ»´ÎÉ¨ÃèÊ±µÄµ²Î»²»ÊÇ¶şµµ
+            // å¦‚æœä¸Šä¸€æ¬¡æ‰«ææ—¶çš„æŒ¡ä½ä¸æ˜¯äºŒæ¡£
             fun_info.gear = GEAR_SECOND;
             flag_get_gear = 1;
         }
@@ -142,7 +142,7 @@ void pin_level_scan(void)
     {
         if (GEAR_THIRD != fun_info.gear)
         {
-            // Èç¹ûÉÏÒ»´ÎÉ¨ÃèÊ±µÄµ²Î»²»ÊÇÈıµµ
+            // å¦‚æœä¸Šä¸€æ¬¡æ‰«ææ—¶çš„æŒ¡ä½ä¸æ˜¯ä¸‰æ¡£
             fun_info.gear = GEAR_THIRD;
             flag_get_gear = 1;
         }
@@ -151,7 +151,7 @@ void pin_level_scan(void)
     {
         if (GEAR_FOURTH != fun_info.gear)
         {
-            // Èç¹ûÉÏÒ»´ÎÉ¨ÃèÊ±µÄµ²Î»²»ÊÇËÄµµ
+            // å¦‚æœä¸Šä¸€æ¬¡æ‰«ææ—¶çš„æŒ¡ä½ä¸æ˜¯å››æ¡£
             fun_info.gear = GEAR_FOURTH;
             flag_get_gear = 1;
         }
@@ -160,7 +160,7 @@ void pin_level_scan(void)
     {
         if (GEAR_FIFTH != fun_info.gear)
         {
-            // Èç¹ûÉÏÒ»´ÎÉ¨ÃèÊ±µÄµ²Î»²»ÊÇÎåµµ
+            // å¦‚æœä¸Šä¸€æ¬¡æ‰«ææ—¶çš„æŒ¡ä½ä¸æ˜¯äº”æ¡£
             fun_info.gear = GEAR_FIFTH;
             flag_get_gear = 1;
         }
@@ -170,7 +170,7 @@ void pin_level_scan(void)
         // printf("P30 == 0\n");
         if (GEAR_SIXTH != fun_info.gear)
         {
-            // Èç¹ûÉÏÒ»´ÎÉ¨ÃèÊ±µÄµ²Î»²»ÊÇÁùµµ
+            // å¦‚æœä¸Šä¸€æ¬¡æ‰«ææ—¶çš„æŒ¡ä½ä¸æ˜¯å…­æ¡£
             fun_info.gear = GEAR_SIXTH;
             flag_get_gear = 1;
         }

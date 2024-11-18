@@ -29,10 +29,10 @@
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
-#if 0 // 不参与编译的程序
+#if 0 // 涓嶅弬涓庣紪璇戠殑绋嬪簭
 
 #if DBG_PRINTF_EN
-// 重写puchar()函数
+// 閲嶅啓puchar()鍑芥暟
 char putchar(char c)
 {
     while(!(UART1_STA & UART_TX_DONE(0x01)));
@@ -71,7 +71,7 @@ void debug_init(void)
 
     UART1_BAUD1 = (((SYSCLK-DEBUG_BAUD)/DEBUG_BAUD) >> 8) & 0xFF;
     UART1_BAUD0 =  ((SYSCLK-DEBUG_BAUD)/DEBUG_BAUD)       & 0xFF;
-    UART1_CON0  = UART_EN(0x01);                                    // UART使能
+    UART1_CON0  = UART_EN(0x01);                                    // UART浣胯兘
 }
 
 /**
@@ -85,7 +85,7 @@ void user_printf(char *p_data)
         debug_putchar(*p_data++);
     }
 }
-#endif // 不参与编译的程序
+#endif // 涓嶅弬涓庣紪璇戠殑绋嬪簭
   
 
 /*************************** (C) COPYRIGHT 2021 HUGE-IC ***** END OF FILE *****/

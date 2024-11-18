@@ -1,18 +1,19 @@
-// ��ʱ��TMR2������ͷ�ļ�
+// 定时器TMR2的驱动头文件
 #ifndef __TMR3_H
 #define __TMR3_H
 
-#include "include.h" // ʹ��оƬ�ٷ��ṩ��ͷ�ļ�
+#include "include.h" // 使用芯片官方提供的头文件
+#include "my_config.h" // 包含自定义的头文件
 
-extern volatile u32 tmr3_cnt; // ��ʱ��TMR3�ļ���ֵ��ÿ�����жϷ������л��һ��
+extern volatile u32 tmr3_cnt; // 定时器TMR3的计数值（每次在中断服务函数中会加一）
 
-// ��ʱ��TMR3�ĳ�ʼ������ʼ����ɺ�Ĭ���ǹرյģ�
+// 定时器TMR3的初始化（初始化完成后，默认是关闭的）
 void tmr3_config(void);
 
-// ������ʱ��TMR3����ʼ��ʱ
+// 开启定时器TMR3，开始计时
 void tmr3_enable(void);
 
-// �رն�ʱ������ռ���ֵ
+// 关闭定时器，清空计数值
 void tmr3_disable(void);
 
 #endif

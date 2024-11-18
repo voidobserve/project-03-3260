@@ -1,7 +1,7 @@
-// Ğ¾Æ¬ÄÚ²¿µÄflashÏà¹Ø²Ù×÷µÄÔ´³ÌĞò
+// èŠ¯ç‰‡å†…éƒ¨çš„flashç›¸å…³æ“ä½œçš„æºç¨‹åº
 #include "flash.h"
 
-#define FLASH_START_ADDR (0x00) // ÆğÊ¼µØÖ·128byte¶ÔÆë
+#define FLASH_START_ADDR (0x00) // èµ·å§‹åœ°å€128byteå¯¹é½
 
 /**
  * @brief  flash erase sector
@@ -12,11 +12,11 @@ void flash_erase_sector(u8 addr)
 {
     FLASH_ADDR = 0x3F;
     FLASH_ADDR = addr;
-    FLASH_PASSWORD = FLASH_PASSWORD(0xB9); // Ğ´Èë²Ù×÷ÃÜÂë
-    FLASH_CON = FLASH_SER_TRG(0x1);        // ´¥·¢ÉÈÇø²Á³ı
+    FLASH_PASSWORD = FLASH_PASSWORD(0xB9); // å†™å…¥æ“ä½œå¯†ç 
+    FLASH_CON = FLASH_SER_TRG(0x1);        // è§¦å‘æ‰‡åŒºæ“¦é™¤
 
     while (!(FLASH_STA & FLASH_SER_FLG(0x1)))
-        ; // µÈ´ıÉÈÇø²Á³ı¿ÕÏĞ
+        ; // ç­‰å¾…æ‰‡åŒºæ“¦é™¤ç©ºé—²
 }
 
 /**
@@ -34,10 +34,10 @@ void flash_write(u8 addr, u8 *p_data, u8 len)
     while (len >= 1)
     {
         while (!(FLASH_STA & FLASH_PROG_FLG(0x1)))
-            ; // µÈ´ıÉÕÂ¼¿ÕÏĞ
+            ; // ç­‰å¾…çƒ§å½•ç©ºé—²
         FLASH_DATA = *(p_data++);
-        FLASH_PASSWORD = FLASH_PASSWORD(0xB9); // Ğ´Èë²Ù×÷ÃÜÂë
-        FLASH_CON = FLASH_PROG_TRG(0x1);       // ´¥·¢ÉÕÂ¼
+        FLASH_PASSWORD = FLASH_PASSWORD(0xB9); // å†™å…¥æ“ä½œå¯†ç 
+        FLASH_CON = FLASH_PROG_TRG(0x1);       // è§¦å‘çƒ§å½•
 
         len -= 1;
     }
@@ -59,17 +59,17 @@ void flash_read(u8 addr, u8 *p_data, u8 len)
     }
 }
 
-// // ²âÊÔº¯Êı£¬²âÊÔÄÜ¹»ÊµÏÖflashµÄ¶ÁĞ´
-// // Ê¹ÓÃÇ°ĞèÒªÏÈ³õÊ¼»¯P12
+// // æµ‹è¯•å‡½æ•°ï¼Œæµ‹è¯•èƒ½å¤Ÿå®ç°flashçš„è¯»å†™
+// // ä½¿ç”¨å‰éœ€è¦å…ˆåˆå§‹åŒ–P12
 // void flash_test(void)
 // {
 //     unsigned int device_addr = 0x12345678;
 //     unsigned int buf = 0;
 
 //     flash_erase_sector(0x00);
-//     // Ğ´ÈëÊı¾İ
+//     // å†™å…¥æ•°æ®
 //     flash_write(0x00, (unsigned char *)&device_addr, sizeof(device_addr));
-//     // ¶ÁÈ¡Êı¾İ
+//     // è¯»å–æ•°æ®
 //     flash_read(0x00, (unsigned char *)&buf, sizeof(buf));
 
 //     if ((const unsigned int)0x12345678 == buf)

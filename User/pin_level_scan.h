@@ -1,11 +1,11 @@
 #ifndef __PIN_LEVEL_SCAN_H
 #define __PIN_LEVEL_SCAN_H
 
-#include "include.h"   // Ê¹ÓÃĞ¾Æ¬¹Ù·½Ìá¹©µÄÍ·ÎÄ¼ş
-#include "my_config.h" // °üº¬×Ô¶¨ÒåµÄÍ·ÎÄ¼ş
+#include "include.h"   // ä½¿ç”¨èŠ¯ç‰‡å®˜æ–¹æä¾›çš„å¤´æ–‡ä»¶
+#include "my_config.h" // åŒ…å«è‡ªå®šä¹‰çš„å¤´æ–‡ä»¶
 
-void pin_level_scan_config(void); // É¨ÃèÒı½ÅµÄÅäÖÃ£¨³õÊ¼»¯£©
-void pin_level_scan(void); // É¨ÃèÒı½ÅµÄµçÆ½
+void pin_level_scan_config(void); // æ‰«æå¼•è„šçš„é…ç½®ï¼ˆåˆå§‹åŒ–ï¼‰
+void pin_level_scan(void); // æ‰«æå¼•è„šçš„ç”µå¹³
 
 
 #endif

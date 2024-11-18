@@ -1,65 +1,66 @@
 #ifndef __FUN_INFO_H
 #define __FUN_INFO_H
 
-#include "include.h"   // Ê¹ÓÃĞ¾Æ¬¹Ù·½Ìá¹©µÄÍ·ÎÄ¼ş
-#include "my_config.h" // °üº¬×Ô¶¨ÒåµÄÍ·ÎÄ¼ş
+#include "include.h"   // ä½¿ç”¨èŠ¯ç‰‡å®˜æ–¹æä¾›çš„å¤´æ–‡ä»¶
+#include "my_config.h" // åŒ…å«è‡ªå®šä¹‰çš„å¤´æ–‡ä»¶
 
-// µ²Î»µÄ¶¨Òå
+// æŒ¡ä½çš„å®šä¹‰
 enum
 {
-    GEAR_NEUTRAL = 0x00, // ¿Õµ²
-    GEAR_FIRST = 0x01,   // Ò»µµ
-    GEAR_SECOND = 0x02,  // ¶şµµ
-    GEAR_THIRD = 0x03,   // Èıµµ
-    GEAR_FOURTH = 0x04,  // ËÄµµ
-    GEAR_FIFTH = 0x05,   // Îåµµ
-    GEAR_SIXTH = 0x06    // Áùµµ
+    GEAR_NEUTRAL = 0x00, // ç©ºæŒ¡
+    GEAR_FIRST = 0x01,   // ä¸€æ¡£
+    GEAR_SECOND = 0x02,  // äºŒæ¡£
+    GEAR_THIRD = 0x03,   // ä¸‰æ¡£
+    GEAR_FOURTH = 0x04,  // å››æ¡£
+    GEAR_FIFTH = 0x05,   // äº”æ¡£
+    GEAR_SIXTH = 0x06    // å…­æ¡£
 };
 
-// ¶¨Òå£¬µÆµÄ¿ª¹Ø×´Ì¬
+// å®šä¹‰ï¼Œç¯çš„å¼€å…³çŠ¶æ€
 enum
 {
     ON = 0x01,
     OFF = 0x00
 };
 
-// ¶¨Òå£¬´æ´¢ËùÓĞ¹¦ÄÜµÄ×´Ì¬µÄ½á¹¹Ìå
+// å®šä¹‰ï¼Œå­˜å‚¨æ‰€æœ‰åŠŸèƒ½çš„çŠ¶æ€çš„ç»“æ„ä½“
 typedef struct
 {
-    u32 engine_speeed; // ·¢¶¯»úµÄ×ªËÙ
-    u32 speed;         // Ê±ËÙ
+    u32 engine_speeed; // å‘åŠ¨æœºçš„è½¬é€Ÿ
+    u32 speed;         // æ—¶é€Ÿ
 
-    u32 total_mileage; // ×ÜÀï³Ì±í£¨´ó¼ÆÀï³Ì£¬0~99999.9£©
-    u32 subtotal_mileage; // ¶Ì¾àÀëÀï³Ì±í£¨Ğ¡¼ÆÀï³Ì£¬0~9999.9£©
+    u32 total_mileage;    // æ€»é‡Œç¨‹è¡¨ï¼ˆå•ä½ï¼šmï¼‰ï¼ˆå¤§è®¡é‡Œç¨‹ï¼ŒèŒƒå›´ï¼š0~ 99999.9 KMï¼‰
+    u32 subtotal_mileage; // çŸ­è·ç¦»é‡Œç¨‹è¡¨(å•ä½ï¼šm)ï¼ˆå°è®¡é‡Œç¨‹ï¼ŒèŒƒå›´ï¼š0~999.9 KMï¼‰
 
-    // u32 date; // ÈÕÆÚ 4byte Äê ÔÂ ÈÕ 
-    u16 year; // Äê·İ
-    u8 month; // ÔÂ·İ
-    u8 day; // ÈÕÆÚ
+    // u32 date; // æ—¥æœŸ 4byte å¹´ æœˆ æ—¥
+    u16 year; // å¹´ä»½
+    u8 month; // æœˆä»½
+    u8 day;   // æ—¥æœŸ
 
-    u32 time; // Ê±¼ä 3byte Ê± ·Ö Ãë
+    // æ—¶é—´ 3byte æ—¶ åˆ† ç§’
+    u8 time_hour;
+    u8 time_min;
+    u8 time_sec;
 
-    u8 gear;    // µ²Î»
-    u8 battery; // µç³ØµçÁ¿
-    u8 brake;   // É²³µµÄ×´Ì¬
+    u8 gear;    // æŒ¡ä½
+    u8 battery; // ç”µæ± ç”µé‡
+    u8 brake;   // åˆ¹è½¦çš„çŠ¶æ€
 
-    // µÆµÄ×´Ì¬ÓÃON »ò OFF±êÖ¾
-    u8 left_turn;  // ×ó×ªÏòµÆµÄ×´Ì¬
-    u8 right_turn; // ÓÒ×ªÏòµÆµÄ×´Ì¬
-    u8 high_beam;  // Ô¶¹âµÆµÄ×´Ì¬
+    // ç¯çš„çŠ¶æ€ç”¨ON æˆ– OFFæ ‡å¿—
+    u8 left_turn;  // å·¦è½¬å‘ç¯çš„çŠ¶æ€
+    u8 right_turn; // å³è½¬å‘ç¯çš„çŠ¶æ€
+    u8 high_beam;  // è¿œå…‰ç¯çš„çŠ¶æ€
 
-    u8 fuel;       // ÓÍÁ¿
-    u8 water_temp; // Ë®ÎÂ
+    u8 fuel;       // æ²¹é‡
+    u8 water_temp; // æ°´æ¸©
 
-    u8 flag_is_in_water_temp_warning; // ±êÖ¾Î»£¬ÊÇ·ñ´¦ÓÚË®ÎÂ±¨¾¯
-
-    
+    u8 flag_is_in_water_temp_warning; // æ ‡å¿—ä½ï¼Œæ˜¯å¦å¤„äºæ°´æ¸©æŠ¥è­¦
 
 } fun_info_t;
 
-extern volatile fun_info_t fun_info; // ´æ·ÅËùÓĞ¹¦ÄÜ×´Ì¬µÄ½á¹¹Ìå±äÁ¿
+extern volatile fun_info_t fun_info; // å­˜æ”¾æ‰€æœ‰åŠŸèƒ½çŠ¶æ€çš„ç»“æ„ä½“å˜é‡
 
-extern void fun_info_init(void); // ³õÊ¼»¯´æ·ÅËùÓĞĞÅÏ¢µÄ½á¹¹Ìå±äÁ¿
-extern void fun_info_save(void); // ½«ĞÅÏ¢Ğ´»Øflash
+extern void fun_info_init(void); // åˆå§‹åŒ–å­˜æ”¾æ‰€æœ‰ä¿¡æ¯çš„ç»“æ„ä½“å˜é‡
+extern void fun_info_save(void); // å°†ä¿¡æ¯å†™å›flash
 
 #endif

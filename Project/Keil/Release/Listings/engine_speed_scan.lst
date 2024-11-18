@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   ENGINE_SPEED_SCAN                                                 11/08/2024 16:31:55 PAGE 1   
+C51 COMPILER V9.60.7.0   ENGINE_SPEED_SCAN                                                 11/18/2024 17:39:07 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE ENGINE_SPEED_SCAN
@@ -11,29 +11,29 @@ line level    source
 
    1          #include "engine_speed_scan.h"
    2          
-   3          // ·¢¶¯»úÃ¿×ªÒ»È¦£¬ÄÜ¼ì²âµ½µÄÂö³å¸öÊı
+   3          // å‘åŠ¨æœºæ¯è½¬ä¸€åœˆï¼Œèƒ½æ£€æµ‹åˆ°çš„è„‰å†²ä¸ªæ•°
    4          #ifndef ENGINE_PULSE_PER_TURN
    5          #define ENGINE_PULSE_PER_TURN 16
    6          #endif
    7          
-   8          static volatile u32 pulse_cnt = 0; // Âö³å¼ÆÊıÖµ
+   8          static volatile u32 pulse_cnt = 0; // è„‰å†²è®¡æ•°å€¼
    9          
-  10          // ·¢¶¯»ú×ªËÙµÄÏà¹ØÅäÖÃ
+  10          // å‘åŠ¨æœºè½¬é€Ÿçš„ç›¸å…³é…ç½®
   11          void engine_speed_scan_config(void)
   12          {
-  13   1          // Ê¹ÓÃIOÖĞ¶ÏÀ´¶ÔÂö³å¼ÆÊı
-  14   1          __SetIRQnIP(P1_IRQn, P1_IQn_CFG); // ÉèÖÃÖĞ¶ÏÓÅÏÈ¼¶
-  15   1          __EnableIRQ(P1_IRQn);             // Ê¹ÄÜP1ÖĞ¶Ï
-  16   1          IE_EA = 1;                        // Ê¹ÄÜ×Ü¿ª¹Ø
+  13   1          // ä½¿ç”¨IOä¸­æ–­æ¥å¯¹è„‰å†²è®¡æ•°
+  14   1          __SetIRQnIP(P1_IRQn, P1_IQn_CFG); // è®¾ç½®ä¸­æ–­ä¼˜å…ˆçº§
+  15   1          __EnableIRQ(P1_IRQn);             // ä½¿èƒ½P1ä¸­æ–­
+  16   1          IE_EA = 1;                        // ä½¿èƒ½æ€»å¼€å…³
   17   1      
-  18   1          P1_MD0 &= ~GPIO_P12_MODE_SEL(0x3); // ÊäÈëÄ£Ê½
-  19   1          P1_PD |= GPIO_P12_PULL_PD(0x1);    // ÅäÖÃÎªÏÂÀ­
-  20   1          P1_IMK |= GPIO_P12_IRQ_MASK(0x1);  // Ê¹ÄÜIOÖĞ¶Ï
+  18   1          P1_MD0 &= ~GPIO_P12_MODE_SEL(0x3); // è¾“å…¥æ¨¡å¼
+  19   1          P1_PD |= GPIO_P12_PULL_PD(0x1);    // é…ç½®ä¸ºä¸‹æ‹‰
+  20   1          P1_IMK |= GPIO_P12_IRQ_MASK(0x1);  // ä½¿èƒ½IOä¸­æ–­
   21   1          P1_TRG0 &= ~GPIO_P12_TRG_SEL(0x3);
-  22   1          P1_TRG0 |= GPIO_P12_TRG_SEL(0x2); // ÅäÖÃÉÏÉıÑØ´¥·¢
+  22   1          P1_TRG0 |= GPIO_P12_TRG_SEL(0x2); // é…ç½®ä¸Šå‡æ²¿è§¦å‘
   23   1      }
   24          
-  25          // »ñÈ¡·¢¶¯»úÃ¿·ÖÖÓ×ªËÙ
+  25          // è·å–å‘åŠ¨æœºæ¯åˆ†é’Ÿè½¬é€Ÿ
   26          // static u32 get_engine_speed_rpm(void)
   27          // {
   28          //     // return (get_turns_per_250ms() * 4 * 60);
@@ -42,76 +42,74 @@ line level    source
   31          //     pulse_cnt = 0;
   32          //     tmr1_cnt = 0;
   33          //     tmr1_enable();
-  34          //     __EnableIRQ(P1_IRQn); // Ê¹ÄÜÖĞ¶Ï
+  34          //     __EnableIRQ(P1_IRQn); // ä½¿èƒ½ä¸­æ–­
   35          
-  36          
-  37          //     while (tmr1_cnt < 2500)
-  38          //     {
-  39          //     }; // µÈ´ı250ms
-  40          
-  41          //     // ¼ÆËã³öÃ¿min(250ms * 4 * 60 == 1min)×ªÁË¶àÉÙÈ¦
-  42          //     tmp = pulse_cnt * 240 / ENGINE_PULSE_PER_TURN;
-  43          
-  44          //     tmr1_disable();
-  45          
+  36          //     while (tmr1_cnt < 2500)
+  37          //     {
+  38          //     }; // ç­‰å¾…250ms
+  39          
+  40          //     // è®¡ç®—å‡ºæ¯min(250ms * 4 * 60 == 1min)è½¬äº†å¤šå°‘åœˆ
+  41          //     tmp = pulse_cnt * 240 / ENGINE_PULSE_PER_TURN;
+  42          
+  43          //     tmr1_disable();
+  44          
+  45          //     __DisableIRQ(P1_IRQn); // ç¦ç”¨ä¸­æ–­
   46          
-  47          //     __DisableIRQ(P1_IRQn); // ½ûÓÃÖĞ¶Ï
-  48          
-  49          //     tmr1_cnt = 0;
-  50          //     pulse_cnt = 0;
-  51          
-  52          //     return tmp;
-  53          // }
-C51 COMPILER V9.60.7.0   ENGINE_SPEED_SCAN                                                 11/08/2024 16:31:55 PAGE 2   
+  47          //     tmr1_cnt = 0;
+  48          //     pulse_cnt = 0;
+  49          
+  50          //     return tmp;
+  51          // }
+  52          
+  53          // å‘åŠ¨æœºè½¬é€Ÿæ‰«æ
+C51 COMPILER V9.60.7.0   ENGINE_SPEED_SCAN                                                 11/18/2024 17:39:07 PAGE 2   
 
-  54          
-  55          // ·¢¶¯»ú×ªËÙÉ¨Ãè
-  56          void engine_speed_scan(void)
-  57          {
-  58   1          // u32 rpm = get_engine_speed_rpm();
-  59   1          // // printf("rpm: %lu\n", rpm);
-  60   1      
-  61   1          // fun_info.engine_speeed = rpm;
-  62   1          // flag_get_engine_speed = 1;
-  63   1          
-  64   1          u32 rpm = 0;
-  65   1          
-  66   1          if (tmr1_cnt >= 2500) // Èç¹ûÒÑ¾­¹ıÁË250ms
-  67   1          {
-  68   2              // 250ms * 4 * 60 == 1min
-  69   2              // ÏÂÃæÊÇ¸ù¾İ250ms¼ì²âµ½µÄÂö³å¸öÊıÀ´¼ÆËã³öÃ¿·ÖÖÓµÄ×ªËÙ
-  70   2              rpm = pulse_cnt * 240 / ENGINE_PULSE_PER_TURN; 
-  71   2      
-  72   2              tmr1_cnt = 0;
-  73   2              pulse_cnt = 0;
-  74   2              fun_info.engine_speeed = rpm;
-  75   2              printf("engine speed %lu rpm\n", rpm);
-  76   2              // flag_get_engine_speed = 1; // ¶à¾Ã¸üĞÂÒ»´Î×´Ì¬»¹Î´È·¶¨
+  54          void engine_speed_scan(void)
+  55          {
+  56   1          // u32 rpm = get_engine_speed_rpm();
+  57   1          // // printf("rpm: %lu\n", rpm);
+  58   1      
+  59   1          // fun_info.engine_speeed = rpm;
+  60   1          // flag_get_engine_speed = 1;
+  61   1      
+  62   1          u32 rpm = 0;
+  63   1      
+  64   1          if (tmr1_cnt >= 2500) // å¦‚æœå·²ç»è¿‡äº†250ms
+  65   1          {
+  66   2              // ä¸‹é¢æ˜¯æ ¹æ®250msæ£€æµ‹åˆ°çš„è„‰å†²ä¸ªæ•°æ¥è®¡ç®—å‡ºæ¯åˆ†é’Ÿçš„è½¬é€Ÿ
+  67   2              // 250ms * 4 * 60 == 1min
+  68   2              rpm = pulse_cnt * 240 / ENGINE_PULSE_PER_TURN; // è®¡ç®—å¾—å‡º1minçš„è½¬é€Ÿ
+  69   2      
+  70   2              tmr1_cnt = 0; 
+  71   2              pulse_cnt = 0;
+  72   2              fun_info.engine_speeed = rpm; //
+  73   2      #if USE_MY_DEBUG
+  74   2              printf("engine speed %lu rpm\n", rpm);
+  75   2      #endif
+  76   2              // flag_get_engine_speed = 1; // å¤šä¹…æ›´æ–°ä¸€æ¬¡çŠ¶æ€è¿˜æœªç¡®å®š
   77   2          }
-  78   1      
-  79   1      }
-  80          
-  81          
-  82          // P1ÖĞ¶Ï·şÎñº¯Êı
-  83          void P1_IRQHandler(void) interrupt P1_IRQn
-  84          {
-  85   1          // Px_PND¼Ä´æÆ÷Ğ´ÈÎºÎÖµ¶¼»áÇå±êÖ¾Î»
-  86   1          u8 p1_pnd = P1_PND;
-  87   1      
-  88   1          // ½øÈëÖĞ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ı
-  89   1          __IRQnIPnPush(P1_IRQn);
-  90   1          // ---------------- ÓÃ»§º¯Êı´¦Àí -------------------
-  91   1      
-  92   1          if (p1_pnd & GPIO_P12_IRQ_PNG(0x1))
-  93   1          {
-  94   2              pulse_cnt++;
-  95   2          }
-  96   1          P1_PND = p1_pnd; // ÇåP1ÖĞ¶Ï±êÖ¾Î»
-  97   1      
-  98   1          // -------------------------------------------------
-  99   1          // ÍË³öÖĞ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ı
- 100   1          __IRQnIPnPop(P1_IRQn);
- 101   1      }
+  78   1      }
+  79          
+  80          // P1ä¸­æ–­æœåŠ¡å‡½æ•°
+  81          void P1_IRQHandler(void) interrupt P1_IRQn
+  82          {
+  83   1          // Px_PNDå¯„å­˜å™¨å†™ä»»ä½•å€¼éƒ½ä¼šæ¸…æ ‡å¿—ä½
+  84   1          u8 p1_pnd = P1_PND;
+  85   1      
+  86   1          // è¿›å…¥ä¸­æ–­è®¾ç½®IPï¼Œä¸å¯åˆ é™¤
+  87   1          __IRQnIPnPush(P1_IRQn);
+  88   1          // ---------------- ç”¨æˆ·å‡½æ•°å¤„ç† -------------------
+  89   1      
+  90   1          if (p1_pnd & GPIO_P12_IRQ_PNG(0x1))
+  91   1          {
+  92   2              pulse_cnt++;
+  93   2          }
+  94   1          P1_PND = p1_pnd; // æ¸…P1ä¸­æ–­æ ‡å¿—ä½
+  95   1      
+  96   1          // -------------------------------------------------
+  97   1          // é€€å‡ºä¸­æ–­è®¾ç½®IPï¼Œä¸å¯åˆ é™¤
+  98   1          __IRQnIPnPop(P1_IRQn);
+  99   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE

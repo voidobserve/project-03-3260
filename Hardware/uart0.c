@@ -2,80 +2,80 @@
 
 #include <string.h> // memset()
 
-// ÉèÖÃµÄ²¨ÌØÂÊĞèÒªÊÊÅäµ¥Æ¬»úµÄÊ±ÖÓ£¬ÕâÀïÖ±½ÓÊ¹ÓÃÁË¹Ù·½µÄ´úÂë
+// è®¾ç½®çš„æ³¢ç‰¹ç‡éœ€è¦é€‚é…å•ç‰‡æœºçš„æ—¶é’Ÿï¼Œè¿™é‡Œç›´æ¥ä½¿ç”¨äº†å®˜æ–¹çš„ä»£ç 
 #define USER_UART0_BAUD ((SYSCLK - UART0_BAUDRATE) / (UART0_BAUDRATE))
 
-// ÓÃÀ´´æ·Å½ÓÊÕµÄÊı¾İÖ¡µÄ»º³åÇø
+// ç”¨æ¥å­˜æ”¾æ¥æ”¶çš„æ•°æ®å¸§çš„ç¼“å†²åŒº
 volatile u8 uart0_recv_buf[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)][FRAME_MAX_LEN] = {0};
-// ÓÃÓÚ¼ÇÂ¼½ÓÊÕ»º³åÇøµÄ¶ÔÓ¦µÄÊı¾İÖ¡µÄ³¤¶È
+// ç”¨äºè®°å½•æ¥æ”¶ç¼“å†²åŒºçš„å¯¹åº”çš„æ•°æ®å¸§çš„é•¿åº¦
 volatile u8 uart0_recv_len[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)] = {0};
-// ¼ÇÂ¼»º³åÇøÖĞ¶ÔÓ¦µÄÎ»ÖÃÊÇ·ñÓĞÊı¾İµÄ±êÖ¾Î»£¨Êı×é£©
-// ÀıÈç£¬»º³åÇøÏÂ±ê0µÄÎ»ÖÃÓĞÖ¸Áî£¬±êÖ¾Î»Êı×éÏÂ±ê0µÄÔªËØÖµÎª1£¬Ã»ÓĞÖ¸Áî£¬ÔªËØµÄÖµÎª0
+// è®°å½•ç¼“å†²åŒºä¸­å¯¹åº”çš„ä½ç½®æ˜¯å¦æœ‰æ•°æ®çš„æ ‡å¿—ä½ï¼ˆæ•°ç»„ï¼‰
+// ä¾‹å¦‚ï¼Œç¼“å†²åŒºä¸‹æ ‡0çš„ä½ç½®æœ‰æŒ‡ä»¤ï¼Œæ ‡å¿—ä½æ•°ç»„ä¸‹æ ‡0çš„å…ƒç´ å€¼ä¸º1ï¼Œæ²¡æœ‰æŒ‡ä»¤ï¼Œå…ƒç´ çš„å€¼ä¸º0
 volatile u8 recved_flagbuf[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)] = {0};
 
-volatile u8 flagbuf_valid_instruction[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)] = {0}; // ´æ·ÅÓĞºÏ·¨Ö¸ÁîµÄ±êÖ¾Î»Êı×é
+volatile u8 flagbuf_valid_instruction[(UART0_RXBUF_LEN) / (FRAME_MAX_LEN)] = {0}; // å­˜æ”¾æœ‰åˆæ³•æŒ‡ä»¤çš„æ ‡å¿—ä½æ•°ç»„
 
-// ´®¿ÚÖĞ¶Ï·şÎñº¯ÊıÖĞ£¬½ÓÊÕÒ»Ö¡µÄ±êÖ¾Î»£¬0--×¼±¸½ÓÊÕÒ»Ö¡µÄµÚÒ»¸ö×Ö½Ú£¬1--ÕıÔÚ½ÓÊÕ¸ÃÖ¡µÄÊı¾İ
+// ä¸²å£ä¸­æ–­æœåŠ¡å‡½æ•°ä¸­ï¼Œæ¥æ”¶ä¸€å¸§çš„æ ‡å¿—ä½ï¼Œ0--å‡†å¤‡æ¥æ”¶ä¸€å¸§çš„ç¬¬ä¸€ä¸ªå­—èŠ‚ï¼Œ1--æ­£åœ¨æ¥æ”¶è¯¥å¸§çš„æ•°æ®
 static volatile bit flag_is_recving_data = 0;
-static volatile u8 frame_len = 0;    // ¼ÇÂ¼´®¿ÚÖĞ¶Ï·şÎñº¯ÊıÖĞ£¬µ±Ç°Òª½ÓÊÕµÄÊı¾İÖ¡µÄ×Ö½ÚÊı
-static volatile u8 cur_recv_len = 0; // ¼ÇÂ¼´®¿ÚÖĞ¶Ï·şÎñº¯ÊıÖĞ£¬µ±Ç°ÒÑ½ÓÊÕµÄÊı¾İÖ¡µÄ×Ö½ÚÊı
-volatile u8 recv_frame_cnt = 0;      // ½ÓÊÕµ½µÄÊı¾İÖ¡µÄ¸öÊı
+static volatile u8 frame_len = 0;    // è®°å½•ä¸²å£ä¸­æ–­æœåŠ¡å‡½æ•°ä¸­ï¼Œå½“å‰è¦æ¥æ”¶çš„æ•°æ®å¸§çš„å­—èŠ‚æ•°
+static volatile u8 cur_recv_len = 0; // è®°å½•ä¸²å£ä¸­æ–­æœåŠ¡å‡½æ•°ä¸­ï¼Œå½“å‰å·²æ¥æ”¶çš„æ•°æ®å¸§çš„å­—èŠ‚æ•°
+volatile u8 recv_frame_cnt = 0;      // æ¥æ”¶åˆ°çš„æ•°æ®å¸§çš„ä¸ªæ•°
 
-static volatile u32 blank_index = 0; // ¼ÇÂ¼µ±Ç°´æ·ÅÊı¾İÖ¡µÄ»º³åÇøµÄ¿ÕµÄµØ·½(»º³åÇøÏÂ±ê)£¬×¼±¸´æ·ÅÒ»Ö¡µÄÊı¾İ
+static volatile u32 blank_index = 0; // è®°å½•å½“å‰å­˜æ”¾æ•°æ®å¸§çš„ç¼“å†²åŒºçš„ç©ºçš„åœ°æ–¹(ç¼“å†²åŒºä¸‹æ ‡)ï¼Œå‡†å¤‡å­˜æ”¾ä¸€å¸§çš„æ•°æ®
 
-// bit test_bit = 0; // ²âÊÔÓÃ
+// bit test_bit = 0; // æµ‹è¯•ç”¨
 
-// u32 test_val = 0; // ²âÊÔÓÃ
+// u32 test_val = 0; // æµ‹è¯•ç”¨
 
-// ÖØĞ´putchar()º¯Êı
+// é‡å†™putchar()å‡½æ•°
 char putchar(char c)
 {
     uart0_sendbyte(c);
     return c;
 }
 
-// uart0³õÊ¼»¯
-// ²¨ÌØÂÊÓÉºê UART0_BAUDRATE À´¾ö¶¨
+// uart0åˆå§‹åŒ–
+// æ³¢ç‰¹ç‡ç”±å® UART0_BAUDRATE æ¥å†³å®š
 void uart0_config(void)
 {
-    // µçÂ·°åÉÏ£¬P11Îª·¢ËÍÒı½Å£¬P12Îª½ÓÊÕÒı½Å
+    // ç”µè·¯æ¿ä¸Šï¼ŒP11ä¸ºå‘é€å¼•è„šï¼ŒP12ä¸ºæ¥æ”¶å¼•è„š
     P1_MD0 &= (~GPIO_P11_MODE_SEL(0x3) | ~GPIO_P12_MODE_SEL(0x3));
-    P1_MD0 |= GPIO_P11_MODE_SEL(0x1); // Êä³öÄ£Ê½
-    FOUT_S11 |= GPIO_FOUT_UART0_TX;   // ÅäÖÃP11ÎªUART0_TX
-    FIN_S7 |= GPIO_FIN_SEL_P12;       // ÅäÖÃP12ÎªUART0_RX
+    P1_MD0 |= GPIO_P11_MODE_SEL(0x1); // è¾“å‡ºæ¨¡å¼
+    FOUT_S11 |= GPIO_FOUT_UART0_TX;   // é…ç½®P11ä¸ºUART0_TX
+    FIN_S7 |= GPIO_FIN_SEL_P12;       // é…ç½®P12ä¸ºUART0_RX
 
-    __EnableIRQ(UART0_IRQn); // ´ò¿ªUARTÄ£¿éÖĞ¶Ï
-    IE_EA = 1;               // ´ò¿ª×ÜÖĞ¶Ï
+    __EnableIRQ(UART0_IRQn); // æ‰“å¼€UARTæ¨¡å—ä¸­æ–­
+    IE_EA = 1;               // æ‰“å¼€æ€»ä¸­æ–­
 
-    UART0_BAUD1 = (USER_UART0_BAUD >> 8) & 0xFF; // ÅäÖÃ²¨ÌØÂÊ¸ß°ËÎ»
-    UART0_BAUD0 = USER_UART0_BAUD & 0xFF;        // ÅäÖÃ²¨ÌØÂÊµÍ°ËÎ»
+    UART0_BAUD1 = (USER_UART0_BAUD >> 8) & 0xFF; // é…ç½®æ³¢ç‰¹ç‡é«˜å…«ä½
+    UART0_BAUD0 = USER_UART0_BAUD & 0xFF;        // é…ç½®æ³¢ç‰¹ç‡ä½å…«ä½
     UART0_CON0 = UART_STOP_BIT(0x0) |
                  UART_RX_IRQ_EN(0x1) |
-                 UART_EN(0x1); // 8bitÊı¾İ£¬1bitÍ£Ö¹Î»£¬Ê¹ÄÜRXÖĞ¶Ï
+                 UART_EN(0x1); // 8bitæ•°æ®ï¼Œ1bitåœæ­¢ä½ï¼Œä½¿èƒ½RXä¸­æ–­
 
     // memset(uart0_recv_buf, 0, sizeof(uart0_recv_buf));
 }
 
-// UART0ÖĞ¶Ï·şÎñº¯Êı£¨½ÓÊÕÖĞ¶Ï£©
+// UART0ä¸­æ–­æœåŠ¡å‡½æ•°ï¼ˆæ¥æ”¶ä¸­æ–­ï¼‰
 void UART0_IRQHandler(void) interrupt UART0_IRQn
 {
     volatile u8 uart0_tmp_val = 0;
 
-    // ½øÈëÖĞ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ı
+    // è¿›å…¥ä¸­æ–­è®¾ç½®IPï¼Œä¸å¯åˆ é™¤
     __IRQnIPnPush(UART0_IRQn);
-    // ---------------- ÓÃ»§º¯Êı´¦Àí -------------------
-    // RX½ÓÊÕÍê³ÉÖĞ¶Ï
+    // ---------------- ç”¨æˆ·å‡½æ•°å¤„ç† -------------------
+    // RXæ¥æ”¶å®Œæˆä¸­æ–­
     if (UART0_STA & UART_RX_DONE(0x1))
     {
         // test_bit = 1;
-        uart0_tmp_val = UART0_DATA; // ÁÙÊ±´æ·Å½ÓÊÕµ½µÄÊı¾İ
+        uart0_tmp_val = UART0_DATA; // ä¸´æ—¶å­˜æ”¾æ¥æ”¶åˆ°çš„æ•°æ®
 
         if ((0 == flag_is_recving_data && uart0_tmp_val != 0xA5) ||
             (recv_frame_cnt >= ((UART0_RXBUF_LEN) / (FRAME_MAX_LEN))))
         {
-            // 1. Èç¹ûÊÇĞÂµÄÒ»Ö¡Êı¾İ£¬È´²»ÊÇÒÔ0xA5¿ªÍ·£¬ËµÃ÷ÕâÒ»Ö¡Êı¾İÎŞĞ§
-            // 2. Èç¹û»º³åÇøÒÑÂú£¬´æ²»ÏÂ¸ü¶àµÄÊı¾İÖ¡
-            // Ö±½ÓÍË³öÖĞ¶Ï£¬²»´¦ÀíÊı¾İ
+            // 1. å¦‚æœæ˜¯æ–°çš„ä¸€å¸§æ•°æ®ï¼Œå´ä¸æ˜¯ä»¥0xA5å¼€å¤´ï¼Œè¯´æ˜è¿™ä¸€å¸§æ•°æ®æ— æ•ˆ
+            // 2. å¦‚æœç¼“å†²åŒºå·²æ»¡ï¼Œå­˜ä¸ä¸‹æ›´å¤šçš„æ•°æ®å¸§
+            // ç›´æ¥é€€å‡ºä¸­æ–­ï¼Œä¸å¤„ç†æ•°æ®
             tmr0_disable();
             tmr0_cnt = 0;
             __IRQnIPnPop(UART0_IRQn);
@@ -85,8 +85,8 @@ void UART0_IRQHandler(void) interrupt UART0_IRQn
         //     (1 == flag_is_recving_data && UART0_DATA == 0xA5))
         else if (uart0_tmp_val == 0xA5)
         {
-            // 1. Èç¹ûÊÇĞÂµÄÒ»Ö¡Êı¾İ£¨ÒÔ¸ñÊ½Í·0xA5¿ªÊ¼£©£¬´ò¿ª¶¨Ê±Æ÷£¬Îª³¬Ê±ÅĞ¶Ï×ö×¼±¸
-            // 2. Èç¹ûÕıÔÚ½ÓÊÕÒ»Ö¡Êı¾İ£¬È´ÓÖÊÕµ½ÁËÒ»´Î¸ñÊ½Í·£¬ÉáÆúÖ®Ç°ÊÕµ½µÄÊı¾İ£¬ÖØĞÂ½ÓÊÕÕâÒ»Ö¡
+            // 1. å¦‚æœæ˜¯æ–°çš„ä¸€å¸§æ•°æ®ï¼ˆä»¥æ ¼å¼å¤´0xA5å¼€å§‹ï¼‰ï¼Œæ‰“å¼€å®šæ—¶å™¨ï¼Œä¸ºè¶…æ—¶åˆ¤æ–­åšå‡†å¤‡
+            // 2. å¦‚æœæ­£åœ¨æ¥æ”¶ä¸€å¸§æ•°æ®ï¼Œå´åˆæ”¶åˆ°äº†ä¸€æ¬¡æ ¼å¼å¤´ï¼Œèˆå¼ƒä¹‹å‰æ”¶åˆ°çš„æ•°æ®ï¼Œé‡æ–°æ¥æ”¶è¿™ä¸€å¸§
             flag_is_recving_data = 1;
             cur_recv_len = 0;
             frame_len = 0;
@@ -97,34 +97,34 @@ void UART0_IRQHandler(void) interrupt UART0_IRQn
 
         if (1 == cur_recv_len)
         {
-            // Èç¹û½ÓÊÕµ½Ò»Ö¡µÄµÚ¶ş¸ö×Ö½ÚµÄÊı¾İ£¬¼ÇÂ¼ÏÂÒª½ÓÊÕµÄÊı¾İ³¤¶È
+            // å¦‚æœæ¥æ”¶åˆ°ä¸€å¸§çš„ç¬¬äºŒä¸ªå­—èŠ‚çš„æ•°æ®ï¼Œè®°å½•ä¸‹è¦æ¥æ”¶çš„æ•°æ®é•¿åº¦
             frame_len = uart0_tmp_val;
             // test_val = frame_len;
             // printf("frame_len %d\n", (int32)frame_len);
         }
 
-        // ³ÌĞòÔËĞĞµ½ÕâÀï£¬ËµÃ÷ÕıÔÚ½ÓÊÕÒ»¸öÊı¾İÖ¡
+        // ç¨‹åºè¿è¡Œåˆ°è¿™é‡Œï¼Œè¯´æ˜æ­£åœ¨æ¥æ”¶ä¸€ä¸ªæ•°æ®å¸§
         if (0 == recved_flagbuf[blank_index])
         {
-            // Èç¹û»º³åÇøÖĞÓĞÊ£ÓàÎ»ÖÃÀ´´æ·ÅÒ»¸öÖ¡£¬²Å·ÅÈëÊı¾İ
+            // å¦‚æœç¼“å†²åŒºä¸­æœ‰å‰©ä½™ä½ç½®æ¥å­˜æ”¾ä¸€ä¸ªå¸§ï¼Œæ‰æ”¾å…¥æ•°æ®
             uart0_recv_buf[blank_index][cur_recv_len++] = uart0_tmp_val;
-            // uart0_recv_buf[0][cur_recv_len++] = UART0_DATA; // ²âÊÔÓÃ
-            tmr0_cnt = 0; // Ã¿½ÓÊÕµ½Ò»¸ö×Ö½ÚÊı¾İ£¬Çå¿Õ³¬Ê±µÄ¼ÆÊ±
+            // uart0_recv_buf[0][cur_recv_len++] = UART0_DATA; // æµ‹è¯•ç”¨
+            tmr0_cnt = 0; // æ¯æ¥æ”¶åˆ°ä¸€ä¸ªå­—èŠ‚æ•°æ®ï¼Œæ¸…ç©ºè¶…æ—¶çš„è®¡æ—¶
 
 #if 1
             if ((frame_len != 0) &&
                 (cur_recv_len) == frame_len)
             {
-                // Èç¹û½ÓÊÕÍêÁËÒ»Ö¡Êı¾İ
-                uart0_recv_len[blank_index] = frame_len; // ¸üĞÂµ±Ç°Êı¾İÖ¡µÄ³¤¶È
+                // å¦‚æœæ¥æ”¶å®Œäº†ä¸€å¸§æ•°æ®
+                uart0_recv_len[blank_index] = frame_len; // æ›´æ–°å½“å‰æ•°æ®å¸§çš„é•¿åº¦
                 // printf("frame_len %d\n", (int32)frame_len);
-                flag_is_recving_data = 0; // ±êÖ¾Î»ÇåÁã£¬×¼±¸½ÓÊÕÏÂÒ»Ö¡Êı¾İ
+                flag_is_recving_data = 0; // æ ‡å¿—ä½æ¸…é›¶ï¼Œå‡†å¤‡æ¥æ”¶ä¸‹ä¸€å¸§æ•°æ®
                 cur_recv_len = 0;
                 frame_len = 0;
 
-                recved_flagbuf[blank_index] = 1; // ¶ÔÓ¦µÄ½ÓÊÕÍê³É±êÖ¾Î»ÖÃÒ»
-                recv_frame_cnt++;                // ½ÓÊÕµ½ÍêÕûµÄÒ»Ö¡£¬¼ÆÊıÖµ¼ÓÒ»
-                // test_bit = 1; // ²âÊÔÓÃ
+                recved_flagbuf[blank_index] = 1; // å¯¹åº”çš„æ¥æ”¶å®Œæˆæ ‡å¿—ä½ç½®ä¸€
+                recv_frame_cnt++;                // æ¥æ”¶åˆ°å®Œæ•´çš„ä¸€å¸§ï¼Œè®¡æ•°å€¼åŠ ä¸€
+                // test_bit = 1; // æµ‹è¯•ç”¨
                 blank_index++;
                 if (blank_index >= ((UART0_RXBUF_LEN) / (FRAME_MAX_LEN)))
                 {
@@ -133,22 +133,22 @@ void UART0_IRQHandler(void) interrupt UART0_IRQn
 
                 // if (recv_frame_cnt < ((UART0_RXBUF_LEN) / (FRAME_MAX_LEN)))
                 // {
-                //     // Èç¹ûÊı×éÖĞÓĞ¿ÕÎ»£¨½ÓÊÕµÄÊı¾İÖ¡¸öÊı < »º³åÇø×Ü¹²ÄÜ½ÓÊÕµÄÊı¾İÖ¡¸öÊı£©
+                //     // å¦‚æœæ•°ç»„ä¸­æœ‰ç©ºä½ï¼ˆæ¥æ”¶çš„æ•°æ®å¸§ä¸ªæ•° < ç¼“å†²åŒºæ€»å…±èƒ½æ¥æ”¶çš„æ•°æ®å¸§ä¸ªæ•°ï¼‰
 
-                //     // Æ«ÒÆµ½Êı×éÖĞ¿ÕµÄµØ·½£¬×¼±¸ÌîÈëÏÂÒ»¸öÊı¾İÖ¡
+                //     // åç§»åˆ°æ•°ç»„ä¸­ç©ºçš„åœ°æ–¹ï¼Œå‡†å¤‡å¡«å…¥ä¸‹ä¸€ä¸ªæ•°æ®å¸§
                 //     while (1)
                 //     {
                 //         blank_index++;
 
                 //         if (blank_index >= ((UART0_RXBUF_LEN) / (FRAME_MAX_LEN)))
                 //         {
-                //             // Èç¹ûÏÂ±ê³¬³öÁË»º³åÇøÄÜÈİÄÉµÄÖ¸Áî¸öÊı
+                //             // å¦‚æœä¸‹æ ‡è¶…å‡ºäº†ç¼“å†²åŒºèƒ½å®¹çº³çš„æŒ‡ä»¤ä¸ªæ•°
                 //             blank_index = 0;
                 //         }
 
                 //         if (0 == recved_flagbuf[blank_index])
                 //         {
-                //             // Èç¹ûÊÇ¿ÕµÄÒ»´¦»º³åÇø£¬ÍË³ö£¬×¼±¸¸øÏÂÒ»´Î½ÓÊÕÊı¾İÖ¡
+                //             // å¦‚æœæ˜¯ç©ºçš„ä¸€å¤„ç¼“å†²åŒºï¼Œé€€å‡ºï¼Œå‡†å¤‡ç»™ä¸‹ä¸€æ¬¡æ¥æ”¶æ•°æ®å¸§
                 //             break;
                 //         }
                 //     }
@@ -163,27 +163,27 @@ void UART0_IRQHandler(void) interrupt UART0_IRQn
             } // if ((cur_recv_len) == frame_len)
 #endif
         } // if (0 == recved_flagbuf[blank_index])
-        // else // Èç¹ûµ±Ç°»º³åÇøÖĞÃ»ÓĞÊ£ÓàÎ»ÖÃÀ´´æ·ÅÒ»¸öÖ¡£¬
+        // else // å¦‚æœå½“å‰ç¼“å†²åŒºä¸­æ²¡æœ‰å‰©ä½™ä½ç½®æ¥å­˜æ”¾ä¸€ä¸ªå¸§ï¼Œ
         // {
         // }
 
     } // if (UART0_STA & UART_RX_DONE(0x1))
 
-    // ÍË³öÖĞ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ı
+    // é€€å‡ºä¸­æ–­è®¾ç½®IPï¼Œä¸å¯åˆ é™¤
     __IRQnIPnPop(UART0_IRQn);
 }
 
-// UART0·¢ËÍÒ»¸ö×Ö½ÚÊı¾İµÄº¯Êı
+// UART0å‘é€ä¸€ä¸ªå­—èŠ‚æ•°æ®çš„å‡½æ•°
 void uart0_sendbyte(u8 senddata)
 {
     while (!(UART0_STA & UART_TX_DONE(0x01)))
         ;
     UART0_DATA = senddata;
-    while (!(UART0_STA & UART_TX_DONE(0x01))) // µÈ´ıÕâ´Î·¢ËÍÍê³É
+    while (!(UART0_STA & UART_TX_DONE(0x01))) // ç­‰å¾…è¿™æ¬¡å‘é€å®Œæˆ
         ;
 }
 
-// Í¨¹ıuart0·¢ËÍÈô¸ÉÊı¾İ
+// é€šè¿‡uart0å‘é€è‹¥å¹²æ•°æ®
 void uart0_send_buff(u8* buf, u8 len)
 {
     u8 i = 0;
@@ -193,32 +193,32 @@ void uart0_send_buff(u8* buf, u8 len)
     }
 }
 
-// ¶ÔUART0½ÓÊÕ»º³åÇøµÄÊı¾İ½øĞĞÑéÖ¤£¨³¬Ê±ÑéÖ¤¡¢³¤¶ÈÑéÖ¤¡¢Ğ£ÑéºÍ¼ÆËã£©
+// å¯¹UART0æ¥æ”¶ç¼“å†²åŒºçš„æ•°æ®è¿›è¡ŒéªŒè¯ï¼ˆè¶…æ—¶éªŒè¯ã€é•¿åº¦éªŒè¯ã€æ ¡éªŒå’Œè®¡ç®—ï¼‰
 extern void __uart_buff_check(void);
 void uart0_scan_handle(void)
 {
-    u8 i = 0;                                  // Ñ­»·¼ÆÊıÖµ£¨×¢ÒâÑ­»·´ÎÊıÒª´óÓÚµÈÓÚÊı×éÄÜ´æ·ÅµÄÖ¸ÁîÊıÄ¿£©
-    volatile u8 checksum = 0;                  // ´æ·ÅÁÙÊ±µÄĞ£ÑéºÍ
-    volatile bit __flag_is_crc_or_len_err = 0; // ±êÖ¾Î»£¬Ğ£ÑéºÍ / Êı¾İ³¤¶È ÊÇ·ñ´íÎó,0--Î´³ö´í£¬1--³ö´í
+    u8 i = 0;                                  // å¾ªç¯è®¡æ•°å€¼ï¼ˆæ³¨æ„å¾ªç¯æ¬¡æ•°è¦å¤§äºç­‰äºæ•°ç»„èƒ½å­˜æ”¾çš„æŒ‡ä»¤æ•°ç›®ï¼‰
+    volatile u8 checksum = 0;                  // å­˜æ”¾ä¸´æ—¶çš„æ ¡éªŒå’Œ
+    volatile bit __flag_is_crc_or_len_err = 0; // æ ‡å¿—ä½ï¼Œæ ¡éªŒå’Œ / æ•°æ®é•¿åº¦ æ˜¯å¦é”™è¯¯,0--æœªå‡ºé”™ï¼Œ1--å‡ºé”™
 
-#if 1 // ½ÓÊÕ³¬Ê±´¦Àí
+#if 1 // æ¥æ”¶è¶…æ—¶å¤„ç†
 
-    if (tmr0_cnt > 10) // Ò»Ö¡ÄÚ£¬³¬¹ı10msÃ»ÓĞÊÕµ½Êı¾İ
+    if (tmr0_cnt > 10) // ä¸€å¸§å†…ï¼Œè¶…è¿‡10msæ²¡æœ‰æ”¶åˆ°æ•°æ®
     {
-        // Èç¹û³¬Ê±
+        // å¦‚æœè¶…æ—¶
         // uart0_sendstr("Time out!\n");
 
-        tmr0_disable(); // ¹Ø±Õ¶¨Ê±Æ÷
-        tmr0_cnt = 0;   // Çå¿Õ¶¨Ê±Æ÷¼ÆÊıÖµ
+        tmr0_disable(); // å…³é—­å®šæ—¶å™¨
+        tmr0_cnt = 0;   // æ¸…ç©ºå®šæ—¶å™¨è®¡æ•°å€¼
 
-        // µ±Ç°µÄÊı¾İÖ¡×÷·Ï
-        cur_recv_len = 0;         // µ±Ç°½ÓÊÕµ½µÄÖ¡µÄ³¤¶ÈÇåÁã
-        frame_len = 0;            // Òª½ÓÊÕµÄÖ¡µÄ³¤¶È£¬ÇåÁã
-        flag_is_recving_data = 0; // ÖØĞÂ¿ªÊ¼½ÓÊÕÊı¾İ
+        // å½“å‰çš„æ•°æ®å¸§ä½œåºŸ
+        cur_recv_len = 0;         // å½“å‰æ¥æ”¶åˆ°çš„å¸§çš„é•¿åº¦æ¸…é›¶
+        frame_len = 0;            // è¦æ¥æ”¶çš„å¸§çš„é•¿åº¦ï¼Œæ¸…é›¶
+        flag_is_recving_data = 0; // é‡æ–°å¼€å§‹æ¥æ”¶æ•°æ®
 
         // if (0 == recved_flagbuf[blank_index])
         // {
-        //     memset(uart0_recv_buf[blank_index], 0, FRAME_MAX_LEN); // Çå¿Õ³¬Ê±µÄÖ¸Áî¶ÔÓ¦µÄ½ÓÊÕ»º³åÇø
+        //     memset(uart0_recv_buf[blank_index], 0, FRAME_MAX_LEN); // æ¸…ç©ºè¶…æ—¶çš„æŒ‡ä»¤å¯¹åº”çš„æ¥æ”¶ç¼“å†²åŒº
         // }
 
 #if USE_MY_DEBUG
@@ -239,19 +239,19 @@ void uart0_scan_handle(void)
 
         return;
     }
-#endif // ½ÓÊÕ³¬Ê±´¦Àí
+#endif // æ¥æ”¶è¶…æ—¶å¤„ç†
 
-    // ¶ÔÊÕµ½µÄÊı¾İÖ¡½øĞĞÑéÖ¤
+    // å¯¹æ”¶åˆ°çš„æ•°æ®å¸§è¿›è¡ŒéªŒè¯
     for (i = 0; i < ((UART0_RXBUF_LEN) / (FRAME_MAX_LEN)); i++)
     {
         if (recved_flagbuf[i])
         {
-            // Èç¹û¶ÔÓ¦µÄÎ»ÖÃÓĞÍêÕûµÄÊı¾İÖ¡
-            // __uart_buff_check(); // ²âÊÔÓÃ
+            // å¦‚æœå¯¹åº”çš„ä½ç½®æœ‰å®Œæ•´çš„æ•°æ®å¸§
+            // __uart_buff_check(); // æµ‹è¯•ç”¨
 
             if (uart0_recv_len[i] != uart0_recv_buf[i][1])
             {
-// Èç¹ûÊı¾İÖ¡µÄ³¤¶È²»ÕıÈ·
+// å¦‚æœæ•°æ®å¸§çš„é•¿åº¦ä¸æ­£ç¡®
 #if USE_MY_DEBUG
                 printf("format len invalid!\n");
 
@@ -266,22 +266,22 @@ void uart0_scan_handle(void)
                 return;
             }
 
-            {                          // ¼ÆËãĞ£ÑéºÍ
-                u8 __loop_crc_cnt = 0; // ÓÃÓÚ¼ÆËãĞ£ÑéºÍµÄÑ­»·¼ÆÊıÖµ
+            {                          // è®¡ç®—æ ¡éªŒå’Œ
+                u8 __loop_crc_cnt = 0; // ç”¨äºè®¡ç®—æ ¡éªŒå’Œçš„å¾ªç¯è®¡æ•°å€¼
                 checksum = 0;
                 for (__loop_crc_cnt = 0; __loop_crc_cnt < (uart0_recv_len[i] - 1); __loop_crc_cnt++)
                 {
                     checksum += uart0_recv_buf[i][__loop_crc_cnt];
                 }
 
-                checksum &= 0x0F; // È¡µÍ4Î»×÷ÎªĞ£Ñé
-                // checksum &= 0xFF; // È¡8Î»×÷ÎªĞ£Ñé
+                checksum &= 0x0F; // å–ä½4ä½ä½œä¸ºæ ¡éªŒ
+                // checksum &= 0xFF; // å–8ä½ä½œä¸ºæ ¡éªŒ
                 if (checksum != uart0_recv_buf[i][uart0_recv_len[i] - 1])
                 {
-                    // Èç¹û¼ÆËãµÄĞ£ÑéºÍÓëÊÕµ½µÄĞ£ÑéºÍ²»Ò»ÖÂ
+                    // å¦‚æœè®¡ç®—çš„æ ¡éªŒå’Œä¸æ”¶åˆ°çš„æ ¡éªŒå’Œä¸ä¸€è‡´
                     __flag_is_crc_or_len_err = 1;
                 }
-            } // ¼ÆËãĞ£ÑéºÍ
+            } // è®¡ç®—æ ¡éªŒå’Œ
 
             if (__flag_is_crc_or_len_err)
             {
@@ -292,27 +292,27 @@ void uart0_scan_handle(void)
                 __flag_is_crc_or_len_err = 0; //
                 recved_flagbuf[i] = 0;
                 recv_frame_cnt--;
-                memset(uart0_recv_buf[i], 0, FRAME_MAX_LEN); // Çå¿ÕĞ£ÑéºÍ´íÎóµÄÖ¸Áî¶ÔÓ¦µÄ»º³åÇø
+                memset(uart0_recv_buf[i], 0, FRAME_MAX_LEN); // æ¸…ç©ºæ ¡éªŒå’Œé”™è¯¯çš„æŒ‡ä»¤å¯¹åº”çš„ç¼“å†²åŒº
             }
 
-            // Èç¹ûÔËĞĞµ½ÕâÀï£¬Êı¾İ¶¼Õı³£
-            flagbuf_valid_instruction[i] = 1; // ¶ÔÓ¦µÄ±êÖ¾Î»ÖÃÒ»£¬±íÊ¾ÊÕµ½ÁËºÏ·¨µÄÖ¸Áî
+            // å¦‚æœè¿è¡Œåˆ°è¿™é‡Œï¼Œæ•°æ®éƒ½æ­£å¸¸
+            flagbuf_valid_instruction[i] = 1; // å¯¹åº”çš„æ ‡å¿—ä½ç½®ä¸€ï¼Œè¡¨ç¤ºæ”¶åˆ°äº†åˆæ³•çš„æŒ‡ä»¤
         } // if (recved_flagbuf[i])
     } // for (i = 0; i < ((UART0_RXBUF_LEN) / (FRAME_MAX_LEN)); i++)
 }
 
-// Çå³ı´®¿Ú½ÓÊÕ»º³åÇøÖĞ£¬µ¥¸öÒÑ¾­´¦ÀíºÃµÄÖ¸Áî
+// æ¸…é™¤ä¸²å£æ¥æ”¶ç¼“å†²åŒºä¸­ï¼Œå•ä¸ªå·²ç»å¤„ç†å¥½çš„æŒ‡ä»¤
 void uart_clear_single_instruction(u8 index)
 {
-    flagbuf_valid_instruction[index] = 0;            // Çå¿Õ»º³åÇø¶ÔÓ¦µÄÔªËØ£¬±íÊ¾¸ÃÏÂ±êµÄÖ¸ÁîÒÑ¾­´¦Àí
-    uart0_recv_len[index] = 0;                       // Çå³ı»º³åÇøÖĞÖ¸Áî¶ÔÓ¦µÄ³¤¶È
-    recved_flagbuf[index] = 0;                       // Çå³ı½ÓÊÕµ½Ö¸ÁîµÄ±êÖ¾Î»
-    memset(uart0_recv_buf[index], 0, FRAME_MAX_LEN); // Çå¿Õ»º³åÇø¶ÔÓ¦µÄÖ¸Áî
+    flagbuf_valid_instruction[index] = 0;            // æ¸…ç©ºç¼“å†²åŒºå¯¹åº”çš„å…ƒç´ ï¼Œè¡¨ç¤ºè¯¥ä¸‹æ ‡çš„æŒ‡ä»¤å·²ç»å¤„ç†
+    uart0_recv_len[index] = 0;                       // æ¸…é™¤ç¼“å†²åŒºä¸­æŒ‡ä»¤å¯¹åº”çš„é•¿åº¦
+    recved_flagbuf[index] = 0;                       // æ¸…é™¤æ¥æ”¶åˆ°æŒ‡ä»¤çš„æ ‡å¿—ä½
+    memset(uart0_recv_buf[index], 0, FRAME_MAX_LEN); // æ¸…ç©ºç¼“å†²åŒºå¯¹åº”çš„æŒ‡ä»¤
 }
 
 #if 1
-// ²âÊÔÓÃµÄ³ÌĞò£º
-// ÏÔÊ¾´®¿Ú»º³åÇøÖĞµÄÊı¾İ£º
+// æµ‹è¯•ç”¨çš„ç¨‹åºï¼š
+// æ˜¾ç¤ºä¸²å£ç¼“å†²åŒºä¸­çš„æ•°æ®ï¼š
 void __uart_buff_check(void)
 {
     u8 i = 0;
@@ -341,13 +341,13 @@ void __uart_buff_check(void)
             {
             case 4:
 
-                // Èç¹ûÊÇËÄ¸ö×Ö½ÚµÄÊı¾İ
+                // å¦‚æœæ˜¯å››ä¸ªå­—èŠ‚çš„æ•°æ®
                 checksum = (uart0_recv_buf[i][0] + uart0_recv_buf[i][1] + uart0_recv_buf[i][2]) & 0x0F;
 
                 if (checksum != uart0_recv_buf[i][3])
                 {
-                    // Èç¹û¼ÆËãµÃ³öµÄĞ£ÑéºÍÓëÊı¾İÖ¡ÖĞµÄĞ£ÑéºÍ²»Ò»ÖÂ
-                    // ËµÃ÷´«ÊäµÄÊı¾İÓĞÎó
+                    // å¦‚æœè®¡ç®—å¾—å‡ºçš„æ ¡éªŒå’Œä¸æ•°æ®å¸§ä¸­çš„æ ¡éªŒå’Œä¸ä¸€è‡´
+                    // è¯´æ˜ä¼ è¾“çš„æ•°æ®æœ‰è¯¯
                     // uart0_sendstr("checknum err_4Bytes\n");
                     // recved_flagbuf[i] = 0;
                     // recv_frame_cnt--;
@@ -359,12 +359,12 @@ void __uart_buff_check(void)
 
             case 5:
 
-                // Èç¹ûÊÇÎå¸ö×Ö½ÚµÄÊı¾İ
+                // å¦‚æœæ˜¯äº”ä¸ªå­—èŠ‚çš„æ•°æ®
                 checksum = (uart0_recv_buf[i][0] + uart0_recv_buf[i][1] + uart0_recv_buf[i][2] + uart0_recv_buf[i][3]) & 0x0F;
                 if (checksum != uart0_recv_buf[i][4])
                 {
-                    // Èç¹û¼ÆËãµÃ³öµÄĞ£ÑéºÍÓëÊı¾İÖ¡ÖĞµÄĞ£ÑéºÍ²»Ò»ÖÂ
-                    // ËµÃ÷´«ÊäµÄÊı¾İÓĞÎó
+                    // å¦‚æœè®¡ç®—å¾—å‡ºçš„æ ¡éªŒå’Œä¸æ•°æ®å¸§ä¸­çš„æ ¡éªŒå’Œä¸ä¸€è‡´
+                    // è¯´æ˜ä¼ è¾“çš„æ•°æ®æœ‰è¯¯
                     // uart0_sendstr("checknum err_5Bytes\n");
                     // recved_flagbuf[i] = 0;
                     // recv_frame_cnt--;
@@ -375,13 +375,13 @@ void __uart_buff_check(void)
                 break;
             case 6:
 
-                // Èç¹ûÊÇÁù¸ö×Ö½ÚµÄÊı¾İ
+                // å¦‚æœæ˜¯å…­ä¸ªå­—èŠ‚çš„æ•°æ®
                 checksum = (uart0_recv_buf[i][0] + uart0_recv_buf[i][1] + uart0_recv_buf[i][2] + uart0_recv_buf[i][3] + uart0_recv_buf[i][4]) & 0x0F;
 
                 if (checksum != uart0_recv_buf[i][5])
                 {
-                    // Èç¹û¼ÆËãµÃ³öµÄĞ£ÑéºÍÓëÊı¾İÖ¡ÖĞµÄĞ£ÑéºÍ²»Ò»ÖÂ
-                    // ËµÃ÷´«ÊäµÄÊı¾İÓĞÎó
+                    // å¦‚æœè®¡ç®—å¾—å‡ºçš„æ ¡éªŒå’Œä¸æ•°æ®å¸§ä¸­çš„æ ¡éªŒå’Œä¸ä¸€è‡´
+                    // è¯´æ˜ä¼ è¾“çš„æ•°æ®æœ‰è¯¯
                     // uart0_sendstr("checknum err_6Bytes\n");
                     // recved_flagbuf[i] = 0;
                     // recv_frame_cnt--;
@@ -390,24 +390,24 @@ void __uart_buff_check(void)
                 }
 
                 break;
-            case 7: // Èç¹ûÊÇ7¸ö×Ö½ÚµÄÊı¾İ
+            case 7: // å¦‚æœæ˜¯7ä¸ªå­—èŠ‚çš„æ•°æ®
                 checksum = (uart0_recv_buf[i][0] + uart0_recv_buf[i][1] + uart0_recv_buf[i][2] + uart0_recv_buf[i][3] + uart0_recv_buf[i][4] + uart0_recv_buf[i][5]) & 0x0F;
                 if (checksum != uart0_recv_buf[i][6])
                 {
-                    // Èç¹û¼ÆËãµÃ³öµÄĞ£ÑéºÍÓëÊı¾İÖ¡ÖĞµÄĞ£ÑéºÍ²»Ò»ÖÂ
-                    // ËµÃ÷´«ÊäµÄÊı¾İÓĞÎó
+                    // å¦‚æœè®¡ç®—å¾—å‡ºçš„æ ¡éªŒå’Œä¸æ•°æ®å¸§ä¸­çš„æ ¡éªŒå’Œä¸ä¸€è‡´
+                    // è¯´æ˜ä¼ è¾“çš„æ•°æ®æœ‰è¯¯
                     // recved_flagbuf[i] = 0;
                     // recv_frame_cnt--;
 
                     __flag_is_crc_or_len_err = 1;
                 }
                 break;
-            case 8: // Èç¹ûÊÇ8¸ö×Ö½ÚµÄÊı¾İ
+            case 8: // å¦‚æœæ˜¯8ä¸ªå­—èŠ‚çš„æ•°æ®
                 checksum = (uart0_recv_buf[i][0] + uart0_recv_buf[i][1] + uart0_recv_buf[i][2] + uart0_recv_buf[i][3] + uart0_recv_buf[i][4] + uart0_recv_buf[i][5] + uart0_recv_buf[i][6]) & 0x0F;
                 if (checksum != uart0_recv_buf[i][7])
                 {
-                    // Èç¹û¼ÆËãµÃ³öµÄĞ£ÑéºÍÓëÊı¾İÖ¡ÖĞµÄĞ£ÑéºÍ²»Ò»ÖÂ
-                    // ËµÃ÷´«ÊäµÄÊı¾İÓĞÎó
+                    // å¦‚æœè®¡ç®—å¾—å‡ºçš„æ ¡éªŒå’Œä¸æ•°æ®å¸§ä¸­çš„æ ¡éªŒå’Œä¸ä¸€è‡´
+                    // è¯´æ˜ä¼ è¾“çš„æ•°æ®æœ‰è¯¯
                     // recved_flagbuf[i] = 0;
                     // recv_frame_cnt--;
                     __flag_is_crc_or_len_err = 1;
@@ -415,7 +415,7 @@ void __uart_buff_check(void)
                 break;
 
             default:
-                // Èç¹û²»ÊÇËÄ¡¢Îå¡¢Áù¡¢Æß¡¢°Ë¸ö×Ö½ÚµÄÊı¾İ£¬ËµÃ÷½ÓÊÕÓĞÎó£¬Ö±½ÓÅ×ÆúÕâÒ»Ö¡Êı¾İ
+                // å¦‚æœä¸æ˜¯å››ã€äº”ã€å…­ã€ä¸ƒã€å…«ä¸ªå­—èŠ‚çš„æ•°æ®ï¼Œè¯´æ˜æ¥æ”¶æœ‰è¯¯ï¼Œç›´æ¥æŠ›å¼ƒè¿™ä¸€å¸§æ•°æ®
 #if USE_MY_DEBUG
                 // printf("recv cnt err\n");
                 __flag_is_crc_or_len_err = 1;

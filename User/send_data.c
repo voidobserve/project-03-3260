@@ -2,133 +2,133 @@
 
 void send_data(u32 instruct, u32 send_data)
 {
-    u32 check_num = 0; // ´æ·ÅĞ£ÑéºÍ
+    u32 check_num = 0; // å­˜æ”¾æ ¡éªŒå’Œ
 
-    uart0_sendbyte(FORMAT_HEAD); // ÏÈ·¢ËÍ¸ñÊ½Í·
+    uart0_sendbyte(FORMAT_HEAD); // å…ˆå‘é€æ ¼å¼å¤´
 
     switch (instruct)
     {
-    case SEND_GEAR:                // ·¢ËÍµ²Î»µÄ×´Ì¬
-        uart0_sendbyte(0x05);      // ·¢ËÍÖ¸ÁîµÄ×Ü³¤¶È
-        uart0_sendbyte(SEND_GEAR); // ·¢ËÍÖ¸Áî
+    case SEND_GEAR:                // å‘é€æŒ¡ä½çš„çŠ¶æ€
+        uart0_sendbyte(0x05);      // å‘é€æŒ‡ä»¤çš„æ€»é•¿åº¦
+        uart0_sendbyte(SEND_GEAR); // å‘é€æŒ‡ä»¤
         uart0_sendbyte(send_data);
 
         check_num = FORMAT_HEAD + 0x05 + SEND_GEAR + (u8)send_data;
-        check_num &= 0x0F; // È¡Ç°ÃæµÄÊı×ÖÏà¼ÓµÄµÍËÄÎ»
+        check_num &= 0x0F; // å–å‰é¢çš„æ•°å­—ç›¸åŠ çš„ä½å››ä½
 
         break;
 
-    case SEND_BATTERY:                // ·¢ËÍµç³ØµçÁ¿µÄ×´Ì¬
-        uart0_sendbyte(0x05);         // ·¢ËÍÖ¸ÁîµÄ×Ü³¤¶È
-        uart0_sendbyte(SEND_BATTERY); // ·¢ËÍÖ¸Áî
-        uart0_sendbyte(send_data);    // ·¢ËÍµç³ØµçÁ¿ĞÅÏ¢
+    case SEND_BATTERY:                // å‘é€ç”µæ± ç”µé‡çš„çŠ¶æ€
+        uart0_sendbyte(0x05);         // å‘é€æŒ‡ä»¤çš„æ€»é•¿åº¦
+        uart0_sendbyte(SEND_BATTERY); // å‘é€æŒ‡ä»¤
+        uart0_sendbyte(send_data);    // å‘é€ç”µæ± ç”µé‡ä¿¡æ¯
 
         check_num = FORMAT_HEAD + 0x05 + SEND_BATTERY + (u8)send_data;
-        check_num &= 0x0F; // È¡Ç°ÃæµÄÊı×ÖÏà¼ÓµÄµÍËÄÎ»
+        check_num &= 0x0F; // å–å‰é¢çš„æ•°å­—ç›¸åŠ çš„ä½å››ä½
         break;
 
-    case SEND_BARKE:                // ·¢ËÍÉ²³µµÄ×´Ì¬
-        uart0_sendbyte(0x05);       // ·¢ËÍÖ¸ÁîµÄ×Ü³¤¶È
-        uart0_sendbyte(SEND_BARKE); // ·¢ËÍÖ¸Áî
-        uart0_sendbyte(send_data);  // ·¢ËÍĞÅÏ¢
+    case SEND_BARKE:                // å‘é€åˆ¹è½¦çš„çŠ¶æ€
+        uart0_sendbyte(0x05);       // å‘é€æŒ‡ä»¤çš„æ€»é•¿åº¦
+        uart0_sendbyte(SEND_BARKE); // å‘é€æŒ‡ä»¤
+        uart0_sendbyte(send_data);  // å‘é€ä¿¡æ¯
 
         check_num = FORMAT_HEAD + 0x05 + SEND_BARKE + (u8)send_data;
-        check_num &= 0x0F; // È¡Ç°ÃæµÄÊı×ÖÏà¼ÓµÄµÍËÄÎ»
+        check_num &= 0x0F; // å–å‰é¢çš„æ•°å­—ç›¸åŠ çš„ä½å››ä½
         break;
 
-    case SEND_LEFT_TURN:                // ·¢ËÍ×ó×ªÏòµÆµÄ×´Ì¬
-        uart0_sendbyte(0x05);           // ·¢ËÍÖ¸ÁîµÄ×Ü³¤¶È
-        uart0_sendbyte(SEND_LEFT_TURN); // ·¢ËÍÖ¸Áî
-        uart0_sendbyte(send_data);      // ·¢ËÍĞÅÏ¢
+    case SEND_LEFT_TURN:                // å‘é€å·¦è½¬å‘ç¯çš„çŠ¶æ€
+        uart0_sendbyte(0x05);           // å‘é€æŒ‡ä»¤çš„æ€»é•¿åº¦
+        uart0_sendbyte(SEND_LEFT_TURN); // å‘é€æŒ‡ä»¤
+        uart0_sendbyte(send_data);      // å‘é€ä¿¡æ¯
 
         check_num = FORMAT_HEAD + 0x05 + SEND_LEFT_TURN + (u8)send_data;
-        check_num &= 0x0F; // È¡Ç°ÃæµÄÊı×ÖÏà¼ÓµÄµÍËÄÎ»
+        check_num &= 0x0F; // å–å‰é¢çš„æ•°å­—ç›¸åŠ çš„ä½å››ä½
         break;
 
-    case SEND_RIGHT_TURN:                // ·¢ËÍÓÒ×ªÏòµÆµÄ×´Ì¬
-        uart0_sendbyte(0x05);            // ·¢ËÍÖ¸ÁîµÄ×Ü³¤¶È
-        uart0_sendbyte(SEND_RIGHT_TURN); // ·¢ËÍÖ¸Áî
-        uart0_sendbyte(send_data);       // ·¢ËÍĞÅÏ¢
+    case SEND_RIGHT_TURN:                // å‘é€å³è½¬å‘ç¯çš„çŠ¶æ€
+        uart0_sendbyte(0x05);            // å‘é€æŒ‡ä»¤çš„æ€»é•¿åº¦
+        uart0_sendbyte(SEND_RIGHT_TURN); // å‘é€æŒ‡ä»¤
+        uart0_sendbyte(send_data);       // å‘é€ä¿¡æ¯
 
         check_num = FORMAT_HEAD + 0x05 + SEND_RIGHT_TURN + (u8)send_data;
-        check_num &= 0x0F; // È¡Ç°ÃæµÄÊı×ÖÏà¼ÓµÄµÍËÄÎ»
+        check_num &= 0x0F; // å–å‰é¢çš„æ•°å­—ç›¸åŠ çš„ä½å››ä½
         break;
 
-    case SEND_HIGH_BEAM:                // ·¢ËÍÔ¶¹âµÆµÄ×´Ì¬
-        uart0_sendbyte(0x05);           // ·¢ËÍÖ¸ÁîµÄ×Ü³¤¶È
-        uart0_sendbyte(SEND_HIGH_BEAM); // ·¢ËÍÖ¸Áî
-        uart0_sendbyte(send_data);      // ·¢ËÍĞÅÏ¢
+    case SEND_HIGH_BEAM:                // å‘é€è¿œå…‰ç¯çš„çŠ¶æ€
+        uart0_sendbyte(0x05);           // å‘é€æŒ‡ä»¤çš„æ€»é•¿åº¦
+        uart0_sendbyte(SEND_HIGH_BEAM); // å‘é€æŒ‡ä»¤
+        uart0_sendbyte(send_data);      // å‘é€ä¿¡æ¯
 
         check_num = FORMAT_HEAD + 0x05 + SEND_HIGH_BEAM + (u8)send_data;
-        check_num &= 0x0F; // È¡Ç°ÃæµÄÊı×ÖÏà¼ÓµÄµÍËÄÎ»
+        check_num &= 0x0F; // å–å‰é¢çš„æ•°å­—ç›¸åŠ çš„ä½å››ä½
         break;
 
-    case SEND_ENGINE_SPEED:                // ·¢ËÍ·¢¶¯»úµÄ×ªËÙ
-        uart0_sendbyte(0x06);              // ·¢ËÍÖ¸ÁîµÄ×Ü³¤¶È
-        uart0_sendbyte(SEND_ENGINE_SPEED); // ·¢ËÍÖ¸Áî
-        uart0_sendbyte(send_data >> 8);    // ·¢ËÍĞÅÏ¢
-        uart0_sendbyte(send_data);         // ·¢ËÍĞÅÏ¢
+    case SEND_ENGINE_SPEED:                // å‘é€å‘åŠ¨æœºçš„è½¬é€Ÿ
+        uart0_sendbyte(0x06);              // å‘é€æŒ‡ä»¤çš„æ€»é•¿åº¦
+        uart0_sendbyte(SEND_ENGINE_SPEED); // å‘é€æŒ‡ä»¤
+        uart0_sendbyte(send_data >> 8);    // å‘é€ä¿¡æ¯
+        uart0_sendbyte(send_data);         // å‘é€ä¿¡æ¯
 
         check_num = FORMAT_HEAD + 0x06 + SEND_ENGINE_SPEED + (u8)(send_data >> 8) + (u8)(send_data);
-        check_num &= 0x0F; // È¡Ç°ÃæµÄÊı×ÖÏà¼ÓµÄµÍËÄÎ»
+        check_num &= 0x0F; // å–å‰é¢çš„æ•°å­—ç›¸åŠ çš„ä½å››ä½
         break;
 
-    case SEND_SPEED:                    // ·¢ËÍÊ±ËÙ
-        uart0_sendbyte(0x06);           // ·¢ËÍÖ¸ÁîµÄ×Ü³¤¶È
-        uart0_sendbyte(SEND_SPEED);     // ·¢ËÍÖ¸Áî
-        uart0_sendbyte(send_data >> 8); // ·¢ËÍĞÅÏ¢
-        uart0_sendbyte(send_data);      // ·¢ËÍĞÅÏ¢
+    case SEND_SPEED:                    // å‘é€æ—¶é€Ÿ
+        uart0_sendbyte(0x06);           // å‘é€æŒ‡ä»¤çš„æ€»é•¿åº¦
+        uart0_sendbyte(SEND_SPEED);     // å‘é€æŒ‡ä»¤
+        uart0_sendbyte(send_data >> 8); // å‘é€ä¿¡æ¯
+        uart0_sendbyte(send_data);      // å‘é€ä¿¡æ¯
 
         check_num = FORMAT_HEAD + 0x06 + SEND_SPEED + (u8)(send_data >> 8) + (u8)(send_data);
-        check_num &= 0x0F; // È¡Ç°ÃæµÄÊı×ÖÏà¼ÓµÄµÍËÄÎ»
+        check_num &= 0x0F; // å–å‰é¢çš„æ•°å­—ç›¸åŠ çš„ä½å››ä½
         break;
 
-    case SEND_FUEL:                // ·¢ËÍÓÍÁ¿
-        uart0_sendbyte(0x05);      // ·¢ËÍÖ¸ÁîµÄ×Ü³¤¶È
-        uart0_sendbyte(SEND_FUEL); // ·¢ËÍÖ¸Áî
-        uart0_sendbyte(send_data); // ·¢ËÍĞÅÏ¢
+    case SEND_FUEL:                // å‘é€æ²¹é‡
+        uart0_sendbyte(0x05);      // å‘é€æŒ‡ä»¤çš„æ€»é•¿åº¦
+        uart0_sendbyte(SEND_FUEL); // å‘é€æŒ‡ä»¤
+        uart0_sendbyte(send_data); // å‘é€ä¿¡æ¯
 
         check_num = FORMAT_HEAD + 0x05 + SEND_FUEL + (u8)send_data;
-        check_num &= 0x0F; // È¡Ç°ÃæµÄÊı×ÖÏà¼ÓµÄµÍËÄÎ»
+        check_num &= 0x0F; // å–å‰é¢çš„æ•°å­—ç›¸åŠ çš„ä½å››ä½
         break;
 
-    case SEND_WATER_TEMP:                // ·¢ËÍË®ÎÂ
-        uart0_sendbyte(0x05);            // ·¢ËÍÖ¸ÁîµÄ×Ü³¤¶È
-        uart0_sendbyte(SEND_WATER_TEMP); // ·¢ËÍÖ¸Áî
-        uart0_sendbyte(send_data);       // ·¢ËÍĞÅÏ¢
+    case SEND_WATER_TEMP:                // å‘é€æ°´æ¸©
+        uart0_sendbyte(0x05);            // å‘é€æŒ‡ä»¤çš„æ€»é•¿åº¦
+        uart0_sendbyte(SEND_WATER_TEMP); // å‘é€æŒ‡ä»¤
+        uart0_sendbyte(send_data);       // å‘é€ä¿¡æ¯
 
         check_num = FORMAT_HEAD + 0x05 + SEND_WATER_TEMP + (u8)send_data;
-        check_num &= 0x0F; // È¡Ç°ÃæµÄÊı×ÖÏà¼ÓµÄµÍËÄÎ»
+        check_num &= 0x0F; // å–å‰é¢çš„æ•°å­—ç›¸åŠ çš„ä½å››ä½
         break;
 
-    case SEND_TOTAL_MILEAGE:                // ·¢ËÍ´ó¼ÆÀï³Ì
-        uart0_sendbyte(0x07);               // ·¢ËÍÖ¸ÁîµÄ×Ü³¤¶È
-        uart0_sendbyte(SEND_TOTAL_MILEAGE); // ·¢ËÍÖ¸Áî
+    case SEND_TOTAL_MILEAGE:                // å‘é€å¤§è®¡é‡Œç¨‹
+        uart0_sendbyte(0x07);               // å‘é€æŒ‡ä»¤çš„æ€»é•¿åº¦
+        uart0_sendbyte(SEND_TOTAL_MILEAGE); // å‘é€æŒ‡ä»¤
 
-        uart0_sendbyte(send_data >> 16); // ·¢ËÍĞÅÏ¢
-        uart0_sendbyte(send_data >> 8);  // ·¢ËÍĞÅÏ¢
-        uart0_sendbyte(send_data);       // ·¢ËÍĞÅÏ¢
+        uart0_sendbyte(send_data >> 16); // å‘é€ä¿¡æ¯
+        uart0_sendbyte(send_data >> 8);  // å‘é€ä¿¡æ¯
+        uart0_sendbyte(send_data);       // å‘é€ä¿¡æ¯
 
         check_num = FORMAT_HEAD + 0x07 + SEND_TOTAL_MILEAGE + (u8)(send_data >> 16) + (u8)(send_data >> 8) + (u8)send_data;
-        check_num &= 0x0F; // È¡Ç°ÃæµÄÊı×ÖÏà¼ÓµÄµÍËÄÎ»
+        check_num &= 0x0F; // å–å‰é¢çš„æ•°å­—ç›¸åŠ çš„ä½å››ä½
         break;
 
-    case SEND_SUBTOTAL_MILEAGE: // ·¢ËÍĞ¡¼ÆÀï³Ì
+    case SEND_SUBTOTAL_MILEAGE: // å‘é€å°è®¡é‡Œç¨‹
 
-        uart0_sendbyte(0x06);               // ·¢ËÍÖ¸ÁîµÄ×Ü³¤¶È
-        uart0_sendbyte(SEND_SUBTOTAL_MILEAGE); // ·¢ËÍÖ¸Áî
+        uart0_sendbyte(0x06);               // å‘é€æŒ‡ä»¤çš„æ€»é•¿åº¦
+        uart0_sendbyte(SEND_SUBTOTAL_MILEAGE); // å‘é€æŒ‡ä»¤
 
-        uart0_sendbyte(send_data >> 8);  // ·¢ËÍĞÅÏ¢
-        uart0_sendbyte(send_data);       // ·¢ËÍĞÅÏ¢
+        uart0_sendbyte(send_data >> 8);  // å‘é€ä¿¡æ¯
+        uart0_sendbyte(send_data);       // å‘é€ä¿¡æ¯
 
         check_num = FORMAT_HEAD + 0x06 + SEND_SUBTOTAL_MILEAGE + (u8)(send_data >> 8) + (u8)send_data;
-        check_num &= 0x0F; // È¡Ç°ÃæµÄÊı×ÖÏà¼ÓµÄµÍËÄÎ»
+        check_num &= 0x0F; // å–å‰é¢çš„æ•°å­—ç›¸åŠ çš„ä½å››ä½
 
         break;
     }
 
-    uart0_sendbyte(check_num); // ·¢ËÍĞ£ÑéºÍ
+    uart0_sendbyte(check_num); // å‘é€æ ¡éªŒå’Œ
 
-    delay_ms(10); // Ã¿´Î·¢ËÍÍê³Éºó£¬ÑÓÊ±10ms
+    delay_ms(10); // æ¯æ¬¡å‘é€å®Œæˆåï¼Œå»¶æ—¶10ms
 }
 

@@ -50,8 +50,8 @@ void delay_ms(u16 ms)
 {
     while (ms--)
     {
-        // WDT_KEY = WDT_KEY_VAL(0xAA); // ι������
-        // delay(1140); // ���Եó�����ֵ�������������ι����������ֵ��Ҫ���µ���������ԭ����1450��
+        // WDT_KEY = WDT_KEY_VAL(0xAA); // 喂狗操作
+        // delay(1140); // 调试得出的数值（由于这里加了喂狗操作，数值需要重新调整，不用原来的1450）
 
         delay(1450);
     }
@@ -66,26 +66,26 @@ void system_init(void)
 {
     u8 i;
 
-    CLK_ACON0 |= CLK_AIP_HRC_EN(0x1); // ʹ�� HIRC
-    __HIRC_DELAY;                     // ���ӳٲ���ɾ��,�ȴ�HIRC�ȶ����ܱ�֤��¼�ȶ���
+    CLK_ACON0 |= CLK_AIP_HRC_EN(0x1); // 使能 HIRC
+    __HIRC_DELAY;                     // 该延迟不可删除,等待HIRC稳定并能保证烧录稳定性
     FLASH_TIMEREG0 = 0x55;
-    /* ���ϵͳʱ������Ϊ48mhz����FLASH_TIMEREG1 = 0x54 */
-    /* ���ϵͳʱ������Ϊ24mhz-12mhz����FLASH_TIMEREG1 = 0x50 */
-    FLASH_TIMEREG1 = 0x5C;              // FLASH�����ٶ� = ϵͳʱ��/4
-    CLK_CON2 = 0x50 | CLK_SYS_DIV(0x0); // ϵͳʱ�Ӳ���Ƶ HIRC48M
-    CLK_CON0 = CLK_SYSCLK_SEL(0x3);     // ϵͳʱ��ѡ��
-    CLK_CON6 = CLK_FLASH_DIV(47);       // FLASH��дʱ��48��Ƶ��1M
-    LVD_CON2 = 3;                       // �˲�����
-    LVD_CON1 &= ~(0x3);                 // VCC\VDD �͵��˲�ȥ������
+    /* 如果系统时钟配置为48mhz，则FLASH_TIMEREG1 = 0x54 */
+    /* 如果系统时钟配置为24mhz-12mhz，则FLASH_TIMEREG1 = 0x50 */
+    FLASH_TIMEREG1 = 0x5C;              // FLASH访问速度 = 系统时钟/4
+    CLK_CON2 = 0x50 | CLK_SYS_DIV(0x0); // 系统时钟不分频 HIRC48M
+    CLK_CON0 = CLK_SYSCLK_SEL(0x3);     // 系统时钟选择
+    CLK_CON6 = CLK_FLASH_DIV(47);       // FLASH烧写时钟48分频：1M
+    LVD_CON2 = 3;                       // 滤波周期
+    LVD_CON1 &= ~(0x3);                 // VCC\VDD 低电滤波去抖功能
 
-    // ��ʼ���Ĵ���
+    // 初始化寄存器
     // FOUT_S00 ~ FOUT_SEL
     for (i = 0x18; i <= 0x32; i++)
     {
         *(unsigned char volatile xdata *)(IOFUNC_BASE + i) = 0x0;
     }
 
-    __LOADER_CHIP_TRIM; // װ��оƬ����ģ��У׼ֵ
+    __LOADER_CHIP_TRIM; // 装载芯片各个模块校准值
 }
 
 /*************************** (C) COPYRIGHT 2021 HUGE-IC ***** END OF FILE *****/

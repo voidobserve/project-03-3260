@@ -1,114 +1,116 @@
-// Àï³Ì±íµÄÔ´³ÌĞò
+// é‡Œç¨‹è¡¨çš„æºç¨‹åº
 #include "mileage.h"
 
-
-// ×ÜÀï³ÌÉ¨Ãè
+// æ€»é‡Œç¨‹æ‰«æ
 void mileage_scan(void)
 {
-#ifdef INTERNATIONAL // ¹«ÖÆµ¥Î»
+#ifdef USE_INTERNATIONAL // å…¬åˆ¶å•ä½
 
-    static u32 old_total_mileage = 0;    // ÓÃÀ´¼ÇÂ¼¾ÉµÄ´ó¼ÆÀï³ÌµÄ±äÁ¿
-    static u32 old_subtotal_mileage = 0; // ÓÃÀ´¼ÇÂ¼¾ÉµÄĞ¡¼ÆÀï³ÌµÄ±äÁ¿
+    static u32 old_total_mileage = 0;    // ç”¨æ¥è®°å½•æ—§çš„å¤§è®¡é‡Œç¨‹çš„å˜é‡
+    static u32 old_subtotal_mileage = 0; // ç”¨æ¥è®°å½•æ—§çš„å°è®¡é‡Œç¨‹çš„å˜é‡
 
-    static bit tmr_is_open = 0; // ¶¨Ê±Æ÷ÊÇ·ñ´ò¿ªµÄ±êÖ¾Î»
+    static bit flag_tmr_is_open = 0; // å®šæ—¶å™¨æ˜¯å¦æ‰“å¼€çš„æ ‡å¿—ä½
 
-    if (0 == tmr_is_open)
+    // æ‰“å¼€å®šæ—¶å™¨
+    if (0 == flag_tmr_is_open)
     {
-        tmr_is_open = 1;
+        flag_tmr_is_open = 1;
         tmr3_cnt = 0;
         tmr3_enable();
     }
 
-    if (tmr3_cnt >= 3000)
+    if (tmr3_cnt >= 30000) // 30000 ms -- 30s
     {
-        // Ã¿30s½«´ó¼ÆÀï³ÌºÍĞ¡¼ÆÀï³ÌĞ´Èëflash
-        tmr3_disable();
+        // æ¯30så°†å¤§è®¡é‡Œç¨‹å’Œå°è®¡é‡Œç¨‹å†™å…¥flash
+        // tmr3_disable();
         tmr3_cnt = 0;
-        tmr_is_open = 0;
+        // flag_tmr_is_open = 0;
 
-        flash_write(0x00, (u8 *)&fun_info, sizeof(fun_info));
+        // flash_write(0x00, (u8 *)&fun_info, sizeof(fun_info));
+        fun_info_save(); // å°† fun_info å†™å›flash
     }
 
     if (distance >= 1000)
     {
-        // Èç¹û×ß¹ıµÄ¾àÀë³¬¹ıÁË1m£¬ÔÙ½øĞĞ±£´æ
-        fun_info.total_mileage += distance / 1000;    // ½«ºÁÃ××ª»»³ÉÃ×£¬ÔÙ±£´æ
-        fun_info.subtotal_mileage += distance / 1000; // ½«ºÁÃ××ª»»³ÉÃ×£¬ÔÙ±£´æ
-        distance %= 1000;                                 // Ê£ÏÂµÄ¡¢Î´±£´æµÄ¡¢²»Âú1mµÄÊı¾İÁôµ½ÏÂÒ»´ÎµÄ±£´æ
+        // å¦‚æœèµ°è¿‡çš„è·ç¦»è¶…è¿‡äº†1mï¼Œå†è¿›è¡Œä¿å­˜
+        fun_info.total_mileage += distance / 1000;    // å°†æ¯«ç±³è½¬æ¢æˆç±³ï¼Œå†ä¿å­˜
+        fun_info.subtotal_mileage += distance / 1000; // å°†æ¯«ç±³è½¬æ¢æˆç±³ï¼Œå†ä¿å­˜
+        distance -= 1000;                             // å‰©ä¸‹çš„ã€æœªä¿å­˜çš„ã€ä¸æ»¡1mçš„æ•°æ®ç•™åˆ°ä¸‹ä¸€æ¬¡å†ä¿å­˜
     }
 
     if ((fun_info.total_mileage - old_total_mileage) > 100)
     {
-        // Èç¹û´ó¼ÆÀï³ÌÓĞ±ä»¯ÇÒ³¬¹ıÁË100m
-        old_total_mileage = fun_info.total_mileage; // ¼ÇÂ¼¾ÉµÄÀï³Ì
+        // å¦‚æœå¤§è®¡é‡Œç¨‹æœ‰å˜åŒ–ä¸”è¶…è¿‡äº†100m
+        old_total_mileage = fun_info.total_mileage; // è®°å½•æ—§çš„é‡Œç¨‹
 
         // printf("total mileage: %lum\n", fun_info.total_mileage);
 
         {
-            // ·¢ËÍÊı¾İµÄ²Ù×÷£¬¿ÉÒÔÏÈÖÃ±êÖ¾Î»
-            // Òª×¢Òâ·¢ËÍµÄÊÇÎåÎ»µÄÕûÊı¡¢Ò»Î»µÄĞ¡Êı¡¢µ¥Î»ÎªKMµÄÊı¾İ
+            // å‘é€æ•°æ®çš„æ“ä½œï¼Œå¯ä»¥å…ˆç½®æ ‡å¿—ä½
+            // è¦æ³¨æ„å‘é€çš„æ˜¯äº”ä½çš„æ•´æ•°ã€ä¸€ä½çš„å°æ•°ã€å•ä½ä¸ºKMçš„æ•°æ®
             flag_get_total_mileage = 1;
         }
     }
 
     if ((fun_info.subtotal_mileage - old_subtotal_mileage) > 1000)
     {
-        // Èç¹ûĞ¡¼ÆÀï³ÌÓĞ±ä»¯ÇÒ³¬¹ıÁË1000m
-        old_subtotal_mileage = fun_info.subtotal_mileage; // ¼ÇÂ¼¾ÉµÄÀï³Ì
+        // å¦‚æœå°è®¡é‡Œç¨‹æœ‰å˜åŒ–ä¸”è¶…è¿‡äº†1000m
+        old_subtotal_mileage = fun_info.subtotal_mileage; // è®°å½•æ—§çš„é‡Œç¨‹
 
         // printf("subtotal mileage: %lum\n", fun_info.subtotal_mileage);
 
         {
-            // ·¢ËÍÊı¾İµÄ²Ù×÷£¬¿ÉÒÔÏÈÖÃ±êÖ¾Î»
-            // Òª×¢Òâ·¢ËÍµÄÊÇËÄÎ»µÄ¡¢µ¥Î»ÎªKMµÄÊı¾İ
+            // å‘é€æ•°æ®çš„æ“ä½œï¼Œå¯ä»¥å…ˆç½®æ ‡å¿—ä½
+            // è¦æ³¨æ„å‘é€çš„æ˜¯å››ä½çš„ã€ä¸€ä½å°æ•°ã€å•ä½ä¸ºKMçš„æ•°æ®
             flag_get_sub_total_mileage = 1;
         }
     }
 
-#endif // INTERNATIONAL ¹«ÖÆµ¥Î»
+#endif // INTERNATIONAL å…¬åˆ¶å•ä½
 
-#ifdef IMPERIAL // Ó¢ÖÆµ¥Î»
+#ifdef USE_IMPERIAL // è‹±åˆ¶å•ä½
 
-    static u32 old_total_mileage = 0;    // ÓÃÀ´¼ÇÂ¼¾ÉµÄ´ó¼ÆÀï³ÌµÄ±äÁ¿
-    static u32 old_subtotal_mileage = 0; // ÓÃÀ´¼ÇÂ¼¾ÉµÄĞ¡¼ÆÀï³ÌµÄ±äÁ¿
+    static u32 old_total_mileage = 0;    // ç”¨æ¥è®°å½•æ—§çš„å¤§è®¡é‡Œç¨‹çš„å˜é‡
+    static u32 old_subtotal_mileage = 0; // ç”¨æ¥è®°å½•æ—§çš„å°è®¡é‡Œç¨‹çš„å˜é‡
 
-    static bit tmr_is_open = 0; // ¶¨Ê±Æ÷ÊÇ·ñ´ò¿ªµÄ±êÖ¾Î»
+    static bit flag_tmr_is_open = 0; // å®šæ—¶å™¨æ˜¯å¦æ‰“å¼€çš„æ ‡å¿—ä½
 
-    if (0 == tmr_is_open)
+    if (0 == flag_tmr_is_open)
     {
-        tmr_is_open = 1;
+        flag_tmr_is_open = 1;
         tmr3_cnt = 0;
         tmr3_enable();
     }
 
-    if (tmr3_cnt >= 3000)
+    if (tmr3_cnt >= 30000) // 30000 ms
     {
-        // Ã¿30s½«´ó¼ÆÀï³ÌºÍĞ¡¼ÆÀï³ÌĞ´Èëflash
+        // æ¯30så°†å¤§è®¡é‡Œç¨‹å’Œå°è®¡é‡Œç¨‹å†™å…¥flash
         tmr3_disable();
         tmr3_cnt = 0;
-        tmr_is_open = 0;
+        flag_tmr_is_open = 0;
 
-        flash_write(0x00, (u8 *)&fun_info, sizeof(fun_info));
+        // flash_write(0x00, (u8 *)&fun_info, sizeof(fun_info));
+        fun_info_save();
     }
 
     if (distance >= 1000)
     {
-        // Èç¹û×ß¹ıµÄ¾àÀë³¬¹ıÁË1m£¬ÔÙ½øĞĞ±£´æ
-        fun_info.total_mileage += distance / 1000;    // ½«ºÁÃ××ª»»³ÉÃ×£¬ÔÙ±£´æ
-        fun_info.subtotal_mileage += distance / 1000; // ½«ºÁÃ××ª»»³ÉÃ×£¬ÔÙ±£´æ
-        distance %= 1000;                                 // Ê£ÏÂµÄ¡¢Î´±£´æµÄ¡¢²»Âú1mµÄÊı¾İÁôµ½ÏÂÒ»´ÎµÄ±£´æ
+        // å¦‚æœèµ°è¿‡çš„è·ç¦»è¶…è¿‡äº†1mï¼Œå†è¿›è¡Œä¿å­˜
+        fun_info.total_mileage += distance / 1000;    // å°†æ¯«ç±³è½¬æ¢æˆç±³ï¼Œå†ä¿å­˜
+        fun_info.subtotal_mileage += distance / 1000; // å°†æ¯«ç±³è½¬æ¢æˆç±³ï¼Œå†ä¿å­˜
+        distance -= 1000;                             // å‰©ä¸‹çš„ã€æœªä¿å­˜çš„ã€ä¸æ»¡1mçš„æ•°æ®ç•™åˆ°ä¸‹ä¸€æ¬¡çš„ä¿å­˜
     }
 
     if ((fun_info.total_mileage - old_total_mileage) > 161)
     {
-        // Èç¹û´ó¼ÆÀï³ÌÓĞ±ä»¯ÇÒ³¬¹ıÁË161m£¬Ô¼0.1Ó¢Àï
-        old_total_mileage = fun_info.total_mileage; // ¼ÇÂ¼¾ÉµÄÀï³Ì
+        // å¦‚æœå¤§è®¡é‡Œç¨‹æœ‰å˜åŒ–ä¸”è¶…è¿‡äº†161mï¼Œçº¦0.1è‹±é‡Œ
+        old_total_mileage = fun_info.total_mileage; // è®°å½•æ—§çš„é‡Œç¨‹
 
         // printf("total mileage: %lum\n", fun_info.total_mileage);
 
         {
-            // ·¢ËÍÊı¾İµÄ²Ù×÷£¬¿ÉÒÔÏÈÖÃ±êÖ¾Î»
-            // Òª×¢Òâ·¢ËÍµÄÊÇÎåÎ»µÄÕûÊı¡¢Ò»Î»µÄĞ¡Êı¡¢µ¥Î»ÎªÓ¢ÀïµÄÊı¾İ
+            // å‘é€æ•°æ®çš„æ“ä½œï¼Œå¯ä»¥å…ˆç½®æ ‡å¿—ä½
+            // è¦æ³¨æ„å‘é€çš„æ˜¯äº”ä½çš„æ•´æ•°ã€ä¸€ä½çš„å°æ•°ã€å•ä½ä¸ºè‹±é‡Œçš„æ•°æ®
 
             flag_get_total_mileage = 1;
         }
@@ -116,17 +118,17 @@ void mileage_scan(void)
 
     if ((fun_info.subtotal_mileage - old_subtotal_mileage) > 1610)
     {
-        // Èç¹ûĞ¡¼ÆÀï³ÌÓĞ±ä»¯ÇÒ³¬¹ıÁË1610m£¬Ô¼1Ó¢Àï
-        old_subtotal_mileage = fun_info.subtotal_mileage; // ¼ÇÂ¼¾ÉµÄÀï³Ì
+        // å¦‚æœå°è®¡é‡Œç¨‹æœ‰å˜åŒ–ä¸”è¶…è¿‡äº†1610mï¼Œçº¦1è‹±é‡Œ
+        old_subtotal_mileage = fun_info.subtotal_mileage; // è®°å½•æ—§çš„é‡Œç¨‹
 
         // printf("subtotal mileage: %lum\n", fun_info.subtotal_mileage);
 
         {
-            // ·¢ËÍÊı¾İµÄ²Ù×÷£¬¿ÉÒÔÏÈÖÃ±êÖ¾Î»
-            // Òª×¢Òâ·¢ËÍµÄÊÇËÄÎ»µÄ¡¢µ¥Î»ÎªÓ¢ÀïµÄÊı¾İ
+            // å‘é€æ•°æ®çš„æ“ä½œï¼Œå¯ä»¥å…ˆç½®æ ‡å¿—ä½
+            // è¦æ³¨æ„å‘é€çš„æ˜¯å››ä½çš„ã€å•ä½ä¸ºè‹±é‡Œçš„æ•°æ®
             flag_get_sub_total_mileage = 1;
         }
     }
 
-#endif // IMPERIAL Ó¢ÖÆµ¥Î»
+#endif // USE_IMPERIAL è‹±åˆ¶å•ä½
 }

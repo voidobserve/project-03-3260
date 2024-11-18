@@ -1,14 +1,14 @@
 #include "fun_info.h" 
 
-volatile fun_info_t fun_info = {0}; // ´æ·ÅËùÓĞ¹¦ÄÜ×´Ì¬µÄ½á¹¹Ìå±äÁ¿
+volatile fun_info_t fun_info = {0}; // å­˜æ”¾æ‰€æœ‰åŠŸèƒ½çŠ¶æ€çš„ç»“æ„ä½“å˜é‡
 
-// ³õÊ¼»¯´æ·ÅËùÓĞĞÅÏ¢µÄ½á¹¹Ìå±äÁ¿
+// åˆå§‹åŒ–å­˜æ”¾æ‰€æœ‰ä¿¡æ¯çš„ç»“æ„ä½“å˜é‡
 void fun_info_init(void)
 {
     flash_read(0x00, (u8*)&fun_info, sizeof(fun_info));
 }
 
-// ±£´æ ´æ·ÅÁËËùÓĞĞÅÏ¢µÄ½á¹¹Ìå±äÁ¿£¬Ğ´ÈëflashÖĞ
+// ä¿å­˜ å­˜æ”¾äº†æ‰€æœ‰ä¿¡æ¯çš„ç»“æ„ä½“å˜é‡ï¼Œå†™å…¥flashä¸­
 void fun_info_save(void)
 {
     flash_erase_sector(0x00);

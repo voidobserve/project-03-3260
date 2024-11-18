@@ -1,113 +1,81 @@
-// ¶¨Ê±Æ÷TMR3µÄÇý¶¯Ô´ÎÄ¼þ
+// å®šæ—¶å™¨TMR3çš„é©±åŠ¨æºæ–‡ä»¶
 #include "tmr3.h"
 
-// ¶¨Ê±Æ÷TMR3µÄ¼ÆÊ±ÖÜÆÚ£¬Ò²ÊÇÖÐ¶Ï´¥·¢ÖÜÆÚ£¨Ã¿¸ô¶à¾Ã´¥·¢Ò»´ÎÖÐ¶Ï£©
-// ¼ÆÊ±ÖÜÆÚ²»ÄÜ´óÓÚ65535£¬ÒòÎªTMR3´æ·Å¼ÆÊ±ÖÜÆÚµÄ¼Ä´æÆ÷Ö»ÓÐ16Î»
-// 0.65625 * 15238 Ô¼µÈÓÚ 10000£¬¼´¶¨Ê±Æ÷Ã¿ 10000us£¨10ms£© ´¥·¢Ò»´ÎÖÐ¶Ï
-// Êµ¼ÊÉÏ»¹ÐèÒªµ÷Õû£¬ËüµÄÊ±ÖÓ²»ÊÇºÜ×¼È·£¬ÒòÎª²»ÊÇ¾§ÕñÌá¹©µÄ£¬¶øÊÇRCÕñµ´Ìá¹©µÄ
-// #define TMR3_CNT_TIME ((15100))
+// å®šæ—¶å™¨å®šæ—¶å‘¨æœŸ (å•ä½:Hz)
+// å‘¨æœŸå€¼ = ç³»ç»Ÿæ—¶é’Ÿ / å®šæ—¶å™¨åˆ†é¢‘ / é¢‘çŽ‡ - 1
+#define TMR3_PERIOD (SYSCLK / 128 / 1000 - 1) // 1000Hz,1ms
 
-#define TMR3_CNT_TIME 15200 // 15200 * 0.65625us Ô¼µÈÓÚ10000us£¬10ms
+volatile u32 tmr3_cnt = 0; // å®šæ—¶å™¨TMR3çš„è®¡æ•°å€¼ï¼ˆæ¯æ¬¡åœ¨ä¸­æ–­æœåŠ¡å‡½æ•°ä¸­ä¼šåŠ ä¸€ï¼‰
+// volatile bit tmr3_flag = 0; // tmr3ä¸­æ–­æœåŠ¡å‡½æ•°ä¸­ä¼šç½®ä½çš„æ ‡å¿—ä½
 
-volatile u32 tmr3_cnt = 0; // ¶¨Ê±Æ÷TMR3µÄ¼ÆÊýÖµ£¨Ã¿´ÎÔÚÖÐ¶Ï·þÎñº¯ÊýÖÐ»á¼ÓÒ»£©
-// volatile bit tmr3_flag = 0; // tmr3ÖÐ¶Ï·þÎñº¯ÊýÖÐ»áÖÃÎ»µÄ±êÖ¾Î»
-
-// ¶¨Ê±Æ÷TMR3µÄ³õÊ¼»¯£¨³õÊ¼»¯Íê³Éºó£¬Ä¬ÈÏÊÇ¹Ø±ÕµÄ£©
+// å®šæ—¶å™¨TMR3çš„åˆå§‹åŒ–ï¼ˆåˆå§‹åŒ–å®ŒæˆåŽï¼Œé»˜è®¤æ˜¯å…³é—­çš„ï¼‰
 void tmr3_config(void)
 {
-    __SetIRQnIP(TMR3_IRQn, TMR3_IQn_CFG); // ÉèÖÃÖÐ¶ÏÓÅÏÈ¼¶£¨TMR3£©
+    __SetIRQnIP(TMR3_IRQn, TMR3_IQn_CFG); // è®¾ç½®ä¸­æ–­ä¼˜å…ˆçº§ï¼ˆTMR3ï¼‰
+    __DisableIRQ(TMR3_IRQn); // ç¦ç”¨ä¸­æ–­
+    IE_EA = 1; // æ‰“å¼€æ€»ä¸­æ–­
 
-    TMR3_CONL &= ~TMR_PRESCALE_SEL(0x07); // Çå³ýTMR3µÄÔ¤·ÖÆµÅäÖÃ¼Ä´æÆ÷
-    // ÅäÖÃTMR3µÄÔ¤·ÖÆµ£¬Îª32·ÖÆµ£¬¼´21MHz / 32 = 0.65625MHz£¬Ô¼0.65625us¼ÆÊýÒ»´Î
-    // £¨Êµ¼Ê²âÊÔºÍ¼ÆËãµÃ³öÕâ¸öÏµÍ³Ê±ÖÓÊÇ21MHzµÄ£¬µ«ÊÇ»¹ÊÇÓÐÐ©Îó²î£©
-    TMR3_CONL |= TMR_PRESCALE_SEL(0x05);
-    TMR3_CONL &= ~TMR_MODE_SEL(0x03); // Çå³ýTMR3µÄÄ£Ê½ÅäÖÃ¼Ä´æÆ÷
-    TMR3_CONL |= TMR_MODE_SEL(0x01);  // ÅäÖÃTMR3µÄÄ£Ê½Îª¼ÆÊýÆ÷Ä£Ê½£¬×îºó¶ÔÏµÍ³Ê±ÖÓµÄÂö³å½øÐÐ¼ÆÊý
-
-    TMR3_CONH &= ~TMR_PRD_PND(0x01); // Çå³ýTMR3µÄ¼ÆÊý±êÖ¾Î»£¬±íÊ¾Î´Íê³É¼ÆÊý
-    TMR3_CONH |= TMR_PRD_IRQ_EN(1);  // Ê¹ÄÜTMR3µÄ¼ÆÊýÖÐ¶Ï
-
-    __DisableIRQ(TMR3_IRQn); // ½ûÓÃÖÐ¶Ï
-
-    // ÅäÖÃTMR3µÄ¼ÆÊýÖÜÆÚ
-    TMR3_PRL = (unsigned char)(TMR3_CNT_TIME % 255);
-    TMR3_PRH = (unsigned char)(TMR3_CNT_TIME / 255);
-
-    // Çå³ýTMR3µÄ¼ÆÊýÖµ
+        // æ¸…é™¤TMR3çš„è®¡æ•°å€¼
     TMR3_CNTL = 0;
     TMR3_CNTH = 0;
 
-    TMR3_CONL &= ~(TMR_SOURCE_SEL(0x07)); // Çå³ýTMR3µÄÊ±ÖÓÔ´ÅäÖÃ¼Ä´æÆ÷
-    // TMR3_CONL |= TMR_SOURCE_SEL(0x07); // ÅäÖÃTMR3µÄÊ±ÖÓÔ´£¬Ê¹ÓÃÏµÍ³Ê±ÖÓ
-    TMR3_CONL |= TMR_SOURCE_SEL(0x05); // ÅäÖÃTMR3µÄÊ±ÖÓÔ´£¬²»ÓÃÈÎºÎÊ±ÖÓ
-    // __EnableIRQ(TMR3_IRQn);			   // Ê¹ÄÜÖÐ¶Ï
-    IE_EA = 1; // ´ò¿ª×ÜÖÐ¶Ï
+
+    TMR3_CONL &= ~TMR_PRESCALE_SEL(0x07); // æ¸…é™¤TMR3çš„é¢„åˆ†é¢‘é…ç½®å¯„å­˜å™¨
+    TMR3_CONL |= TMR_PRESCALE_SEL(0x07);// é…ç½®é¢„åˆ†é¢‘å¯„å­˜å™¨,128åˆ†é¢‘
+    TMR3_CONL &= ~TMR_MODE_SEL(0x03); // æ¸…é™¤TMR3çš„æ¨¡å¼é…ç½®å¯„å­˜å™¨
+    TMR3_CONL |= TMR_MODE_SEL(0x01);  // é…ç½®TMR3çš„æ¨¡å¼ä¸ºè®¡æ•°å™¨æ¨¡å¼ï¼Œæœ€åŽå¯¹ç³»ç»Ÿæ—¶é’Ÿçš„è„‰å†²è¿›è¡Œè®¡æ•°
+
+    TMR3_CONH &= ~TMR_PRD_PND(0x01); // æ¸…é™¤TMR3çš„è®¡æ•°æ ‡å¿—ä½ï¼Œè¡¨ç¤ºæœªå®Œæˆè®¡æ•°
+    TMR3_CONH |= TMR_PRD_IRQ_EN(1);  // ä½¿èƒ½TMR3çš„è®¡æ•°ä¸­æ–­
+
+    // é…ç½®TMR3çš„è®¡æ•°å‘¨æœŸ
+    TMR3_PRH = TMR_PERIOD_VAL_H((TMR3_PERIOD >> 8) & 0xFF); // å‘¨æœŸå€¼
+    TMR3_PRL = TMR_PERIOD_VAL_L((TMR3_PERIOD >> 0) & 0xFF);
+
+    TMR3_CONL &= ~(TMR_SOURCE_SEL(0x07)); // æ¸…é™¤TMR3çš„æ—¶é’Ÿæºé…ç½®å¯„å­˜å™¨
+    TMR3_CONL |= TMR_SOURCE_SEL(0x05); // é…ç½®TMR3çš„æ—¶é’Ÿæºï¼Œä¸ç”¨ä»»ä½•æ—¶é’Ÿ
 }
 
-// ¿ªÆô¶¨Ê±Æ÷TMR3£¬¿ªÊ¼¼ÆÊ±
+// å¼€å¯å®šæ—¶å™¨TMR3ï¼Œå¼€å§‹è®¡æ—¶
 void tmr3_enable(void)
 {
-    // ÖØÐÂ¸øTMR3ÅäÖÃÊ±ÖÓ
-    TMR3_CONL &= ~(TMR_SOURCE_SEL(0x07)); // Çå³ý¶¨Ê±Æ÷µÄÊ±ÖÓÔ´ÅäÖÃ¼Ä´æÆ÷
-    TMR3_CONL |= TMR_SOURCE_SEL(0x06);    // ÅäÖÃ¶¨Ê±Æ÷µÄÊ±ÖÓÔ´£¬Ê¹ÓÃÏµÍ³Ê±ÖÓ£¨Ô¼21MHz£©
+    // é‡æ–°ç»™TMR3é…ç½®æ—¶é’Ÿ
+    TMR3_CONL &= ~(TMR_SOURCE_SEL(0x07)); // æ¸…é™¤å®šæ—¶å™¨çš„æ—¶é’Ÿæºé…ç½®å¯„å­˜å™¨
+    TMR3_CONL |= TMR_SOURCE_SEL(0x06);    // é…ç½®å®šæ—¶å™¨çš„æ—¶é’Ÿæºï¼Œä½¿ç”¨ç³»ç»Ÿæ—¶é’Ÿï¼ˆçº¦21MHzï¼‰
 
-    __EnableIRQ(TMR3_IRQn); // Ê¹ÄÜÖÐ¶Ï
-    IE_EA = 1;              // ´ò¿ª×ÜÖÐ¶Ï
+    __EnableIRQ(TMR3_IRQn); // ä½¿èƒ½ä¸­æ–­
+    IE_EA = 1;              // æ‰“å¼€æ€»ä¸­æ–­
 }
 
-// ¹Ø±Õ¶¨Ê±Æ÷£¬Çå¿Õ¼ÆÊýÖµ
+// å…³é—­å®šæ—¶å™¨ï¼Œæ¸…ç©ºè®¡æ•°å€¼
 void tmr3_disable(void)
 {
-    // ²»¸ø¶¨Ê±Æ÷Ìá¹©Ê±ÖÓ£¬ÈÃËüÍ£Ö¹¼ÆÊý
-    TMR3_CONL &= ~(TMR_SOURCE_SEL(0x07)); // Çå³ý¶¨Ê±Æ÷µÄÊ±ÖÓÔ´ÅäÖÃ¼Ä´æÆ÷
-    TMR3_CONL |= TMR_SOURCE_SEL(0x05);    // ÅäÖÃ¶¨Ê±Æ÷µÄÊ±ÖÓÔ´£¬²»ÓÃÈÎºÎÊ±ÖÓ
+    // ä¸ç»™å®šæ—¶å™¨æä¾›æ—¶é’Ÿï¼Œè®©å®ƒåœæ­¢è®¡æ•°
+    TMR3_CONL &= ~(TMR_SOURCE_SEL(0x07)); // æ¸…é™¤å®šæ—¶å™¨çš„æ—¶é’Ÿæºé…ç½®å¯„å­˜å™¨
+    TMR3_CONL |= TMR_SOURCE_SEL(0x05);    // é…ç½®å®šæ—¶å™¨çš„æ—¶é’Ÿæºï¼Œä¸ç”¨ä»»ä½•æ—¶é’Ÿ
 
-    // Çå³ý¶¨Ê±Æ÷µÄ¼ÆÊýÖµ
+    // æ¸…é™¤å®šæ—¶å™¨çš„è®¡æ•°å€¼
     TMR3_CNTL = 0;
     TMR3_CNTH = 0;
 
-    __DisableIRQ(TMR3_IRQn); // ¹Ø±ÕÖÐ¶Ï£¨²»Ê¹ÄÜÖÐ¶Ï£©
+    __DisableIRQ(TMR3_IRQn); // å…³é—­ä¸­æ–­ï¼ˆä¸ä½¿èƒ½ä¸­æ–­ï¼‰
 }
 
-// TMR3ÖÐ¶Ï·þÎñº¯Êý
+// TMR3ä¸­æ–­æœåŠ¡å‡½æ•°
 void TIMR3_IRQHandler(void) interrupt TMR3_IRQn
 {
-#if 1 // ¶¨Ê±Æ÷µÄ¶¨Ê±ÖÐ¶Ï
-    // ½øÈëÖÐ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ý
+    // è¿›å…¥ä¸­æ–­è®¾ç½®IPï¼Œä¸å¯åˆ é™¤
     __IRQnIPnPush(TMR3_IRQn);
 
-    // ---------------- ÓÃ»§º¯Êý´¦Àí -------------------
-    // ÖÜÆÚÖÐ¶Ï
+    // ---------------- ç”¨æˆ·å‡½æ•°å¤„ç† -------------------
+    // å‘¨æœŸä¸­æ–­
     if (TMR3_CONH & TMR_PRD_PND(0x1))
     {
-        TMR3_CONH |= TMR_PRD_PND(0x1); // Çå³ýpending
+        TMR3_CONH |= TMR_PRD_PND(0x1); // æ¸…é™¤pending
 
         tmr3_cnt++; 
     }
 
-    // ÍË³öÖÐ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ý
+    // é€€å‡ºä¸­æ–­è®¾ç½®IPï¼Œä¸å¯åˆ é™¤
     __IRQnIPnPop(TMR3_IRQn);
-#endif
-
-#if 0 // ¶¨Ê±Æ÷µÄÊäÈë²¶»ñÖÐ¶Ï
-
-    // ½øÈëÖÐ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ý
-    __IRQnIPnPush(TMR3_IRQn);
-
-    // ---------------- ÓÃ»§º¯Êý´¦Àí -------------------
-
-    if (TMR3_CONH & TMR_CAP_PND(0x1))
-    {
-        TMR3_CONH |= TMR_CAP_PND(0x1); // Çå³ýpending
-
-        tmr3_cap_val    = ((TMR3_PWMH << 8) | TMR3_PWML); // ¶ÁÈ¡²¶»ñµÄÖµ
-        tmr3_cnt++; // Âö³å¼ÆÊýÖµ¼ÓÒ»
-
-        TMR_ALLCON = TMR3_CNT_CLR(0x1); // Çå³ý¼ÆÊýÖµ
-    }
-
-    // ÍË³öÖÐ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ý
-    __IRQnIPnPop(TMR3_IRQn);
-
-#endif
 }
