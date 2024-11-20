@@ -32,7 +32,8 @@
         "engine_speed_scan.h": "c",
         "instruction.h": "c",
         "tk_debug.h": "c",
-        "set_date_time.h": "c"
+        "set_date_time.h": "c",
+        "tmr4.h": "c"
     },
     "typescript.suggest.jsdoc.generateReturns": false,
     "javascript.suggest.jsdoc.generateReturns": false

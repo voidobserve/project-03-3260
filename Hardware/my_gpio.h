@@ -5,8 +5,8 @@
 #include "include.h" // 包含芯片官方提供的头文件
 
 // 开发板上与LED正极连接的引脚
-#define LED6 P01
-#define LED7 P26
+// #define LED6 P01
+// #define LED7 P26
 
 // p11、p12在开发板上作为串口使用
 void p11_output_config(void);
@@ -34,5 +34,6 @@ void p27_input_config(void); // p27配置成输入上拉模式
 
 void p30_input_config(void); // p30配置成输入上拉模式
 // void p31_input_config(void); // p31配置成输入上拉模式
+
 
 #endif

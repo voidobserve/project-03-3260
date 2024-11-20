@@ -21,7 +21,7 @@ enum
     INSTRUCTION_GET_TOTAL_MILEAGE = 0x2B,    // 获取大计里程
     INSTRUCTION_GET_SUBTOTAL_MILEAGE = 0x2C, // 获取小计里程
 
-    INSTRUCTION_GET_TOUCH_KEY_STATUS = 0x2D,      // 获取触摸按键状态
+    // INSTRUCTION_GET_TOUCH_KEY_STATUS = 0x2D,      // 获取触摸按键状态
     INSTRUCTION_ALTER_DATE = 0x2E,                // 修改日期
     INSTRUCTION_ALTER_TIME = 0x2F,                // 修改时间
     INSTRUCTION_GET_BATTERY_VAL = 0x30,           // 获取电池电压
@@ -53,10 +53,10 @@ extern volatile bit flag_get_temp_of_water; // 获取水温 / 得到了水温
 extern volatile bit flag_get_total_mileage;     // 获取大计里程 / 得到了大计里程
 extern volatile bit flag_get_sub_total_mileage; // 获取小计里程 / 得到了小计里程
 
-extern volatile bit flag_get_touch_key_status;      // 获取触摸按键的状态
+// extern volatile bit flag_get_touch_key_status;      // 获取触摸按键的状态
 extern volatile bit flag_alter_date;                // 修改日期
 extern volatile bit flag_alter_time;                // 修改时间
-extern volatile bit flag_get_bat_val;               // 获取电池电压
+extern volatile bit flag_get_voltage_of_battery;               // 获取电池电压
 extern volatile bit flag_set_temp_of_water_warning; // 设置水温报警
 extern volatile bit flag_clear_total_mileage;       // 清除大计里程
 extern volatile bit flag_clear_sub_total_mileage;   // 清除小计里程

@@ -6,6 +6,7 @@
 ".\Release\Objects\tmr1.obj",
 ".\Release\Objects\tmr2.obj",
 ".\Release\Objects\tmr3.obj",
+".\Release\Objects\tmr4.obj",
 ".\Release\Objects\uart0.obj",
 ".\Release\Objects\adc.obj",
 ".\Release\Objects\flash.obj",

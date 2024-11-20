@@ -184,10 +184,10 @@ void uart0_sendbyte(u8 senddata)
 }
 
 // 通过uart0发送若干数据
-void uart0_send_buff(u8* buf, u8 len)
+void uart0_send_buff(u8 *buf, u8 len)
 {
     u8 i = 0;
-    for(; i < len; i++)
+    for (; i < len; i++)
     {
         uart0_sendbyte(buf[i]);
     }
@@ -254,10 +254,8 @@ void uart0_scan_handle(void)
 // 如果数据帧的长度不正确
 #if USE_MY_DEBUG
                 printf("format len invalid!\n");
-
                 printf("%d  %d \n", (u32)uart0_recv_len[i], (u32)uart0_recv_buf[i][1]);
-
-                __uart_buff_check();
+                __uart_buff_check(); // 打印串口接收缓冲区中的数据
 #endif
                 recved_flagbuf[i] = 0;
                 recv_frame_cnt--;
@@ -274,9 +272,9 @@ void uart0_scan_handle(void)
                     checksum += uart0_recv_buf[i][__loop_crc_cnt];
                 }
 
-                checksum &= 0x0F; // 取低4位作为校验
-                // checksum &= 0xFF; // 取8位作为校验
-                if (checksum != uart0_recv_buf[i][uart0_recv_len[i] - 1])
+                // checksum &= 0x0F; // 取低4位作为校验
+                checksum &= 0xFF; // 取8位作为校验
+                if (checksum != (uart0_recv_buf[i][uart0_recv_len[i] - 1]))
                 {
                     // 如果计算的校验和与收到的校验和不一致
                     __flag_is_crc_or_len_err = 1;

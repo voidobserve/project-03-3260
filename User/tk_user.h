@@ -53,8 +53,14 @@
 void debug_gpio_config(void);
 #endif
 
-void user_init(void);
-void user_handle(void);
+// void user_init(void);
+// void user_handle(void);
+
+#if 0 // 交给另一个3260来检测触摸按键
+// 非阻塞的按键扫描函数
+void touch_key_scan(void); 
+#endif // 交给另一个3260来检测触摸按键 
+
 /**
   * @}
   */

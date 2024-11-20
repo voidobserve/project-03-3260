@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   ENGINE_SPEED_SCAN                                                 11/18/2024 17:39:07 PAGE 1   
+C51 COMPILER V9.60.7.0   ENGINE_SPEED_SCAN                                                 11/20/2024 15:06:13 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE ENGINE_SPEED_SCAN
@@ -13,10 +13,10 @@ line level    source
    2          
    3          // 发动机每转一圈，能检测到的脉冲个数
    4          #ifndef ENGINE_PULSE_PER_TURN
-   5          #define ENGINE_PULSE_PER_TURN 16
+   5          #define ENGINE_PULSE_PER_TURN (16)
    6          #endif
    7          
-   8          static volatile u32 pulse_cnt = 0; // 脉冲计数值
+   8          static volatile u32 detect_engine_pulse_cnt = 0; // 脉冲计数值
    9          
   10          // 发动机转速的相关配置
   11          void engine_speed_scan_config(void)
@@ -33,87 +33,57 @@ line level    source
   22   1          P1_TRG0 |= GPIO_P12_TRG_SEL(0x2); // 配置上升沿触发
   23   1      }
   24          
-  25          // 获取发动机每分钟转速
-  26          // static u32 get_engine_speed_rpm(void)
-  27          // {
-  28          //     // return (get_turns_per_250ms() * 4 * 60);
-  29          
-  30          //     u32 tmp = 0;
-  31          //     pulse_cnt = 0;
-  32          //     tmr1_cnt = 0;
-  33          //     tmr1_enable();
-  34          //     __EnableIRQ(P1_IRQn); // 使能中断
-  35          
-  36          //     while (tmr1_cnt < 2500)
-  37          //     {
-  38          //     }; // 等待250ms
-  39          
-  40          //     // 计算出每min(250ms * 4 * 60 == 1min)转了多少圈
-  41          //     tmp = pulse_cnt * 240 / ENGINE_PULSE_PER_TURN;
-  42          
-  43          //     tmr1_disable();
-  44          
-  45          //     __DisableIRQ(P1_IRQn); // 禁用中断
-  46          
-  47          //     tmr1_cnt = 0;
-  48          //     pulse_cnt = 0;
+  25          // 发动机转速扫描
+  26          void engine_speed_scan(void)
+  27          {
+  28   1          u32 rpm = 0;
+  29   1      
+  30   1          if (tmr1_cnt >= 2500) // 如果已经过了250ms
+  31   1          {
+  32   2              // 下面是根据250ms检测到的脉冲个数来计算出每分钟的转速
+  33   2              // 250ms * 4 * 60 == 1min
+  34   2              rpm = detect_engine_pulse_cnt * 240 / ENGINE_PULSE_PER_TURN; // 计算得出1min的转速
+  35   2      
+  36   2              tmr1_cnt = 0; 
+  37   2              detect_engine_pulse_cnt = 0;
+  38   2              fun_info.engine_speeed = rpm; //
+  39   2      #if USE_MY_DEBUG
+  40   2              printf("engine speed %lu rpm\n", rpm);
+  41   2      #endif
+  42   2      
+  43   2      
+  44   2              flag_get_engine_speed = 1; // 多久更新一次状态还未确定
+  45   2          }
+  46   1      
+  47   1      
+  48   1      }
   49          
-  50          //     return tmp;
-  51          // }
-  52          
-  53          // 发动机转速扫描
-C51 COMPILER V9.60.7.0   ENGINE_SPEED_SCAN                                                 11/18/2024 17:39:07 PAGE 2   
+  50          // P1中断服务函数
+  51          void P1_IRQHandler(void) interrupt P1_IRQn
+  52          {
+  53   1          // Px_PND寄存器写任何值都会清标志位
+C51 COMPILER V9.60.7.0   ENGINE_SPEED_SCAN                                                 11/20/2024 15:06:13 PAGE 2   
 
-  54          void engine_speed_scan(void)
-  55          {
-  56   1          // u32 rpm = get_engine_speed_rpm();
-  57   1          // // printf("rpm: %lu\n", rpm);
-  58   1      
-  59   1          // fun_info.engine_speeed = rpm;
-  60   1          // flag_get_engine_speed = 1;
-  61   1      
-  62   1          u32 rpm = 0;
-  63   1      
-  64   1          if (tmr1_cnt >= 2500) // 如果已经过了250ms
-  65   1          {
-  66   2              // 下面是根据250ms检测到的脉冲个数来计算出每分钟的转速
-  67   2              // 250ms * 4 * 60 == 1min
-  68   2              rpm = pulse_cnt * 240 / ENGINE_PULSE_PER_TURN; // 计算得出1min的转速
-  69   2      
-  70   2              tmr1_cnt = 0; 
-  71   2              pulse_cnt = 0;
-  72   2              fun_info.engine_speeed = rpm; //
-  73   2      #if USE_MY_DEBUG
-  74   2              printf("engine speed %lu rpm\n", rpm);
-  75   2      #endif
-  76   2              // flag_get_engine_speed = 1; // 多久更新一次状态还未确定
-  77   2          }
-  78   1      }
-  79          
-  80          // P1中断服务函数
-  81          void P1_IRQHandler(void) interrupt P1_IRQn
-  82          {
-  83   1          // Px_PND寄存器写任何值都会清标志位
-  84   1          u8 p1_pnd = P1_PND;
-  85   1      
-  86   1          // 进入中断设置IP，不可删除
-  87   1          __IRQnIPnPush(P1_IRQn);
-  88   1          // ---------------- 用户函数处理 -------------------
-  89   1      
-  90   1          if (p1_pnd & GPIO_P12_IRQ_PNG(0x1))
-  91   1          {
-  92   2              pulse_cnt++;
-  93   2          }
-  94   1          P1_PND = p1_pnd; // 清P1中断标志位
-  95   1      
-  96   1          // -------------------------------------------------
-  97   1          // 退出中断设置IP，不可删除
-  98   1          __IRQnIPnPop(P1_IRQn);
-  99   1      }
+  54   1          u8 p1_pnd = P1_PND;
+  55   1      
+  56   1          // 进入中断设置IP，不可删除
+  57   1          __IRQnIPnPush(P1_IRQn);
+  58   1          // ---------------- 用户函数处理 -------------------
+  59   1      
+  60   1          if (p1_pnd & GPIO_P12_IRQ_PNG(0x1))
+  61   1          {
+  62   2              detect_engine_pulse_cnt++;
+  63   2          }
+  64   1          P1_PND = p1_pnd; // 清P1中断标志位
+  65   1      
+  66   1          // -------------------------------------------------
+  67   1          // 退出中断设置IP，不可删除
+  68   1          __IRQnIPnPop(P1_IRQn);
+  69   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    238    ----
+   CODE SIZE        =    240    ----
    CONSTANT SIZE    =     22    ----
    XDATA SIZE       =      4       4
    PDATA SIZE       =   ----    ----

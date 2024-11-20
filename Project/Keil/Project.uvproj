@@ -427,6 +427,11 @@
               <FilePath>..\..\Hardware\tmr3.c</FilePath>
             </File>
             <File>
+              <FileName>tmr4.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Hardware\tmr4.c</FilePath>
+            </File>
+            <File>
               <FileName>uart0.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Hardware\uart0.c</FilePath>
