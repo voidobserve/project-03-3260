@@ -1,0 +1,497 @@
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/21/2024 16:13:17 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE AD_KEY
+OBJECT MODULE PLACED IN .\Release\Objects\ad_key.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\ad_key.c LARGE OPTIMIZE(8,SIZE) BROWSE INTVECTOR(0X000C) INCD
+                    -IR(..\..\Libraries\Include;..\..\User;..\..\User\lib;..\..\Hardware) INTERVAL(3) DEBUG OBJECTEXTEND PRINT(.\Release\List
+                    -ings\ad_key.lst) OBJECT(.\Release\Objects\ad_key.obj)
+
+line level    source
+
+   1          #include "ad_key.h"
+   2          
+   3          enum
+   4          {
+   5              AD_KEY_SCAN_STATUS_NONE,                  // 空状态，检测是否有按键按下
+   6              AD_KEY_SCAN_STATUS_IS_DETECT_LOOG_PRESS,  // 正在检测是否为长按（要跟检测长按作区分
+             -）
+   7              AD_KEY_SCAN_STATUS_IS_HANDLE_LONG_PRESS,  // 正在处理长按
+   8              AD_KEY_SCAN_STATUS_IS_HANDLE_HOLD_PRESS,  // 正在处理长按持续（不松手）
+   9              AD_KEY_SCAN_STATUS_IS_HANDLE_SHORT_PRESS, // 正在处理短按
+  10          
+  11              AD_KEY_SCAN_STATUS_IS_WAIT_SHORT_PRESS_RELEASE, // 正在等待短按松开
+  12              AD_KEY_SCAN_STATUS_IS_WAIT_LONG_PRESS_RELEASE,  // 正在等待长按松开
+  13              AD_KEY_SCAN_STATUS_IS_END,                      // 收尾处理
+  14          };
+  15          static volatile u8 ad_key_scan_status = 0; // 非阻塞的按键扫描函数中，使用的状态机
+  16          
+  17          // 存放按键对应的ad值:
+  18          const u16 ad_key_scan_table[] = {
+  19              AD_KEY_ONE_LEFT_VAL,
+  20              AD_KEY_TWO_LEFT_VAL,
+  21              AD_KEY_THREE_LEFT_VAL,
+  22              AD_KEY_ONE_RIGHT_VAL,
+  23              AD_KEY_TWO_RIGHT_VAL,
+  24              AD_KEY_THREE_RIGHT_VAL,
+  25          };
+  26          
+  27          static u8 __detect_press(u16 cur_ad_key)
+  28          {
+  29   1          u8 flag_is_detect_press = 0;
+  30   1          u8 i = 0;
+  31   1          for (i = 0; i < ARRAY_SIZE(ad_key_scan_table); i++)
+  32   1          {
+  33   2              if (cur_ad_key > (ad_key_scan_table[i] - AD_KEY_INTERVAL) &&
+  34   2                  cur_ad_key < (ad_key_scan_table[i] + AD_KEY_INTERVAL))
+  35   2              {
+  36   3                  // 如果之前未检测到按键，现在检测到按键按下
+  37   3                  flag_is_detect_press = 1;
+  38   3                  break;
+  39   3              }
+  40   2          }
+  41   1      
+  42   1          return flag_is_detect_press;
+  43   1      }
+  44          
+  45          // 非阻塞的按键扫描函数
+  46          void ad_key_scan(void)
+  47          {
+  48   1          volatile u16 ad_key = 0;                   // __tk_key_flag 单次按键标志
+  49   1          static u16 ad_key_last = 0;                // 用于存放长按时，对应的按键
+  50   1          static volatile u32 touch_time_cnt = 0;    // 长按计数值
+  51   1          static u8 flag_is_detect_ad_key_press = 0; // 标志位，检测按键是否按下
+  52   1      
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/21/2024 16:13:17 PAGE 2   
+
+  53   1          /* 按键扫描函数 */
+  54   1          ad_key = adc_getval(); // 每次调用约占用370us，可以忽略不计
+  55   1          // printf("ad_key val %u\n", ad_key);
+  56   1      
+  57   1          if (AD_KEY_SCAN_STATUS_NONE == ad_key_scan_status) // 未检测到按键时
+  58   1          {
+  59   2              // 如果有按键按下（并且之前扫描到的不是长按）
+  60   2              // 判断是否为长按：
+  61   2      
+  62   2              if (0 == flag_is_detect_ad_key_press)
+  63   2              {
+  64   3                  flag_is_detect_ad_key_press = __detect_press(ad_key);
+  65   3                  if (flag_is_detect_ad_key_press)
+  66   3                  {
+  67   4                      // 如果之前未检测到按键，现在检测到按键按下:
+  68   4                      ad_key_last = ad_key;
+  69   4                  }
+  70   3              }
+  71   2      
+  72   2              if (0 == flag_is_detect_ad_key_press)
+  73   2              {
+  74   3                  // 未检测到按键按下
+  75   3                  return;
+  76   3              }
+  77   2      
+  78   2              // if (flag_is_detect_ad_key_press)
+  79   2              // {
+  80   2              //     // 如果之前未检测到按键，现在检测到按键按下
+  81   2              //     ad_key_last = ad_key;
+  82   2              // }
+  83   2              // else if (ad_key_last > (ad_key - AD_KEY_INTERVAL) &&
+  84   2              //          ad_key_last < (ad_key + AD_KEY_INTERVAL))
+  85   2              if (ad_key_last > (ad_key - AD_KEY_INTERVAL) &&
+  86   2                  ad_key_last < (ad_key + AD_KEY_INTERVAL))
+  87   2              {
+  88   3                  // 如果上次检测到的按键与此次的按键相等，说明按键还未松开
+  89   3                  touch_time_cnt += (1 + ONE_CYCLE_TIME_MS);
+  90   3      
+  91   3                  if (touch_time_cnt >= LONG_PRESS_TIME_THRESHOLD_MS)
+  92   3                  {
+  93   4                      // 如果长按超过了设置的长按时间
+  94   4                      // 跳转到长按处理
+  95   4                      touch_time_cnt = 0;     // 清除长按时间计数
+  96   4                      printf("long press\n"); // 测试用
+  97   4                      ad_key_scan_status = AD_KEY_SCAN_STATUS_IS_HANDLE_LONG_PRESS;
+  98   4                  }
+  99   3              }
+ 100   2              else
+ 101   2              {
+ 102   3                  // 如果上次检测到的按键与此次的按键不相等，并且上次检测到的按键�
+             -��等于0
+ 103   3                  // touch_time_cnt = 0; // 清除长按时间计数（可以留到收尾处理）
+ 104   3      
+ 105   3                  // 跳转到短按处理
+ 106   3                  ad_key_scan_status = AD_KEY_SCAN_STATUS_IS_HANDLE_SHORT_PRESS;
+ 107   3                  printf("short press\n"); // 测试用
+ 108   3              }
+ 109   2      
+ 110   2              delay_ms(1); //
+ 111   2          }
+ 112   1      
+ 113   1          if (AD_KEY_SCAN_STATUS_IS_HANDLE_SHORT_PRESS == ad_key_scan_status)
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/21/2024 16:13:17 PAGE 3   
+
+ 114   1          {
+ 115   2              // 如果是正在处理短按
+ 116   2              // flag_get_touch_key_status = 1; // 默认获取到了按键状态
+ 117   2      
+ 118   2              if (ad_key_last > (AD_KEY_ONE_LEFT_VAL - AD_KEY_INTERVAL) &&
+ 119   2                  ad_key_last < (AD_KEY_ONE_LEFT_VAL + AD_KEY_INTERVAL))
+ 120   2              {
+ 121   3                  // 如果  被触摸
+ 122   3      
+ 123   3                  // 如果没有按键双击，说明是短按
+ 124   3      #if USE_MY_DEBUG
+ 125   3                  printf("one left press\n");
+ 126   3      #endif
+ 127   3                  // fun_info.touch_key_val = TOUCH_KEY_VAL_VOL_INC;
+ 128   3                  send_data(SEND_TOUCH_KEY_STATUS, TOUCH_KEY_VAL_VOL_INC);
+ 129   3              }
+ 130   2              else if (ad_key_last > (AD_KEY_TWO_LEFT_VAL - AD_KEY_INTERVAL) &&
+ 131   2                       ad_key_last < (AD_KEY_TWO_LEFT_VAL + AD_KEY_INTERVAL))
+ 132   2              {
+ 133   3                  // 如果  被触摸
+ 134   3      
+ 135   3                  // 如果没有按键双击，说明是短按
+ 136   3      #if USE_MY_DEBUG
+ 137   3                  printf("two left press\n");
+ 138   3      #endif
+ 139   3                  // fun_info.touch_key_val = TOUCH_KEY_VAL_MUTE;
+ 140   3                  send_data(SEND_TOUCH_KEY_STATUS, TOUCH_KEY_VAL_MUTE);
+ 141   3              }
+ 142   2              else if (ad_key_last > (AD_KEY_THREE_LEFT_VAL - AD_KEY_INTERVAL) &&
+ 143   2                       ad_key_last < (AD_KEY_THREE_LEFT_VAL + AD_KEY_INTERVAL))
+ 144   2              {
+ 145   3                  // 如果  被触摸
+ 146   3      
+ 147   3      #if USE_MY_DEBUG
+ 148   3                  printf("three left press\n");
+ 149   3      #endif
+ 150   3                  // fun_info.touch_key_val = TOUCH_KEY_VAL_VOL_DEC;
+ 151   3                  send_data(SEND_TOUCH_KEY_STATUS, TOUCH_KEY_VAL_VOL_DEC);
+ 152   3              }
+ 153   2              else if (ad_key_last > (AD_KEY_ONE_RIGHT_VAL - AD_KEY_INTERVAL) &&
+ 154   2                       ad_key_last < (AD_KEY_ONE_RIGHT_VAL + AD_KEY_INTERVAL))
+ 155   2              {
+ 156   3                  // 如果  被触摸
+ 157   3      
+ 158   3      #if USE_MY_DEBUG
+ 159   3                  printf("one right press\n");
+ 160   3      #endif
+ 161   3                  // fun_info.touch_key_val = TOUCH_KEY_VAL_NEXT;
+ 162   3                  send_data(SEND_TOUCH_KEY_STATUS, TOUCH_KEY_VAL_NEXT);
+ 163   3              }
+ 164   2              else if (ad_key_last > (AD_KEY_TWO_RIGHT_VAL - AD_KEY_INTERVAL) &&
+ 165   2                       ad_key_last < (AD_KEY_TWO_RIGHT_VAL + AD_KEY_INTERVAL))
+ 166   2              {
+ 167   3                  // 如果  被触摸
+ 168   3      
+ 169   3      #if USE_MY_DEBUG
+ 170   3                  printf("two right press\n");
+ 171   3      #endif
+ 172   3                  // fun_info.touch_key_val = TOUCH_KEY_VAL_MODE;
+ 173   3                  send_data(SEND_TOUCH_KEY_STATUS, TOUCH_KEY_VAL_MODE);
+ 174   3              }
+ 175   2              else if (ad_key_last > (AD_KEY_THREE_RIGHT_VAL - AD_KEY_INTERVAL) &&
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/21/2024 16:13:17 PAGE 4   
+
+ 176   2                       ad_key_last < (AD_KEY_THREE_RIGHT_VAL + AD_KEY_INTERVAL))
+ 177   2              {
+ 178   3                  // 如果  被触摸
+ 179   3      
+ 180   3      #if USE_MY_DEBUG
+ 181   3                  printf("three right press\n");
+ 182   3      #endif
+ 183   3                  // fun_info.touch_key_val = TOUCH_KEY_VAL_PRE;
+ 184   3                  send_data(SEND_TOUCH_KEY_STATUS, TOUCH_KEY_VAL_PRE);
+ 185   3              }
+ 186   2              else
+ 187   2              {
+ 188   3                  // 如果没有按键被触摸
+ 189   3                  // flag_get_touch_key_status = 0; // 清空该标志位，不发送按键状态
+ 190   3              }
+ 191   2      
+ 192   2              ad_key_scan_status = AD_KEY_SCAN_STATUS_IS_WAIT_SHORT_PRESS_RELEASE;
+ 193   2          }
+ 194   1      
+ 195   1          if (AD_KEY_SCAN_STATUS_IS_HANDLE_LONG_PRESS == ad_key_scan_status)
+ 196   1          {
+ 197   2              // flag_get_touch_key_status = 1; // 默认获取到了按键状态
+ 198   2              // 处理长按
+ 199   2              if (ad_key_last > (AD_KEY_ONE_LEFT_VAL - AD_KEY_INTERVAL) &&
+ 200   2                  ad_key_last < (AD_KEY_ONE_LEFT_VAL + AD_KEY_INTERVAL))
+ 201   2              {
+ 202   3                  // 如果  被触摸
+ 203   3      
+ 204   3      #if USE_MY_DEBUG
+ 205   3                  // printf("one left long press\n");
+ 206   3      #endif
+ 207   3                  // flag_get_touch_key_status = 0; // 这个按键没有长按对应的操作
+ 208   3              }
+ 209   2              else if (ad_key_last > (AD_KEY_TWO_LEFT_VAL - AD_KEY_INTERVAL) &&
+ 210   2                       ad_key_last < (AD_KEY_TWO_LEFT_VAL + AD_KEY_INTERVAL))
+ 211   2              {
+ 212   3                  // 如果KEY2被触摸
+ 213   3      
+ 214   3      #if USE_MY_DEBUG
+ 215   3                  printf("two left long press\n");
+ 216   3      #endif
+ 217   3                  // fun_info.touch_key_val = TOUCH_KEY_VAL_POWER;
+ 218   3                  send_data(SEND_TOUCH_KEY_STATUS, TOUCH_KEY_VAL_POWER);
+ 219   3              }
+ 220   2              else if (ad_key_last > (AD_KEY_THREE_LEFT_VAL - AD_KEY_INTERVAL) &&
+ 221   2                       ad_key_last < (AD_KEY_THREE_LEFT_VAL + AD_KEY_INTERVAL))
+ 222   2              {
+ 223   3                  // 如果  被触摸
+ 224   3      
+ 225   3      #if USE_MY_DEBUG
+ 226   3                  // printf("three left long press\n");
+ 227   3      #endif
+ 228   3                  // flag_get_touch_key_status = 0; // 这个按键没有长按对应的操作
+ 229   3              }
+ 230   2              else if (ad_key_last > (AD_KEY_ONE_RIGHT_VAL - AD_KEY_INTERVAL) &&
+ 231   2                       ad_key_last < (AD_KEY_ONE_RIGHT_VAL + AD_KEY_INTERVAL))
+ 232   2              {
+ 233   3                  // 如果  被触摸
+ 234   3      
+ 235   3      #if USE_MY_DEBUG
+ 236   3                  // printf("one right long press\n");
+ 237   3      #endif
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/21/2024 16:13:17 PAGE 5   
+
+ 238   3                  // flag_get_touch_key_status = 0; // 这个按键没有长按对应的操作
+ 239   3              }
+ 240   2              else if (ad_key_last > (AD_KEY_TWO_RIGHT_VAL - AD_KEY_INTERVAL) &&
+ 241   2                       ad_key_last < (AD_KEY_TWO_RIGHT_VAL + AD_KEY_INTERVAL))
+ 242   2              {
+ 243   3                  // 如果  被触摸
+ 244   3      
+ 245   3      #if USE_MY_DEBUG
+ 246   3                  printf("two right long press\n");
+ 247   3      #endif
+ 248   3                  // fun_info.touch_key_val = TOUCH_KEY_VAL_MAIN;
+ 249   3                  send_data(SEND_TOUCH_KEY_STATUS, TOUCH_KEY_VAL_MAIN);
+ 250   3              }
+ 251   2              else if (ad_key_last > (AD_KEY_THREE_RIGHT_VAL - AD_KEY_INTERVAL) &&
+ 252   2                       ad_key_last < (AD_KEY_THREE_RIGHT_VAL + AD_KEY_INTERVAL))
+ 253   2              {
+ 254   3                  // 如果  被触摸
+ 255   3      
+ 256   3      #if USE_MY_DEBUG
+ 257   3                  // printf("three right long press\n");
+ 258   3      #endif
+ 259   3                  // flag_get_touch_key_status = 0; // 这个按键没有长按对应的操作
+ 260   3              }
+ 261   2      
+ 262   2              ad_key_scan_status = AD_KEY_SCAN_STATUS_IS_HANDLE_HOLD_PRESS; // 跳转到长按持续
+ 263   2          }
+ 264   1      
+ 265   1          if (AD_KEY_SCAN_STATUS_IS_HANDLE_HOLD_PRESS == ad_key_scan_status)
+ 266   1          {
+ 267   2              // 处理长按持续
+ 268   2              // flag_get_touch_key_status = 1; // 默认获取到了按键状态
+ 269   2      
+ 270   2              if (ad_key_last > (ad_key - AD_KEY_INTERVAL) &&
+ 271   2                  ad_key_last < (ad_key + AD_KEY_INTERVAL))
+ 272   2              {
+ 273   3                  touch_time_cnt++;
+ 274   3                  if (ad_key_last > (AD_KEY_ONE_LEFT_VAL - AD_KEY_INTERVAL) &&
+ 275   3                      ad_key_last < (AD_KEY_ONE_LEFT_VAL + AD_KEY_INTERVAL))
+ 276   3                  {
+ 277   4                      if (touch_time_cnt >= HOLD_PRESS_TIME_THRESHOLD_MS)
+ 278   4                      {
+ 279   5                          touch_time_cnt = 0;
+ 280   5      #if USE_MY_DEBUG
+ 281   5                          printf("one left continue press\n");
+ 282   5      #endif
+ 283   5                          // fun_info.touch_key_val = TOUCH_KEY_VAL_VOL_INC;
+ 284   5                          send_data(SEND_TOUCH_KEY_STATUS, TOUCH_KEY_VAL_VOL_INC);
+ 285   5                      }
+ 286   4                  }
+ 287   3                  else if (ad_key_last > (AD_KEY_TWO_LEFT_VAL - AD_KEY_INTERVAL) &&
+ 288   3                           ad_key_last < (AD_KEY_TWO_LEFT_VAL + AD_KEY_INTERVAL))
+ 289   3                  {
+ 290   4                      if (touch_time_cnt >= HOLD_PRESS_TIME_THRESHOLD_MS)
+ 291   4                      {
+ 292   5                          touch_time_cnt = 0;
+ 293   5      #if USE_MY_DEBUG
+ 294   5                          // printf("two left continue press\n");
+ 295   5      #endif
+ 296   5                          // flag_get_touch_key_status = 0; // 这个按键没有长按持续对应的操作
+ 297   5                      }
+ 298   4                  }
+ 299   3                  else if (ad_key_last > (AD_KEY_THREE_LEFT_VAL - AD_KEY_INTERVAL) &&
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/21/2024 16:13:17 PAGE 6   
+
+ 300   3                           ad_key_last < (AD_KEY_THREE_LEFT_VAL + AD_KEY_INTERVAL))
+ 301   3                  {
+ 302   4                      if (touch_time_cnt >= HOLD_PRESS_TIME_THRESHOLD_MS)
+ 303   4                      {
+ 304   5                          touch_time_cnt = 0;
+ 305   5      #if USE_MY_DEBUG
+ 306   5                          // printf("three left continue press\n");
+ 307   5      #endif
+ 308   5                          // fun_info.touch_key_val = TOUCH_KEY_VAL_VOL_DEC;
+ 309   5                          send_data(SEND_TOUCH_KEY_STATUS, TOUCH_KEY_VAL_VOL_DEC);
+ 310   5                      }
+ 311   4                  }
+ 312   3                  else if (ad_key_last > (AD_KEY_ONE_RIGHT_VAL - AD_KEY_INTERVAL) &&
+ 313   3                           ad_key_last < (AD_KEY_ONE_RIGHT_VAL + AD_KEY_INTERVAL))
+ 314   3                  {
+ 315   4                      if (touch_time_cnt >= HOLD_PRESS_TIME_THRESHOLD_MS)
+ 316   4                      {
+ 317   5                          touch_time_cnt = 0;
+ 318   5      #if USE_MY_DEBUG
+ 319   5                          // printf("one right continue press\n");
+ 320   5      #endif
+ 321   5                          // flag_get_touch_key_status = 0; // 这个按键没有长按持续对应的操作
+ 322   5                      }
+ 323   4                  }
+ 324   3                  else if (ad_key_last > (AD_KEY_TWO_RIGHT_VAL - AD_KEY_INTERVAL) &&
+ 325   3                           ad_key_last < (AD_KEY_TWO_RIGHT_VAL + AD_KEY_INTERVAL))
+ 326   3                  {
+ 327   4                      if (touch_time_cnt >= HOLD_PRESS_TIME_THRESHOLD_MS)
+ 328   4                      {
+ 329   5                          touch_time_cnt = 0;
+ 330   5      #if USE_MY_DEBUG
+ 331   5                          // printf("two right continue press\n");
+ 332   5      #endif
+ 333   5                          // flag_get_touch_key_status = 0; // 这个按键没有长按持续对应的操作
+ 334   5                      }
+ 335   4                  }
+ 336   3                  else if (ad_key_last > (AD_KEY_THREE_RIGHT_VAL - AD_KEY_INTERVAL) &&
+ 337   3                           ad_key_last < (AD_KEY_THREE_RIGHT_VAL + AD_KEY_INTERVAL))
+ 338   3                  {
+ 339   4                      if (touch_time_cnt >= HOLD_PRESS_TIME_THRESHOLD_MS)
+ 340   4                      {
+ 341   5                          touch_time_cnt = 0;
+ 342   5      #if USE_MY_DEBUG
+ 343   5                          // printf("three right continue press\n");
+ 344   5      #endif
+ 345   5                          // flag_get_touch_key_status = 0; // 这个按键没有长按持续对应的操作
+ 346   5                      }
+ 347   4                  }
+ 348   3      
+ 349   3                  delay_ms(1);
+ 350   3              }
+ 351   2              else
+ 352   2              {
+ 353   3                  // 如果之前检测到的按键与当前检测到的按键不一致，
+ 354   3                  // 说明 可能松开了手 或是 一只手按住了原来的按键另一只手按了其他�
+             -��键
+ 355   3      
+ 356   3                  // 跳转到等待长按松开
+ 357   3                  ad_key_scan_status = AD_KEY_SCAN_STATUS_IS_WAIT_LONG_PRESS_RELEASE;
+ 358   3                  // flag_get_touch_key_status = 0; // 清空语句块刚开始默认置位的标志位
+ 359   3              }
+ 360   2          }
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/21/2024 16:13:17 PAGE 7   
+
+ 361   1      
+ 362   1          if ((AD_KEY_SCAN_STATUS_IS_WAIT_LONG_PRESS_RELEASE == ad_key_scan_status) ||
+ 363   1              (AD_KEY_SCAN_STATUS_IS_WAIT_SHORT_PRESS_RELEASE == ad_key_scan_status))
+ 364   1          {
+ 365   2              // 如果是等待按键松开
+ 366   2              static volatile u16 loose_cnt = 0; // 存放松手计数值
+ 367   2      
+ 368   2              flag_is_detect_ad_key_press = __detect_press(ad_key);
+ 369   2      
+ 370   2              if (0 == flag_is_detect_ad_key_press)
+ 371   2              {
+ 372   3                  loose_cnt++;
+ 373   3                  delay_ms(1);
+ 374   3              }
+ 375   2              else
+ 376   2              {
+ 377   3                  // 只要有一次检测到按键，说明没有松开手
+ 378   3                  loose_cnt = 0;
+ 379   3              }
+ 380   2      
+ 381   2              if (loose_cnt >= LOOSE_PRESS_CNT_MS) // 这里的比较值需要注意，不能大于变量类型�
+             -��应的最大值
+ 382   2              {
+ 383   3                  loose_cnt = 0; // 清空松手计数
+ 384   3                  // 如果 xx ms内没有检测到按键按下，说明已经松开手
+ 385   3      
+ 386   3                  if (AD_KEY_SCAN_STATUS_IS_WAIT_LONG_PRESS_RELEASE == ad_key_scan_status)
+ 387   3                  {
+ 388   4                      if (ad_key_last > (AD_KEY_ONE_LEFT_VAL - AD_KEY_INTERVAL) &&
+ 389   4                          ad_key_last < (AD_KEY_ONE_LEFT_VAL + AD_KEY_INTERVAL))
+ 390   4                      {
+ 391   5      #if USE_MY_DEBUG
+ 392   5                          // printf("one left long press loose\n");
+ 393   5      #endif
+ 394   5                          // send_status_keyval(KEY_PRESS_LOOSE, ad_key1);
+ 395   5                      }
+ 396   4                      else if (ad_key_last > (AD_KEY_TWO_LEFT_VAL - AD_KEY_INTERVAL) &&
+ 397   4                               ad_key_last < (AD_KEY_TWO_LEFT_VAL + AD_KEY_INTERVAL))
+ 398   4                      {
+ 399   5      #if USE_MY_DEBUG
+ 400   5                          // printf("two left long press loose\n");
+ 401   5      #endif
+ 402   5                          // send_status_keyval(KEY_PRESS_LOOSE, ad_key2);
+ 403   5                      }
+ 404   4                      else if (ad_key_last > (AD_KEY_THREE_LEFT_VAL - AD_KEY_INTERVAL) &&
+ 405   4                               ad_key_last < (AD_KEY_THREE_LEFT_VAL + AD_KEY_INTERVAL))
+ 406   4                      {
+ 407   5      #if USE_MY_DEBUG
+ 408   5                          // printf("three left long press loose\n");
+ 409   5      #endif
+ 410   5                          // send_status_keyval(KEY_PRESS_LOOSE, ad_key3);
+ 411   5                      }
+ 412   4                      else if (ad_key_last > (AD_KEY_ONE_RIGHT_VAL - AD_KEY_INTERVAL) &&
+ 413   4                               ad_key_last < (AD_KEY_ONE_RIGHT_VAL + AD_KEY_INTERVAL))
+ 414   4                      {
+ 415   5      #if USE_MY_DEBUG
+ 416   5                          // printf("one right long press loose\n");
+ 417   5      #endif
+ 418   5                          // send_status_keyval(KEY_PRESS_LOOSE, ad_key4);
+ 419   5                      }
+ 420   4                      else if (ad_key_last > (AD_KEY_TWO_RIGHT_VAL - AD_KEY_INTERVAL) &&
+ 421   4                               ad_key_last < (AD_KEY_TWO_RIGHT_VAL + AD_KEY_INTERVAL))
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/21/2024 16:13:17 PAGE 8   
+
+ 422   4                      {
+ 423   5      #if USE_MY_DEBUG
+ 424   5                          // printf("two right long press loose\n");
+ 425   5      #endif
+ 426   5                          // send_status_keyval(KEY_PRESS_LOOSE, ad_key5);
+ 427   5                      }
+ 428   4                      else if (ad_key_last > (AD_KEY_THREE_RIGHT_VAL - AD_KEY_INTERVAL) &&
+ 429   4                               ad_key_last < (AD_KEY_THREE_RIGHT_VAL + AD_KEY_INTERVAL))
+ 430   4                      {
+ 431   5      #if USE_MY_DEBUG
+ 432   5                          // printf("three right long press loose\n");
+ 433   5      #endif
+ 434   5                          // send_status_keyval(KEY_PRESS_LOOSE, ad_key5);
+ 435   5                      }
+ 436   4                  }
+ 437   3      
+ 438   3                  ad_key_scan_status = AD_KEY_SCAN_STATUS_IS_END; // 跳转到收尾处理
+ 439   3              }
+ 440   2          }
+ 441   1      
+ 442   1          if (AD_KEY_SCAN_STATUS_IS_END == ad_key_scan_status)
+ 443   1          {
+ 444   2              // 收尾处理
+ 445   2              ad_key = 0;
+ 446   2              ad_key_last = 0;
+ 447   2              touch_time_cnt = 0;
+ 448   2              flag_is_detect_ad_key_press = 0;
+ 449   2      
+ 450   2              // fun_info.touch_key_val = 0;
+ 451   2      
+ 452   2              ad_key_scan_status = AD_KEY_SCAN_STATUS_NONE;
+ 453   2          }
+ 454   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1312    ----
+   CONSTANT SIZE    =    196    ----
+   XDATA SIZE       =     22       2
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

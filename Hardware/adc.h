@@ -4,11 +4,27 @@
 #include "include.h" // 使用芯片官方提供的头文件
 #include "my_config.h" // 包含自定义的头文件
 
+// 定义adc检测引脚
+// ADC_PIN // 
+enum
+{
+    ADC_PIN_NONE = 0x00,
+    
+    ADC_PIN_BATTERY = 0x01,
+    ADC_PIN_TOUCH,
+};
+
 extern u16 adc_val;
 // extern bit adc_done_flag;
 
-void adc_pin_config(void);
-void adc_showval(void);
-void adc_scan(void); 
+void adc_config(void);
+void adc_sel_pin(u8 pin_index);
+u16 adc_getval(void);// adc采集+滤波
+
+
+// void adc_showval(void);
+// void adc_scan(void); 
+
+
 
 #endif

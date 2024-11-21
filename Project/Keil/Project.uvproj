@@ -390,13 +390,6 @@
         </Group>
         <Group>
           <GroupName>LIb</GroupName>
-          <Files>
-            <File>
-              <FileName>tk_simplify_algorithm_V1.0.0.LIB</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\..\User\lib\tk_simplify_algorithm_V1.0.0.LIB</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>Hardware</GroupName>
@@ -452,16 +445,6 @@
           <GroupName>User</GroupName>
           <Files>
             <File>
-              <FileName>tk_config.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\User\lib\tk_config.h</FilePath>
-            </File>
-            <File>
-              <FileName>tk_set.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\lib\tk_set.c</FilePath>
-            </File>
-            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\main.c</FilePath>
@@ -492,11 +475,6 @@
               <FilePath>..\..\User\speed_scan.c</FilePath>
             </File>
             <File>
-              <FileName>tk_user.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\User\tk_user.c</FilePath>
-            </File>
-            <File>
               <FileName>engine_speed_scan.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\engine_speed_scan.c</FilePath>
@@ -510,6 +488,11 @@
               <FileName>instruction.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\instruction.c</FilePath>
+            </File>
+            <File>
+              <FileName>ad_key.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\ad_key.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   ADC                                                               11/20/2024 15:06:12 PAGE 1   
+C51 COMPILER V9.60.7.0   ADC                                                               11/21/2024 16:13:16 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE ADC
@@ -11,137 +11,146 @@ line level    source
 
    1          #include "adc.h"
    2          
-   3          // 用自定义的序号来标记测量adc的引脚，方便切换adc的引脚时进行判断
-   4          #define ADC_PIN_BATTERY 0x01 // 测量电池电压的引脚
-   5          #define ADC_PIN_TOUCH 0x02   // 测量触摸芯片发送过来的电压的引脚
+   3          
+   4          volatile u16 adc_val = 0; // adc值，0~4095
+   5          // bit adc_done_flag = 0; // adc转换完成标志
    6          
-   7          u16 adc_val = 0; // adc值，0~4095
-   8          // bit adc_done_flag = 0; // adc转换完成标志
-   9          
-  10          // adc引脚配置，使用adc时还需要切换到对应的引脚通道
-  11          void adc_pin_config(void)
-  12          {
-  13   1          // 配置P23为模拟输入模式
-  14   1          P2_MD0 |= GPIO_P23_MODE_SEL(0x3); // 设为模拟模式
-  15   1          // P04--测量电池电压的引脚
-  16   1          P0_MD0 |= GPIO_P04_MODE_SEL(0x3); // 模拟模式
-  17   1          // P05--测量触摸IC传过来的电压的引脚
-  18   1          P0_MD0 |= GPIO_P05_MODE_SEL(0x3); // 模拟模式
-  19   1      
-  20   1          // ADC配置
-  21   1          ADC_ACON1 &= ~(ADC_VREF_SEL(0x7) | ADC_EXREF_SEL(0x1)); // 清除电压选择，关闭外部参考电�
+   7          // adc配置，使用adc时还需要切换到对应的引脚通道
+   8          void adc_config(void)
+   9          {
+  10   1          // 配置P23为模拟输入模式
+  11   1          P2_MD0 |= GPIO_P23_MODE_SEL(0x3); // 设为模拟模式
+  12   1          // P04--测量电池电压的引脚
+  13   1          P0_MD0 |= GPIO_P04_MODE_SEL(0x3); // 模拟模式
+  14   1          // P05--测量触摸IC传过来的电压的引脚
+  15   1          P0_MD0 |= GPIO_P05_MODE_SEL(0x3); // 模拟模式
+  16   1      
+  17   1          // ADC配置
+  18   1          ADC_ACON1 &= ~(ADC_VREF_SEL(0x7) | ADC_EXREF_SEL(0x1)); // 清除电压选择，关闭外部参考电�
              -��
-  22   1          ADC_ACON1 &= ~(ADC_INREF_SEL(0x01));                    // 关闭内部参考电压
-  23   1      
-  24   1          // 不能使用VCCA，待修改，看看芯片最低的工作电压和实际提供的电压
-  25   1          ADC_ACON1 |= ADC_VREF_SEL(0x06) | ADC_TEN_SEL(0x3); // 选择内部参考电压VCCA，关闭测试信�
-             -��
-  26   1          ADC_ACON0 = ADC_CMP_EN(0x1) |                       // 打开ADC中的CMP使能信号
-  27   1                      ADC_BIAS_EN(0x1) |                      // 打开ADC偏置电流能使信号
-  28   1                      ADC_BIAS_SEL(0x1);                      // 偏置电流选择：1x
-  29   1      }
-  30          
-  31          // 切换adc扫描的引脚
-  32          // pin_index--引脚序号
-  33          void adc_sel_pin(u8 pin_index)
-  34          {
-  35   1          switch (pin_index)
-  36   1          {
-  37   2          case ADC_PIN_BATTERY:                  // P04
-  38   2              ADC_CHS0 = ADC_ANALOG_CHAN(0x04) | // P04通路
-  39   2                         ADC_EXT_SEL(0x0);       // 选择外部通路
-  40   2              ADC_CFG0 |= ADC_CHAN0_EN(0x1) |    // 使能通道0转换
-  41   2                          ADC_EN(0x1);           // 使能A/D转换
-  42   2              break;
-  43   2      
-  44   2          case ADC_PIN_TOUCH:                    // P05
-  45   2              ADC_CHS0 = ADC_ANALOG_CHAN(0x05) | // P05通路
-  46   2                         ADC_EXT_SEL(0x0);       // 选择外部通路
-  47   2              ADC_CFG0 |= ADC_CHAN0_EN(0x1) |    // 使能通道0转换
-  48   2                          ADC_EN(0x1);           // 使能A/D转换
-  49   2              break;
-  50   2          }
-  51   1          delay_ms(1); // 等待ADC模块配置稳定，需要等待20us以上
-C51 COMPILER V9.60.7.0   ADC                                                               11/20/2024 15:06:12 PAGE 2   
+  19   1          ADC_ACON1 &= ~(ADC_INREF_SEL(0x01));                    // 关闭内部参考电压
+  20   1      
+  21   1          // 不能使用VCCA，待修改，看看芯片最低的工作电压和实际提供的电压
+  22   1          ADC_ACON1 |= ADC_VREF_SEL(0x06) | ADC_TEN_SEL(0x3); // 选择内部VCCA作为参考电压，关闭测�
+             -��信号
+  23   1          ADC_ACON0 = ADC_CMP_EN(0x1) |                       // 打开ADC中的CMP使能信号
+  24   1                      ADC_BIAS_EN(0x1) |                      // 打开ADC偏置电流能使信号
+  25   1                      ADC_BIAS_SEL(0x1);                      // 偏置电流选择：1x
+  26   1      }
+  27          
+  28          // 切换adc扫描的引脚
+  29          // adc_pin--adc引脚，在对应的枚举类型中定义
+  30          void adc_sel_pin(u8 adc_pin)
+  31          {
+  32   1          switch (adc_pin)
+  33   1          {
+  34   2          case ADC_PIN_BATTERY:                  // P04
+  35   2              ADC_CHS0 = ADC_ANALOG_CHAN(0x04) | // P04通路
+  36   2                         ADC_EXT_SEL(0x0);       // 选择外部通路
+  37   2              ADC_CFG0 |= ADC_CHAN0_EN(0x1) |    // 使能通道0转换
+  38   2                          ADC_EN(0x1);           // 使能A/D转换
+  39   2              break;
+  40   2      
+  41   2          case ADC_PIN_TOUCH:                    // P05
+  42   2              ADC_CHS0 = ADC_ANALOG_CHAN(0x05) | // P05通路
+  43   2                         ADC_EXT_SEL(0x0);       // 选择外部通路
+  44   2              ADC_CFG0 |= ADC_CHAN0_EN(0x1) |    // 使能通道0转换
+  45   2                          ADC_EN(0x1);           // 使能A/D转换
+  46   2              break;
+  47   2          }
+  48   1      
+  49   1          delay_ms(1); // 等待ADC模块配置稳定，需要等待20us以上
+  50   1      }
+  51          
+C51 COMPILER V9.60.7.0   ADC                                                               11/21/2024 16:13:16 PAGE 2   
 
-  52   1      }
-  53          
-  54          // 获取adc值，存放到变量adc_val中(adc单次转换)
-  55          u16 adc_single_convert(void)
-  56          {
-  57   1          ADC_CFG0 |= ADC_CHAN0_TRG(0x1); // 触发ADC0转换
-  58   1          while (!(ADC_STA & ADC_CHAN0_DONE(0x1)))
-  59   1              ;                                           // 等待转换完成
-  60   1          ADC_STA = ADC_CHAN0_DONE(0x1);                  // 清除ADC0转换完成标志位
-  61   1          return ((ADC_DATAH0 << 4) | (ADC_DATAL0 >> 4)); // 读取ADC0的值
-  62   1      }
-  63          
-  64          // adc采集+滤波
-  65          void adc_sample_filter(void)
-  66          {
-  67   1          u8 i = 0;
-  68   1          u32 tmp;
-  69   1          for (i = 0; i < 32; i++)
-  70   1          {
-  71   2              tmp += adc_single_convert();
-  72   2              if (i >= 1)
-  73   2              {
-  74   3                  tmp >>= 1; // 相当于tmp /= 2;
-  75   3              }
-  76   2          }
-  77   1      
-  78   1          adc_val = (u16)tmp;
-  79   1      }
-  80          
-  81          void adc_showval(void)
-  82          {
-  83   1          adc_sel_pin(ADC_PIN_BATTERY);
-  84   1          adc_sample_filter();
-  85   1      
-  86   1      // 连接串口查看ADC值
-  87   1      #if USE_MY_DEBUG
-  88   1          // printf("ADC_PIN_BATTERY = %d\r\n", adc_val);
-  89   1      #endif
-  90   1          delay_ms(500);
-  91   1      
-  92   1          adc_sel_pin(ADC_PIN_TOUCH);
-  93   1          adc_sample_filter();
-  94   1      
-  95   1          // 连接串口查看ADC值
-  96   1      #if USE_MY_DEBUG
-  97   1          // printf("ADC_PIN_TOUCH = %d\r\n", adc_val);
-  98   1      #endif
-  99   1          delay_ms(500);
- 100   1      }
- 101          
- 102          // 测试用，还未能真正检测，只能将检测到的ad值直接转换成对应的百分比
- 103          void adc_scan(void)
- 104          {
- 105   1          adc_sel_pin(ADC_PIN_BATTERY);
- 106   1          adc_sample_filter();                                // 滤波完成之后可能还会出现跳变，�
-             -�该在后续加入死区判断
- 107   1          fun_info.battery = (u8)((u32)adc_val * 100 / 4095); // u16的adc_val乘以100会直接溢出，这里�
-             -��强转为u32
- 108   1      
- 109   1      #if USE_MY_DEBUG
- 110   1          // 测试用：
- 111   1          // printf("ADC_PIN_BATTERY = %d\r\n", adc_val);
-C51 COMPILER V9.60.7.0   ADC                                                               11/20/2024 15:06:12 PAGE 3   
+  52          // 获取adc值，存放到变量adc_val中(adc单次转换)
+  53          static u16 __adc_single_convert(void)
+  54          {
+  55   1          ADC_CFG0 |= ADC_CHAN0_TRG(0x1); // 触发ADC0转换
+  56   1          while (!(ADC_STA & ADC_CHAN0_DONE(0x1)))
+  57   1              ;                                           // 等待转换完成
+  58   1          ADC_STA = ADC_CHAN0_DONE(0x1);                  // 清除ADC0转换完成标志位
+  59   1          return ((ADC_DATAH0 << 4) | (ADC_DATAL0 >> 4)); // 读取ADC0的值
+  60   1      }
+  61          
+  62          // adc采集+滤波
+  63          u16 adc_getval(void)
+  64          {
+  65   1          u16 __adc_val_tmp = 0; // 存放单次采集到的ad值
+  66   1          u32 __adc_val_sum = 0; // 存放所有采集到的ad值的累加
+  67   1          u16 __get_adcmax = 0; // 存放采集到的最大的ad值
+  68   1          u16  __get_adcmin = 0xFFFF; // 存放采集到的最小的ad值(初始值为最大值)
+  69   1          u8 i = 0;
+  70   1      
+  71   1          for (i = 0; i < 20; i++)
+  72   1          {
+  73   2              __adc_val_tmp = __adc_single_convert(); // 获取一次ad值
+  74   2              if (i < 2)
+  75   2                  continue; // 丢弃前两次采样的
+  76   2              if (__adc_val_tmp > __get_adcmax)
+  77   2                  __get_adcmax = __adc_val_tmp; // 更新当前采集到的最大值
+  78   2              if (__adc_val_tmp < __get_adcmin)
+  79   2                  __get_adcmin = __adc_val_tmp; // 更新当前采集到的最小值
+  80   2              __adc_val_sum += __adc_val_tmp;
+  81   2          }
+  82   1      
+  83   1          __adc_val_sum -= __get_adcmax;          // 去掉一个最大
+  84   1          __adc_val_sum -= __get_adcmin;          // 去掉一个最小
+  85   1          __adc_val_tmp = (__adc_val_sum >> 4); // 除以16，取平均值
+  86   1      
+  87   1          return __adc_val_tmp;
+  88   1      }
+  89          
+  90          // void adc_showval(void)
+  91          // {
+  92          //     adc_sel_pin(ADC_PIN_BATTERY);
+  93          //     adc_sample_filter();
+  94          
+  95          // // 连接串口查看ADC值
+  96          // #if USE_MY_DEBUG
+  97          //     // printf("ADC_PIN_BATTERY = %d\r\n", adc_val);
+  98          // #endif
+  99          //     delay_ms(500);
+ 100          
+ 101          //     adc_sel_pin(ADC_PIN_TOUCH);
+ 102          //     adc_sample_filter();
+ 103          
+ 104          //     // 连接串口查看ADC值
+ 105          // #if USE_MY_DEBUG
+ 106          //     // printf("ADC_PIN_TOUCH = %d\r\n", adc_val);
+ 107          // #endif
+ 108          //     delay_ms(500);
+ 109          // }
+ 110          
+ 111          // // 测试用，还未能真正检测，只能将检测到的ad值直接转换成对应的百分比
+ 112          // void adc_scan(void)
+ 113          // {
+C51 COMPILER V9.60.7.0   ADC                                                               11/21/2024 16:13:16 PAGE 3   
 
- 112   1          // printf("battery : %d %%\n", (u16)fun_info.battery); // %d打印是两个字节，不强转会越界
-             -访问
- 113   1      #endif
- 114   1      
- 115   1          flag_get_battery = 1;
- 116   1      
- 117   1          delay_ms(10); // adc采样不能太频繁
- 118   1      }
+ 114          //     adc_sel_pin(ADC_PIN_BATTERY);
+ 115          //     adc_sample_filter();                                // 滤波完成之后可能还会出现跳变�
+             -�应该在后续加入死区判断
+ 116          //     fun_info.battery = (u8)((u32)adc_val * 100 / 4095); // u16的adc_val乘以100会直接溢出，这�
+             -��要强转为u32
+ 117          
+ 118          // #if USE_MY_DEBUG
+ 119          //     // 测试用：
+ 120          //     // printf("ADC_PIN_BATTERY = %d\r\n", adc_val);
+ 121          //     // printf("battery : %d %%\n", (u16)fun_info.battery); // %d打印是两个字节，不强转会越
+             -界访问
+ 122          // #endif
+ 123          
+ 124          //     flag_get_battery = 1;
+ 125          
+ 126          //     delay_ms(10); // adc采样不能太频繁
+ 127          // }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    261    ----
+   CODE SIZE        =    341    ----
    CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =      2       5
+   XDATA SIZE       =      2      11
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----

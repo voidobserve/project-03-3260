@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   MY_GPIO                                                           11/20/2024 15:06:11 PAGE 1   
+C51 COMPILER V9.60.7.0   MY_GPIO                                                           11/21/2024 16:13:15 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MY_GPIO
@@ -62,7 +62,7 @@ line level    source
   49   1          // 位操作
   50   1          P12 = 1;
   51   1      }
-C51 COMPILER V9.60.7.0   MY_GPIO                                                           11/20/2024 15:06:11 PAGE 2   
+C51 COMPILER V9.60.7.0   MY_GPIO                                                           11/21/2024 16:13:15 PAGE 2   
 
   52          
   53          /**
@@ -126,7 +126,7 @@ line level    source
  109          
  110          // p07配置成输入上拉模式
  111          void p07_input_config(void)
-C51 COMPILER V9.60.7.0   MY_GPIO                                                           11/20/2024 15:06:11 PAGE 3   
+C51 COMPILER V9.60.7.0   MY_GPIO                                                           11/21/2024 16:13:15 PAGE 3   
 
  112          {
  113   1          // 配置为输入模式
@@ -190,7 +190,7 @@ line level    source
  171   1      }
  172          
  173          // p23配置成输入上拉模式
-C51 COMPILER V9.60.7.0   MY_GPIO                                                           11/20/2024 15:06:11 PAGE 4   
+C51 COMPILER V9.60.7.0   MY_GPIO                                                           11/21/2024 16:13:15 PAGE 4   
 
  174          void p23_input_config(void)
  175          {

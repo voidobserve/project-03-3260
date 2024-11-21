@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   FUN_INFO                                                          11/20/2024 15:06:12 PAGE 1   
+C51 COMPILER V9.60.7.0   FUN_INFO                                                          11/21/2024 16:13:17 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE FUN_INFO
@@ -32,7 +32,7 @@ line level    source
 MODULE INFORMATION:   STATIC OVERLAYABLE
    CODE SIZE        =     54    ----
    CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =     36    ----
+   XDATA SIZE       =     34    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----

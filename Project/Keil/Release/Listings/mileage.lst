@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   MILEAGE                                                           11/20/2024 15:06:13 PAGE 1   
+C51 COMPILER V9.60.7.0   MILEAGE                                                           11/21/2024 16:13:17 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MILEAGE
@@ -62,7 +62,7 @@ line level    source
   50   2      
   51   2              {
   52   3                  // 发送数据的操作，可以先置标志位
-C51 COMPILER V9.60.7.0   MILEAGE                                                           11/20/2024 15:06:13 PAGE 2   
+C51 COMPILER V9.60.7.0   MILEAGE                                                           11/21/2024 16:13:17 PAGE 2   
 
   53   3                  flag_get_total_mileage = 1;
   54   3              }

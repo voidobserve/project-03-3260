@@ -346,7 +346,7 @@ void main(void)
         p03_output_config(); // 输出高电平用的引脚，到时候检测acc,才输出高电平，现在它一开始就是高电平
         P03 = 1;             // 输出高电平，使能屏幕显示
 
-        adc_pin_config();
+        adc_config();
     } // user_init();
 
 #if USE_MY_DEBUG
@@ -370,28 +370,25 @@ void main(void)
     // fun_info.save_info.time_sec = 55;
 #endif
 
-    /* 按键初始化 */
-    // tk_param_init();
 
+    // 测试用到的配置：
     // P1_MD0 &= (~GPIO_P11_MODE_SEL(0x3));
     // P1_MD0 |= GPIO_P11_MODE_SEL(0x1); // 输出模式
     // FOUT_S11 |= GPIO_FOUT_AF_FUNC;
+   
 
     /* 系统主循环 */
     while (1)
     {
-        /* 按键扫描函数 */
-        // __tk_scan(); // 使用了库里面的接口（闭源库）
-
-        /* 用户循环扫描函数接口 */
-        // touch_key_scan();
-
         // 扫描状态是否变化，如果变化则更新标志位，更新状态的信息到结构体中
         // pin_level_scan();
         // speed_scan();        // 扫描当前时速
         // engine_speed_scan(); // 扫描当前发动机转速
         // adc_scan(); // adc扫描，并转换成百分比的形式发送
         // mileage_scan(); // 里程扫描（大计里程扫描+小计里程扫描）
+
+        adc_sel_pin(ADC_PIN_TOUCH); // 内部至少占用1ms
+        ad_key_scan();  
 
         // 1. 测试 从串口接收指令，是否能够正确识别
         {
@@ -410,6 +407,10 @@ void main(void)
 
         // 注意要先打开对应的定时器:
         time_update(); // 更新时间
+
+
+          
+    
     }
 }
 

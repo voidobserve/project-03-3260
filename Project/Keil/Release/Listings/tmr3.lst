@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   TMR3                                                              11/20/2024 15:06:12 PAGE 1   
+C51 COMPILER V9.60.7.0   TMR3                                                              11/21/2024 16:13:16 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TMR3
@@ -62,7 +62,7 @@ line level    source
   49          
   50          // 关闭定时器，清空计数值
   51          void tmr3_disable(void)
-C51 COMPILER V9.60.7.0   TMR3                                                              11/20/2024 15:06:12 PAGE 2   
+C51 COMPILER V9.60.7.0   TMR3                                                              11/21/2024 16:13:16 PAGE 2   
 
   52          {
   53   1          // 不给定时器提供时钟，让它停止计数

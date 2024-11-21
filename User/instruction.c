@@ -391,6 +391,7 @@ void instruction_handle(void)
 #endif // USE_IMPERIAL 英制单位
     }
 
+// 触摸按键在 ad_key_scan() 函数中，独立发送
 //     if (flag_get_touch_key_status)
 //     {
 //         // 如果要获取触摸按键的状态 / 得到了触摸按键的状态
