@@ -31,13 +31,24 @@ void mileage_scan(void)
     if (distance >= 1000)
     {
         // 如果走过的距离超过了1m，再进行保存
-        fun_info.save_info.total_mileage += distance / 1000;    // 将毫米转换成米，再保存
-        fun_info.save_info.subtotal_mileage += distance / 1000; // 将毫米转换成米，再保存
-        distance -= 1000;                             // 剩下的、未保存的、不满1m的数据留到下一次再保存
+
+        // 限制大计里程在 1000000000000 mm(1000,000km)以内
+        if (fun_info.save_info.total_mileage < (u32)1000000000000 - 1001)
+        {
+            fun_info.save_info.total_mileage += distance / 1000; // 将毫米转换成米，再保存
+        }
+
+        // 限制小计里程在 1,000,000,000 mm(1000km)以内
+        if (fun_info.save_info.subtotal_mileage < (u32)1000000000 - 1001)
+        {
+            fun_info.save_info.subtotal_mileage += distance / 1000; // 将毫米转换成米，再保存
+        }
+
+        distance -= 1000; // 剩下的、未保存的、不满1m的数据留到下一次再保存
     }
 
 #ifdef USE_INTERNATIONAL /* 公制单位 */
-                      // 如果大计里程有变化且超过了100m
+                         // 如果大计里程有变化且超过了100m
     if ((fun_info.save_info.total_mileage - old_total_mileage) > 100)
 #else /* USE_IMPERIAL // 英制单位 */
     // 如果大计里程有变化且超过了161m(0.1英里)
@@ -55,7 +66,7 @@ void mileage_scan(void)
     }
 
 #ifdef USE_INTERNATIONAL /* 公制单位 */
-                      // 如果小计里程有变化且超过了100m
+                         // 如果小计里程有变化且超过了100m
     if ((fun_info.save_info.subtotal_mileage - old_subtotal_mileage) > 100)
 #else /* USE_IMPERIAL // 英制单位 */
     // 如果小计里程有变化且超过了161m(0.1英里)

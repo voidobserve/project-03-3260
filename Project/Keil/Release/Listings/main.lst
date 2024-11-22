@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 16:13:35 PAGE 1   
+C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 17:58:18 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
@@ -29,105 +29,80 @@ line level    source
   18          /* Includes ------------------------------------------------------------------*/
   19          #include "include.h"
   20          
-  21          /** @addtogroup Template_Project
-  22           * @{
-  23           */
-  24          
-  25          /* Private typedef -----------------------------------------------------------*/
-  26          /* Private define ------------------------------------------------------------*/
-  27          /* Private macro -------------------------------------------------------------*/
-  28          /* Private variables ---------------------------------------------------------*/
-  29          /* Private function prototypes -----------------------------------------------*/
-  30          /* Private functions ---------------------------------------------------------*/
-  31          
-  32          /**
-  33           * @brief  Main program.
-  34           * @param  None
-  35           * @retval None
-  36           */
-  37          // extern u32 test_val; // 测试用
-  38          
-  39          // enum
-  40          // {
-  41          //     CUR_SCAN_ENGINE_SPEED, // 当前要扫描引擎速度
-  42          //     CUR_SCAN_SPEED, // 当前要扫描时速
-  43          // }
-  44          
-  45          // 更新时间
-  46          void time_update(void)
-  47          {
-  48   1          if (tmr4_cnt >= 1000) // 如果计时满1s(1000ms)
-  49   1          {
-  50   2              tmr4_cnt -= 1000;
-  51   2      
-  52   2              if (fun_info.save_info.time_sec < 59) // 最大加到59s，测试通过
-  53   2              {
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 16:13:35 PAGE 2   
+  21          
+  22          // 更新时间
+  23          void time_update(void)
+  24          {
+  25   1          if (tmr4_cnt >= 1000) // 如果计时满1s(1000ms)
+  26   1          {
+  27   2              tmr4_cnt -= 1000; // 为了尽量让时间准确，这里是 -=1000 ，而不是清零
+  28   2      
+  29   2              if (fun_info.save_info.time_sec < 59) // 最大加到59s，测试通过
+  30   2              {
+  31   3                  fun_info.save_info.time_sec++;
+  32   3              }
+  33   2              else
+  34   2              {
+  35   3                  fun_info.save_info.time_sec = 0;
+  36   3                  fun_info_save(); // 每分钟保存一次时间到flash
+  37   3      
+  38   3                  // printf("cur min %d \n", (u16)fun_info.time_min);
+  39   3      
+  40   3                  if (fun_info.save_info.time_min < 59) // 最大加到59min，测试通过
+  41   3                  {
+  42   4                      fun_info.save_info.time_min++;
+  43   4                  }
+  44   3                  else
+  45   3                  {
+  46   4                      fun_info.save_info.time_min = 0;
+  47   4                      // printf("cur hour %d \n", (u16)fun_info.time_hour);
+  48   4      
+  49   4                      if (fun_info.save_info.time_hour < 23) // 最大加到23h，测试通过
+  50   4                      {
+  51   5                          fun_info.save_info.time_hour++;
+  52   5                      }
+  53   4                      else
+C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 17:58:18 PAGE 2   
 
-  54   3                  fun_info.save_info.time_sec++;
-  55   3              }
-  56   2              else
-  57   2              {
-  58   3                  fun_info.save_info.time_sec = 0;
-  59   3                  fun_info_save(); // 每分钟保存一次时间到flash
-  60   3      
-  61   3                  // printf("cur min %d \n", (u16)fun_info.time_min);
-  62   3      
-  63   3                  if (fun_info.save_info.time_min < 59) // 最大加到59min，测试通过
-  64   3                  {
-  65   4                      fun_info.save_info.time_min++;
-  66   4                  }
-  67   3                  else
-  68   3                  {
-  69   4                      fun_info.save_info.time_min = 0;
-  70   4                      // printf("cur hour %d \n", (u16)fun_info.time_hour);
-  71   4      
-  72   4                      if (fun_info.save_info.time_hour < 23) // 最大加到23h，测试通过
-  73   4                      {
-  74   5                          fun_info.save_info.time_hour++;
-  75   5                      }
-  76   4                      else
-  77   4                      {
-  78   5                          fun_info.save_info.time_hour = 0;
-  79   5                          fun_info.save_info.time_min = 0;
-  80   5                          fun_info.save_info.time_sec = 0;
-  81   5                      }
-  82   4                  }
-  83   3              }
-  84   2      
-  85   2      #if USE_MY_DEBUG
-  86   2              // printf("cur sec %d \n", (u16)fun_info.time_sec);
-  87   2      
-  88   2              // 测试用，可以在这里修改数据，然后发送
-  89   2              {
-  90   3                  /*
-  91   3                      #define TEST_SEND_BATTERY // 测试通过
-  92   3                      #define TEST_SEND_BRAKE // MP5上面没有显示，串口有发送对应的数据
-  93   3                      #define TEST_SEND_LEFT_TURN // 测试通过
-  94   3                      #define TEST_SEND_RIGHT_TURN // 测试通过
-  95   3                      #define TEST_SEND_HIGH_BEAM // 测试通过
-  96   3      
-  97   3                      #define TEST_SEND_SPEED // 测试通过，但是要注意时速的显示范围
-  98   3                      #define TEST_SEND_ENGINE_SPEED // 测试通过
-  99   3                      #define TEST_SEND_FUEL // 测试通过
- 100   3      
- 101   3                      #define TEST_SEND_TEMP_OF_WATER // 没有显示，改用水温报警
- 102   3                      #define TEST_SEND_TOTAL_MILEAGE // 测试通过
- 103   3                      #define TEST_SEND_SUBTOTAL_MILEAGE // 测试通过
- 104   3      
- 105   3                      #define TEST_SEND_TOUCH_KEY
- 106   3                      #define TEST_SEND_TEMP_OF_WATER_WARNING // 测试通过
- 107   3                      #define TEST_SEND_VOLTAGE_OF_BATTERY // 测试通过
- 108   3                  */
- 109   3      
- 110   3                  // #define TEST_SEND_VOLTAGE_OF_BATTERY
- 111   3      
- 112   3      #ifdef TEST_SEND_BATTERY
+  54   4                      {
+  55   5                          fun_info.save_info.time_hour = 0;
+  56   5                          fun_info.save_info.time_min = 0;
+  57   5                          fun_info.save_info.time_sec = 0;
+  58   5                      }
+  59   4                  }
+  60   3              }
+  61   2      
+  62   2      #if USE_MY_DEBUG
+  63   2              // printf("cur sec %d \n", (u16)fun_info.time_sec);
+  64   2      
+  65   2              // 测试用，可以在这里修改数据，然后发送
+  66   2              {
+  67   3                  /*
+  68   3                      #define TEST_SEND_BATTERY // 测试通过
+  69   3                      #define TEST_SEND_BRAKE // MP5上面没有显示，串口有发送对应的数据
+  70   3                      #define TEST_SEND_LEFT_TURN // 测试通过
+  71   3                      #define TEST_SEND_RIGHT_TURN // 测试通过
+  72   3                      #define TEST_SEND_HIGH_BEAM // 测试通过
+  73   3      
+  74   3                      #define TEST_SEND_SPEED // 测试通过，但是要注意时速的显示范围
+  75   3                      #define TEST_SEND_ENGINE_SPEED // 测试通过
+  76   3                      #define TEST_SEND_FUEL // 测试通过
+  77   3      
+  78   3                      #define TEST_SEND_TEMP_OF_WATER // 没有显示，改用水温报警
+  79   3                      #define TEST_SEND_TOTAL_MILEAGE // 测试通过
+  80   3                      #define TEST_SEND_SUBTOTAL_MILEAGE // 测试通过
+  81   3      
+  82   3                      #define TEST_SEND_TOUCH_KEY
+  83   3                      #define TEST_SEND_TEMP_OF_WATER_WARNING // 测试通过
+  84   3                      #define TEST_SEND_VOLTAGE_OF_BATTERY // 测试通过
+  85   3                  */
+  86   3      
+  87   3                  // #define TEST_SEND_VOLTAGE_OF_BATTERY
+  88   3      
+  89   3      #ifdef TEST_SEND_BATTERY
                           // =============================================
                           // 测试发送电池电量--单位：百分比
                           if (fun_info.battery < 100)
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 16:13:35 PAGE 3   
-
                           {
                               fun_info.battery++;
                           }
@@ -139,8 +114,8 @@ line level    source
                           // printf("cur battery %d \%\n", (u16)fun_info.battery);
                           flag_get_battery = 1;
               #endif
- 127   3      
- 128   3      #ifdef TEST_SEND_BRAKE
+ 104   3      
+ 105   3      #ifdef TEST_SEND_BRAKE
                           // =============================================
                           // 测试发送 刹车状态
                           if (fun_info.brake)
@@ -151,11 +126,13 @@ line level    source
                           {
                               fun_info.brake = 1;
                           }
+C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 17:58:18 PAGE 3   
+
               
                           flag_get_brake = 1;
               #endif
- 142   3      
- 143   3      #ifdef TEST_SEND_LEFT_TURN
+ 119   3      
+ 120   3      #ifdef TEST_SEND_LEFT_TURN
                           // =============================================
                           // 测试发送 左转向灯
                           if (fun_info.left_turn)
@@ -169,8 +146,8 @@ line level    source
               
                           flag_get_left_turn = 1;
               #endif
- 157   3      
- 158   3      #ifdef TEST_SEND_RIGHT_TURN
+ 134   3      
+ 135   3      #ifdef TEST_SEND_RIGHT_TURN
                           // =============================================
                           // 测试发送 右转向灯
                           if (fun_info.right_turn)
@@ -184,14 +161,12 @@ line level    source
               
                           flag_get_right_turn = 1;
               #endif
- 172   3      
- 173   3      #ifdef TEST_SEND_HIGH_BEAM
+ 149   3      
+ 150   3      #ifdef TEST_SEND_HIGH_BEAM
                           // #if 1
                           // =============================================
                           // 测试发送 远光灯 状态
                           if (fun_info.high_beam)
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 16:13:35 PAGE 4   
-
                           {
                               fun_info.high_beam = 0;
                           }
@@ -202,8 +177,8 @@ line level    source
               
                           flag_get_high_beam = 1;
               #endif
- 188   3      
- 189   3      #ifdef TEST_SEND_SPEED
+ 165   3      
+ 166   3      #ifdef TEST_SEND_SPEED
                           // =============================================
                           // 测试发送 时速
                           if (fun_info.speed < 0xFFFF)
@@ -215,10 +190,12 @@ line level    source
                               fun_info.speed = 0;
                           }
               
+C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 17:58:18 PAGE 4   
+
                           flag_get_speed = 1;
               #endif
- 203   3      
- 204   3      #ifdef TEST_SEND_ENGINE_SPEED
+ 180   3      
+ 181   3      #ifdef TEST_SEND_ENGINE_SPEED
                           // =============================================
                           // 测试发送 发动机转速
                           if (fun_info.engine_speeed < (0xFFFF - 1000))
@@ -232,8 +209,8 @@ line level    source
               
                           flag_get_engine_speed = 1;
               #endif
- 218   3      
- 219   3      #ifdef TEST_SEND_FUEL
+ 195   3      
+ 196   3      #ifdef TEST_SEND_FUEL
                           // =============================================
                           // 测试发送 油量
                           if (fun_info.fuel < 0xFF)
@@ -248,14 +225,12 @@ line level    source
                           flag_get_fuel = 1;
               
               #endif
- 234   3      
- 235   3      #ifdef TEST_SEND_TEMP_OF_WATER
+ 211   3      
+ 212   3      #ifdef TEST_SEND_TEMP_OF_WATER
                           // =============================================
                           // 测试发送 水温
                           if (fun_info.temp_of_water < 0xFF)
                           {
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 16:13:35 PAGE 5   
-
                               fun_info.temp_of_water++;
                           }
                           else
@@ -265,8 +240,8 @@ line level    source
               
                           flag_get_temp_of_water = 1;
               #endif
- 249   3      
- 250   3      #ifdef TEST_SEND_TOTAL_MILEAGE
+ 226   3      
+ 227   3      #ifdef TEST_SEND_TOTAL_MILEAGE
                           // =============================================
                           // 测试发送 大计里程
                           // fun_info.save_info.total_mileage = 90000;
@@ -279,11 +254,13 @@ line level    source
                               fun_info.save_info.total_mileage = 0xFFFF0000;
                           }
               
+C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 17:58:18 PAGE 5   
+
                           flag_get_total_mileage = 1;
               
               #endif
- 266   3      
- 267   3      #ifdef TEST_SEND_SUBTOTAL_MILEAGE
+ 243   3      
+ 244   3      #ifdef TEST_SEND_SUBTOTAL_MILEAGE
                           // =============================================
                           // 测试发送 小计里程
                           if (fun_info.save_info.subtotal_mileage < 1000)
@@ -297,8 +274,8 @@ line level    source
               
                           flag_get_sub_total_mileage = 1;
               #endif
- 281   3      
- 282   3      #ifdef TEST_SEND_TEMP_OF_WATER_WARNING
+ 258   3      
+ 259   3      #ifdef TEST_SEND_TEMP_OF_WATER_WARNING
                           // =============================================
                           // 测试发送 水温报警
               
@@ -313,13 +290,11 @@ line level    source
               
                           flag_set_temp_of_water_warning = 1;
               #endif
- 297   3      
- 298   3      #ifdef TEST_SEND_VOLTAGE_OF_BATTERY
+ 274   3      
+ 275   3      #ifdef TEST_SEND_VOLTAGE_OF_BATTERY
                           // 测试 发送电池电压
                           if (fun_info.voltage_of_battery < (0xFFFF - 10))
                           {
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 16:13:35 PAGE 6   
-
                               fun_info.voltage_of_battery += 10;
                           }
                           else
@@ -329,61 +304,61 @@ line level    source
               
                           flag_get_voltage_of_battery = 1;
               #endif
- 311   3              }
- 312   2      
- 313   2      #endif
- 314   2          }
- 315   1      }
- 316          
- 317          void main(void)
- 318          {
- 319   1          // 看门狗默认打开, 复位时间2s
- 320   1          system_init();
- 321   1      
- 322   1          WDT_KEY = WDT_KEY_VAL(0xDD); //  关闭看门狗
- 323   1      
- 324   1          // 关闭HCK和HDA的调试功能
- 325   1          WDT_KEY = 0x55;  // 解除写保护
- 326   1          IO_MAP &= ~0x01; // 清除这个寄存器的值，实现关闭HCK和HDA引脚的调试功能（解除�
+ 288   3              }
+ 289   2      
+ 290   2      #endif // #if USE_MY_DEBUG
+ 291   2          }
+ 292   1      }
+ 293          
+ 294          void main(void)
+ 295          {
+ 296   1          // 看门狗默认打开, 复位时间2s
+ 297   1          system_init();
+ 298   1      
+ 299   1          WDT_KEY = WDT_KEY_VAL(0xDD); //  关闭看门狗
+ 300   1      
+ 301   1          // 关闭HCK和HDA的调试功能
+C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 17:58:18 PAGE 6   
+
+ 302   1          WDT_KEY = 0x55;  // 解除写保护
+ 303   1          IO_MAP &= ~0x01; // 清除这个寄存器的值，实现关闭HCK和HDA引脚的调试功能（解除�
              -��射）
- 327   1          WDT_KEY = 0xBB;
- 328   1      
- 329   1          /* 用户代码初始化接口 */
- 330   1          // user_init();
- 331   1          {                    // user_init();
- 332   2              fun_info_init(); // 初始化用于存放信息的变量
- 333   2      
- 334   2              tmr0_config();           // 串口检测数据超时需要使用到的定时器
- 335   2              uart0_config();          // 发送和接收指令使用到的串口
- 336   2              pin_level_scan_config(); // 刹车、转向灯、挡位的检测引脚配置
- 337   2      
- 338   2              tmr1_config(); // 检测一段时间内的脉冲个数所需的定时器
- 339   2              // tmr2_pwm_config(); // 测试用的PWM
- 340   2              speed_scan_config();        // 时速扫描的配置
- 341   2              engine_speed_scan_config(); // 发动机转速扫描的配置
- 342   2      
- 343   2              tmr3_config();     // 定时将里程写入flash所需的定时器
- 344   2              tmr4_cnt_config(); // 配置用于后台更新时间的定时器（时钟默认打开）
- 345   2      
- 346   2              p03_output_config(); // 输出高电平用的引脚，到时候检测acc,才输出高电平，现�
+ 304   1          WDT_KEY = 0xBB;
+ 305   1      
+ 306   1          /* 用户代码初始化接口 */
+ 307   1          // user_init();
+ 308   1          {                    // user_init();
+ 309   2              fun_info_init(); // 初始化用于存放信息的变量
+ 310   2      
+ 311   2              tmr0_config();           // 串口检测数据超时需要使用到的定时器
+ 312   2              uart0_config();          // 发送和接收指令使用到的串口
+ 313   2              pin_level_scan_config(); // 刹车、转向灯、挡位的检测引脚配置
+ 314   2      
+ 315   2              tmr1_config(); // 检测一段时间内的脉冲个数所需的定时器
+ 316   2              tmr2_config(); // 时速扫描使用到的定时器
+ 317   2              speed_scan_config();        // 时速扫描的配置
+ 318   2              engine_speed_scan_config(); // 发动机转速扫描的配置
+ 319   2      
+ 320   2              tmr3_config();     // 定时将里程写入flash所需的定时器
+ 321   2              tmr4_cnt_config(); // 配置用于后台更新时间的定时器（时钟默认打开）
+ 322   2      
+ 323   2              p03_output_config(); // 输出高电平用的引脚，到时候检测acc,才输出高电平，现�
              -��它一开始就是高电平
- 347   2              P03 = 1;             // 输出高电平，使能屏幕显示
- 348   2      
- 349   2              adc_config();
- 350   2          } // user_init();
- 351   1      
- 352   1      #if USE_MY_DEBUG
- 353   1          // 测试用，一上电打印flash中存放的信息
- 354   1          printf("year %d month %d day %d \n", (u16)fun_info.save_info.year, (u16)fun_info.save_info.month, (u16
+ 324   2              P03 = 1;             // 输出高电平，使能屏幕显示
+ 325   2      
+ 326   2              adc_config();
+ 327   2          } // user_init();
+ 328   1      
+ 329   1      #if USE_MY_DEBUG
+ 330   1          // 测试用，一上电打印flash中存放的信息
+ 331   1          printf("year %d month %d day %d \n", (u16)fun_info.save_info.year, (u16)fun_info.save_info.month, (u16
              -)fun_info.save_info.day);
- 355   1      #endif
- 356   1      
- 357   1      #if 0// 测试发送日期和时间
+ 332   1      #endif
+ 333   1      
+ 334   1      #if 0// 测试发送日期和时间
               //     // 当前日期
               //     fun_info.save_info.year = 2024;
               //     fun_info.save_info.month = 0x0B;
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 16:13:35 PAGE 7   
-
               //     fun_info.save_info.day = 0x0A;
               
               // #if USE_MY_DEBUG
@@ -396,64 +371,64 @@ line level    source
                   // fun_info.save_info.time_min = 45;
                   // fun_info.save_info.time_sec = 55;
               #endif
- 372   1      
- 373   1      
- 374   1          // 测试用到的配置：
- 375   1          // P1_MD0 &= (~GPIO_P11_MODE_SEL(0x3));
- 376   1          // P1_MD0 |= GPIO_P11_MODE_SEL(0x1); // 输出模式
- 377   1          // FOUT_S11 |= GPIO_FOUT_AF_FUNC;
- 378   1         
- 379   1      
- 380   1          /* 系统主循环 */
- 381   1          while (1)
- 382   1          {
- 383   2              // 扫描状态是否变化，如果变化则更新标志位，更新状态的信息到结构体�
-             -�
- 384   2              // pin_level_scan();
- 385   2              // speed_scan();        // 扫描当前时速
- 386   2              // engine_speed_scan(); // 扫描当前发动机转速
- 387   2              // adc_scan(); // adc扫描，并转换成百分比的形式发送
- 388   2              // mileage_scan(); // 里程扫描（大计里程扫描+小计里程扫描）
- 389   2      
- 390   2              adc_sel_pin(ADC_PIN_TOUCH); // 内部至少占用1ms
- 391   2              ad_key_scan();  
- 392   2      
- 393   2              // 1. 测试 从串口接收指令，是否能够正确识别
- 394   2              {
- 395   3                  uart0_scan_handle();  // 检查串口接收缓冲区的数据是否符合协议,如果有正�
-             -�的指令，会存到另一个缓冲区中
- 396   3                  instruction_scan();   // 扫描是否有合法的指令
- 397   3                  instruction_handle(); // 扫描是否有对应的获取/状态更新操作
- 398   3              }
- 399   2      
- 400   2              // 2. 测试 时速和发动机的转速的扫描，并且不会阻塞主循环
- 401   2              // 注意要先打开对应的定时器
- 402   2              // {
- 403   2              //     engine_speed_scan(); // 检测发动机转速
- 404   2              //     speed_scan();        // 检测时速
- 405   2              //     mileage_scan();      // 检测大计里程和小计里程
- 406   2              // }
- 407   2      
- 408   2              // 注意要先打开对应的定时器:
- 409   2              time_update(); // 更新时间
- 410   2      
- 411   2      
- 412   2                
- 413   2          
- 414   2          }
- 415   1      }
- 416          
- 417          /**
- 418           * @}
- 419           */
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 16:13:35 PAGE 8   
+ 349   1      
+ 350   1      
+ 351   1          // 测试用到的配置：
+ 352   1          // P1_MD0 &= (~GPIO_P11_MODE_SEL(0x3));
+ 353   1          // P1_MD0 |= GPIO_P11_MODE_SEL(0x1); // 输出模式
+ 354   1          // FOUT_S11 |= GPIO_FOUT_AF_FUNC;
+ 355   1         
+ 356   1      
+ 357   1          /* 系统主循环 */
+ 358   1          while (1)
+ 359   1          {
+C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 17:58:18 PAGE 7   
 
- 420          
- 421          /*************************** (C) COPYRIGHT 2022 HUGE-IC ***** END OF FILE *****/
+ 360   2              // 扫描状态是否变化，如果变化则更新标志位，更新状态的信息到结构体�
+             -�
+ 361   2              // pin_level_scan();
+ 362   2              // speed_scan();        // 扫描当前时速
+ 363   2              // engine_speed_scan(); // 扫描当前发动机转速
+ 364   2              // adc_scan(); // adc扫描，并转换成百分比的形式发送
+ 365   2              // mileage_scan(); // 里程扫描（大计里程扫描+小计里程扫描）
+ 366   2      
+ 367   2              adc_sel_pin(ADC_PIN_TOUCH); // 内部至少占用1ms
+ 368   2              ad_key_scan();  
+ 369   2      
+ 370   2              // 1. 测试 从串口接收指令，是否能够正确识别
+ 371   2              {
+ 372   3                  uart0_scan_handle();  // 检查串口接收缓冲区的数据是否符合协议,如果有正�
+             -�的指令，会存到另一个缓冲区中
+ 373   3                  instruction_scan();   // 扫描是否有合法的指令
+ 374   3                  instruction_handle(); // 扫描是否有对应的获取/状态更新操作
+ 375   3              }
+ 376   2      
+ 377   2              // 2. 测试 时速和发动机的转速的扫描，并且不会阻塞主循环
+ 378   2              // 注意要先打开对应的定时器
+ 379   2              // {
+ 380   2              //     engine_speed_scan(); // 检测发动机转速
+ 381   2              //     speed_scan();        // 检测时速
+ 382   2              //     mileage_scan();      // 检测大计里程和小计里程
+ 383   2              // }
+ 384   2      
+ 385   2              // 注意要先打开对应的定时器:
+ 386   2              time_update(); // 更新时间
+ 387   2      
+ 388   2      
+ 389   2                
+ 390   2          
+ 391   2          }
+ 392   1      }
+ 393          
+ 394          /**
+ 395           * @}
+ 396           */
+ 397          
+ 398          /*************************** (C) COPYRIGHT 2022 HUGE-IC ***** END OF FILE *****/
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    232    ----
+   CODE SIZE        =    235    ----
    CONSTANT SIZE    =     26    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----

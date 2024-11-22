@@ -52,11 +52,11 @@
 
 // 注意：只有 TOUCH_KEY_VAL_VOL_INC 和 TOUCH_KEY_VAL_VOL_DEC 需要检测持续按下
 
-// #define DETECT_DOUBLE_CLICK_INTERVAL (100) // 检测双击的时间间隔(单位：ms)
-#define LONG_PRESS_TIME_THRESHOLD_MS (750) // 长按时间阈值（单位：ms）
-#define HOLD_PRESS_TIME_THRESHOLD_MS (150) // 长按持续(不松手)的时间阈值(单位：ms)，每隔 xx 时间认为有一次长按持续事件
-#define LOOSE_PRESS_CNT_MS (50)            // 松手计时，松开手多久，才认为是真的松手了
-#define ONE_CYCLE_TIME_MS (1)              // 主函数完成一次循环所需的时间，单位：ms (0--说明每次调用该函数的时间很短，可以忽略不计)
+// #define DETECT_DOUBLE_CLICK_INTERVAL (100) // 检测双击的时间间隔(单位：ms)(没有用到双击操作)
+#define LONG_PRESS_TIME_THRESHOLD_MS (750) // 长按时间阈值(单位：ms)(注意不能大于变量类型的大小)
+#define HOLD_PRESS_TIME_THRESHOLD_MS (150) // 长按持续(不松手)的时间阈值(单位：ms)，每隔 xx 时间认为有一次长按持续事件(注意不能大于变量类型的大小)
+#define LOOSE_PRESS_CNT_MS (50)            // 松手计时，松开手多久，才认为是真的松手了(注意不能大于变量类型的大小)
+#define ONE_CYCLE_TIME_MS (1)              // 主函数完成一次循环所需的时间，单位：ms (0--说明每次调用该函数的时间很短，可以忽略不计)(注意不能大于变量类型的大小)
 // 触摸按键配置
 // ======================================================
 
@@ -89,6 +89,6 @@
 #include "flash.h"   // 提供flash操作的接口
 #include "mileage.h" // 里程表的相关接口
 
-#include "ad_key.h"
+#include "ad_key.h" // 检测触摸IC发送过来的ad信号
 
 #endif // end file

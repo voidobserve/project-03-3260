@@ -51,7 +51,7 @@ typedef struct
     save_info_t save_info; // 存储在flash中的结构体变量
 
     u32 engine_speeed; // 发动机的转速（单位：rpm）
-    u32 speed;         // 时速(单位：km/h，使用英制单位时，只需要再发送时进行转换)
+    u32 speed;         // 时速(单位：km/h，使用英制单位时，只需要在发送时进行转换)
 
     // u16 touch_key_val; // 触摸按键键值
     u16 voltage_of_battery; // 电池电压

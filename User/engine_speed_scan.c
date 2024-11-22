@@ -35,16 +35,20 @@ void engine_speed_scan(void)
 
         tmr1_cnt = 0; 
         detect_engine_pulse_cnt = 0;
+
+        // 限制待发送的发动机转速
+        if (rpm >= 65535)
+        {
+            rpm = 65535;
+        }
+
         fun_info.engine_speeed = rpm; //
 #if USE_MY_DEBUG
         printf("engine speed %lu rpm\n", rpm);
 #endif
 
-
         flag_get_engine_speed = 1; // 多久更新一次状态还未确定
     }
-
-
 }
 
 // P1中断服务函数

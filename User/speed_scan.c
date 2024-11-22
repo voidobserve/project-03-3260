@@ -8,10 +8,10 @@
 // 车轮一圈表示多少毫米
 #ifndef MM_PER_TURN
 #define MM_PER_TURN (1795) // 一圈1795毫米
-#endif                   // 车轮一圈表示多少毫米
+#endif                     // 车轮一圈表示多少毫米
 
 static volatile u32 detect_speed_pulse_cnt = 0; // 脉冲计数值
-volatile u32 distance = 0;         // 存放每次扫描时走过的路程（单位：毫米）-->用于里程表的计数
+volatile u32 distance = 0;                      // 存放每次扫描时走过的路程（单位：毫米）-->用于里程表的计数
 
 // 时速扫描的配置
 void speed_scan_config(void)
@@ -31,7 +31,7 @@ void speed_scan_config(void)
 // 速度扫描函数
 void speed_scan(void)
 {
-    static u32 last_speed = 0;                  // 记录上一次采集到的速度
+    static u32 last_speed = 0; // 记录上一次采集到的速度
 
     static u8 speed_increases_cnt = 0; // 检测速度是否在增加的计数值
     static u8 speed_decreases_cnt = 0; // 检测速度是否在减少的计数值
@@ -48,7 +48,7 @@ void speed_scan(void)
         // 计算得出1小时能走过多少毫米
         // tmp = tmp * 4 * 3600;
         cur_speed *= 14400;
-        cur_speed /= 1000000; // 换算成 km/h的单位
+        cur_speed /= 1000000;       // 换算成 km/h的单位
         detect_speed_pulse_cnt = 0; // 清除脉冲计数
 
         if (cur_speed > last_speed)
@@ -56,9 +56,15 @@ void speed_scan(void)
             speed_decreases_cnt = 0;
             speed_increases_cnt++;
 
-            if (speed_increases_cnt >= 10)
+            if (speed_increases_cnt >= 10) // 10 * 100ms
             {
                 last_speed = cur_speed;
+
+                // 对准备发送的时速做限制
+                if (cur_speed >= 999) // 999km/h
+                {
+                    cur_speed = 999;
+                }
 
                 fun_info.speed = cur_speed;
                 flag_get_speed = 1;
@@ -68,8 +74,14 @@ void speed_scan(void)
         {
             speed_increases_cnt = 0;
             speed_decreases_cnt++;
-            if (speed_decreases_cnt >= 10)
+            if (speed_decreases_cnt >= 10) // 10 * 100ms
             {
+                // 对准备发送的时速做限制
+                if (cur_speed >= 999) // 999km/h
+                {
+                    cur_speed = 999;
+                }
+
                 last_speed = cur_speed;
 
                 fun_info.speed = cur_speed;

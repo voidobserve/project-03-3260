@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   PIN_LEVEL_SCAN                                                    11/21/2024 16:13:17 PAGE 1   
+C51 COMPILER V9.60.7.0   PIN_LEVEL_SCAN                                                    11/21/2024 17:58:18 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE PIN_LEVEL_SCAN
@@ -62,7 +62,7 @@ line level    source
   51   1          {
   52   2              // 如果 左转向灯开启
   53   2              if (OFF == fun_info.left_turn)
-C51 COMPILER V9.60.7.0   PIN_LEVEL_SCAN                                                    11/21/2024 16:13:17 PAGE 2   
+C51 COMPILER V9.60.7.0   PIN_LEVEL_SCAN                                                    11/21/2024 17:58:18 PAGE 2   
 
   54   2              {
   55   3                  // 如果上一次扫描时远光灯是关闭的
@@ -126,7 +126,7 @@ line level    source
  113   1          // 以最低挡位优先，当最低档有信号时，不管其他挡位的信号，直接以最低档
              -的为主
  114   1          if (0 == P06)
-C51 COMPILER V9.60.7.0   PIN_LEVEL_SCAN                                                    11/21/2024 16:13:17 PAGE 3   
+C51 COMPILER V9.60.7.0   PIN_LEVEL_SCAN                                                    11/21/2024 17:58:18 PAGE 3   
 
  115   1          {
  116   2              if (GEAR_NEUTRAL != fun_info.gear)
@@ -190,7 +190,7 @@ line level    source
  174   3                  fun_info.gear = GEAR_SIXTH;
  175   3                  flag_get_gear = 1;
  176   3              }
-C51 COMPILER V9.60.7.0   PIN_LEVEL_SCAN                                                    11/21/2024 16:13:17 PAGE 4   
+C51 COMPILER V9.60.7.0   PIN_LEVEL_SCAN                                                    11/21/2024 17:58:18 PAGE 4   
 
  177   2          }
  178   1      }

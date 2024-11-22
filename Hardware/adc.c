@@ -7,8 +7,9 @@ volatile u16 adc_val = 0; // adc值，0~4095
 // adc配置，使用adc时还需要切换到对应的引脚通道
 void adc_config(void)
 {
-    // 配置P23为模拟输入模式
-    P2_MD0 |= GPIO_P23_MODE_SEL(0x3); // 设为模拟模式
+    // // 配置P23为模拟输入模式
+    // P2_MD0 |= GPIO_P23_MODE_SEL(0x3); // 设为模拟模式
+    
     // P04--测量电池电压的引脚
     P0_MD0 |= GPIO_P04_MODE_SEL(0x3); // 模拟模式
     // P05--测量触摸IC传过来的电压的引脚

@@ -18,36 +18,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "include.h"
 
-/** @addtogroup Template_Project
- * @{
- */
-
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
-
-/**
- * @brief  Main program.
- * @param  None
- * @retval None
- */
-// extern u32 test_val; // 测试用
-
-// enum
-// {
-//     CUR_SCAN_ENGINE_SPEED, // 当前要扫描引擎速度
-//     CUR_SCAN_SPEED, // 当前要扫描时速
-// }
 
 // 更新时间
 void time_update(void)
 {
     if (tmr4_cnt >= 1000) // 如果计时满1s(1000ms)
     {
-        tmr4_cnt -= 1000;
+        tmr4_cnt -= 1000; // 为了尽量让时间准确，这里是 -=1000 ，而不是清零
 
         if (fun_info.save_info.time_sec < 59) // 最大加到59s，测试通过
         {
@@ -310,7 +287,7 @@ void time_update(void)
 #endif
         }
 
-#endif
+#endif // #if USE_MY_DEBUG
     }
 }
 
@@ -336,7 +313,7 @@ void main(void)
         pin_level_scan_config(); // 刹车、转向灯、挡位的检测引脚配置
 
         tmr1_config(); // 检测一段时间内的脉冲个数所需的定时器
-        // tmr2_pwm_config(); // 测试用的PWM
+        tmr2_config(); // 时速扫描使用到的定时器
         speed_scan_config();        // 时速扫描的配置
         engine_speed_scan_config(); // 发动机转速扫描的配置
 
