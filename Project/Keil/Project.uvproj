@@ -439,6 +439,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\Hardware\flash.c</FilePath>
             </File>
+            <File>
+              <FileName>gpio_interrupt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Hardware\gpio_interrupt.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

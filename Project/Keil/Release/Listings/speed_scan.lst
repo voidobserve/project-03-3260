@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/21/2024 17:58:18 PAGE 1   
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/23/2024 16:10:42 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE SPEED_SCAN
@@ -12,133 +12,189 @@ line level    source
    1          #include "speed_scan.h"
    2          
    3          // 多少个脉冲表示一圈
-   4          #ifndef PULSE_PER_TURN
-   5          #define PULSE_PER_TURN (16)
-   6          #endif // 多少个脉冲表示一圈
+   4          #ifndef SPEED_SCAN_PULSE_PER_TURN
+              #define SPEED_SCAN_PULSE_PER_TURN (16)
+              #endif // 多少个脉冲表示一圈
    7          
    8          // 车轮一圈表示多少毫米
-   9          #ifndef MM_PER_TURN
-  10          #define MM_PER_TURN (1795) // 一圈1795毫米
-  11          #endif                     // 车轮一圈表示多少毫米
+   9          #ifndef SPEED_SCAN_MM_PER_TURN
+              #define SPEED_SCAN_MM_PER_TURN (1795) // 一圈1795毫米
+              #endif                                // 车轮一圈表示多少毫米
   12          
-  13          static volatile u32 detect_speed_pulse_cnt = 0; // 脉冲计数值
-  14          volatile u32 distance = 0;                      // 存放每次扫描时走过的路程（单位：毫米�
-             -��-->用于里程表的计数
-  15          
-  16          // 时速扫描的配置
-  17          void speed_scan_config(void)
-  18          {
-  19   1          // 使用IO中断来对脉冲计数
-  20   1          __SetIRQnIP(P0_IRQn, P0_IQn_CFG); // 设置中断优先级
-  21   1          __EnableIRQ(P0_IRQn);             // 使能P1中断
-  22   1          IE_EA = 1;                        // 使能总开关
-  23   1      
-  24   1          P0_MD0 &= ~GPIO_P02_MODE_SEL(0x3); // 输入模式
-  25   1          P0_PD |= GPIO_P02_PULL_PD(0x1);    // 配置为下拉
-  26   1          P0_IMK |= GPIO_P02_IRQ_MASK(0x1);  // 使能IO中断
-  27   1          P0_TRG0 &= ~GPIO_P02_TRG_SEL(0x3);
-  28   1          P0_TRG0 |= GPIO_P02_TRG_SEL(0x2); // 配置上升沿触发
-  29   1      }
-  30          
-  31          // 速度扫描函数
-  32          void speed_scan(void)
-  33          {
-  34   1          static u32 last_speed = 0; // 记录上一次采集到的速度
-  35   1      
-  36   1          static u8 speed_increases_cnt = 0; // 检测速度是否在增加的计数值
-  37   1          static u8 speed_decreases_cnt = 0; // 检测速度是否在减少的计数值
-  38   1      
-  39   1          u32 cur_speed = 0; // 记录当前采集到的速度
-  40   1      
-  41   1          if (tmr2_cnt >= 1000) // 如果经过了100ms
-  42   1          {
-  43   2              tmr2_cnt = 0; // 清除定时器计数
-  44   2              // 计算1000ms内走过了多少毫米
-  45   2              // 脉冲个数 / 一圈有多少个脉冲 * 一圈表示走过了多少mm == 该段时间内走�
-             -�的距离(单位:mm)
-  46   2              cur_speed = detect_speed_pulse_cnt * MM_PER_TURN / PULSE_PER_TURN;
-  47   2              distance += cur_speed; // 存放走过的距离，单位：毫米(因为没有使用浮点类型,�
-             -��要累加,否则后续统计里程时就会丢失数据)
-  48   2              // 计算得出1小时能走过多少毫米
-  49   2              // tmp = tmp * 4 * 3600;
-  50   2              cur_speed *= 14400;
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/21/2024 17:58:18 PAGE 2   
+  13          volatile u32 speed_scan_time_cnt = 0; // 速度扫描时，用到的时间计数值，会在定时器中�
+             -�中累加
+  14          
+  15          volatile u32 detect_speed_pulse_cnt = 0; // 检测时速的脉冲计数值
+  16          volatile u32 distance = 0;               // 存放每次扫描时走过的路程（单位：毫米）-->�
+             -�于里程表的计数
+  17          
+  18          // 时速扫描的配置
+  19          void speed_scan_config(void)
+  20          {
+  21   1          // 使用IO中断来对脉冲计数
+  22   1          __SetIRQnIP(P0_IRQn, P0_IQn_CFG); // 设置中断优先级
+  23   1          __EnableIRQ(P0_IRQn);             // 使能P1中断
+  24   1          IE_EA = 1;                        // 使能总开关
+  25   1      
+  26   1          P0_MD0 &= ~GPIO_P02_MODE_SEL(0x3); // 输入模式
+  27   1          P0_PU |= GPIO_P02_PULL_UP(0x1);    // 配置为上拉
+  28   1          // P0_PD |= GPIO_P02_PULL_PD(0x01); // 下拉
+  29   1          P0_IMK |= GPIO_P02_IRQ_MASK(0x1);  // 使能IO中断
+  30   1          P0_TRG0 &= ~GPIO_P02_TRG_SEL(0x3); // 清空触发沿配置的寄存器
+  31   1          P0_TRG0 |= GPIO_P02_TRG_SEL(0x2);  // 配置上升沿触发
+  32   1          // P0_TRG0 |= GPIO_P02_TRG_SEL(0x1); // 配置下降沿触发
+  33   1      }
+  34          
+  35          // 速度扫描函数
+  36          void speed_scan(void)
+  37          {
+  38   1      #if 0
+                  // 以下这种方法，万一速度保持不变，只会发送第一次检测到的数据，
+                  // 如果这次检测到的数据没有被MP5正确接收，MP5就显示不了该数据 
+                  static u32 last_speed = 0; // 记录上一次采集到的速度
+                  static u8 speed_increases_cnt = 0; // 检测速度是否在增加的计数值
+                  static u8 speed_decreases_cnt = 0; // 检测速度是否在减少的计数值
+              #endif
+  45   1      
+  46   1          u32 cur_speed = 0;                    // 记录当前采集到的速度
+  47   1          static u32 cur_speed_average_val = 0; // 存放当前速度的平均值(单位：km/h)
+  48   1      
+  49   1          static u8 speed_scan_cnt = 0;
+  50   1      
+  51   1          if (speed_scan_time_cnt >= SPEED_SCAN_TIME_MS) // 如果经过了 xx ms
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/23/2024 16:10:42 PAGE 2   
 
-  51   2              cur_speed /= 1000000;       // 换算成 km/h的单位
-  52   2              detect_speed_pulse_cnt = 0; // 清除脉冲计数
-  53   2      
-  54   2              if (cur_speed > last_speed)
-  55   2              {
-  56   3                  speed_decreases_cnt = 0;
-  57   3                  speed_increases_cnt++;
-  58   3      
-  59   3                  if (speed_increases_cnt >= 10) // 10 * 100ms
-  60   3                  {
-  61   4                      last_speed = cur_speed;
-  62   4      
-  63   4                      // 对准备发送的时速做限制
-  64   4                      if (cur_speed >= 999) // 999km/h
-  65   4                      {
-  66   5                          cur_speed = 999;
-  67   5                      }
-  68   4      
-  69   4                      fun_info.speed = cur_speed;
-  70   4                      flag_get_speed = 1;
-  71   4                  }
-  72   3              }
-  73   2              else if (cur_speed < last_speed)
-  74   2              {
-  75   3                  speed_increases_cnt = 0;
-  76   3                  speed_decreases_cnt++;
-  77   3                  if (speed_decreases_cnt >= 10) // 10 * 100ms
-  78   3                  {
-  79   4                      // 对准备发送的时速做限制
-  80   4                      if (cur_speed >= 999) // 999km/h
-  81   4                      {
-  82   5                          cur_speed = 999;
-  83   5                      }
-  84   4      
-  85   4                      last_speed = cur_speed;
-  86   4      
-  87   4                      fun_info.speed = cur_speed;
-  88   4                      flag_get_speed = 1;
-  89   4                  }
-  90   3              }
-  91   2              else
-  92   2              {
-  93   3                  // 如果速度未发生变化
-  94   3                  speed_increases_cnt = 0;
-  95   3                  speed_decreases_cnt = 0;
-  96   3              }
-  97   2          }
-  98   1      }
-  99          
- 100          // P0中断服务函数
- 101          void P0_IRQHandler(void) interrupt P0_IRQn
- 102          {
- 103   1          // Px_PND寄存器写任何值都会清标志位
- 104   1          u8 p0_pnd = P0_PND;
- 105   1      
- 106   1          // 进入中断设置IP，不可删除
- 107   1          __IRQnIPnPush(P0_IRQn);
- 108   1          // ---------------- 用户函数处理 -------------------
- 109   1          if (p0_pnd & GPIO_P02_IRQ_PNG(0x1))
- 110   1          {
- 111   2              detect_speed_pulse_cnt++;
- 112   2          }
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/21/2024 17:58:18 PAGE 3   
+  52   1          {
+  53   2              speed_scan_time_cnt -= SPEED_SCAN_TIME_MS; // 为了准确，减去这部分时间对应的计数�
+             -��，而不是直接清零
+  54   2      
+  55   2              /*
+  56   2                  计算 xx ms内走过了多少毫米
+  57   2                  xx ms内走过了多少毫米 == 当前扫描时间内检测到的脉冲个数 / 车轮一圈�
+             -��应多少个脉冲 * 一圈对应 xx 毫米
+  58   2                  换成单片机可以计算的形式：
+  59   2                  xx ms内走过了多少毫米 == 当前扫描时间内检测到的脉冲个数 * 一圈对应 
+             -xx 毫米 / 车轮一圈对应多少个脉冲
+  60   2              */
+  61   2              cur_speed = detect_speed_pulse_cnt * SPEED_SCAN_MM_PER_TURN / SPEED_SCAN_PULSE_PER_TURN;
+  62   2      
+  63   2              // printf("cur pulse cnt %lu \n", detect_speed_pulse_cnt); // 临时测试用
+  64   2      
+  65   2              detect_speed_pulse_cnt = 0; // 清空脉冲计数
+  66   2              distance += cur_speed;      // 存放走过的距离，单位：毫米
+  67   2      
+  68   2              /*
+  69   2                  已知在扫描时间内走过了xx mm
+  70   2                  时速的计算公式:
+  71   2                  扫描时间内走过的距离 / 1000 * (1 / 扫描时间对1s的占比) * 3.6
+  72   2                      扫描时间内走过的距离 / 1000，转换成 m/扫描时间 的单位
+  73   2                      * (1 / 扫描时间对1s的占比)，转换成以s为单位的速度
+  74   2                      * 3.6，因为 1m/s == 3.6km/h，最后转换成 以km/h的单位
+  75   2                  转换成单片机可以计算的形式：
+  76   2                  时速 == 扫描时间内走过的距离 * 36 * (1 / 扫描时间对1s的占比) / 10000；
+  77   2      
+  78   2                  逐渐变换成单片机可以计算的形式：
+  79   2                  cur_speed = cur_speed * 36 * (1 / (SPEED_SCAN_TIME_MS / 1000)) / 10000;
+  80   2                  cur_speed = cur_speed * 36 * 1000 / SPEED_SCAN_TIME_MS / 10000;
+  81   2                  cur_speed = cur_speed * 36 / SPEED_SCAN_TIME_MS / 10;
+  82   2              */
+  83   2              cur_speed = (cur_speed * 36) / SPEED_SCAN_TIME_MS / 10;
+  84   2      
+  85   2              // printf("cur speed %lu \n", cur_speed);
+  86   2      
+  87   2      #if 0
+                      // 以下这种方法，万一速度保持不变，只会发送第一次检测到的数据，
+                      // 如果这次检测到的数据没有被MP5正确接收，MP5就显示不了该数据
+                      if (cur_speed > last_speed)
+                      {
+                          speed_decreases_cnt = 0;
+                          speed_increases_cnt++;
+              
+                          if (speed_increases_cnt >= SPEED_SCAN_FILTER_CNT) //  
+                          {
+                              last_speed = cur_speed;
+              
+                              // 对准备发送的时速做限制
+                              if (cur_speed >= 999) // 999km/h
+                              {
+                                  cur_speed = 999;
+                              }
+              
+                              fun_info.speed = cur_speed;
+                              flag_get_speed = 1;
+                          }
+                      }
+                      else if (cur_speed < last_speed)
+                      {
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/23/2024 16:10:42 PAGE 3   
 
- 113   1          P0_PND = p0_pnd; // 清P0中断标志位
- 114   1          // -------------------------------------------------
- 115   1          // 退出中断设置IP，不可删除
- 116   1          __IRQnIPnPop(P0_IRQn);
- 117   1      }
+                          speed_increases_cnt = 0;
+                          speed_decreases_cnt++;
+                          if (speed_decreases_cnt >= SPEED_SCAN_FILTER_CNT) //  
+                          {
+                              // 对准备发送的时速做限制
+                              if (cur_speed >= 999) // 999km/h
+                              {
+                                  cur_speed = 999;
+                              }
+              
+                              last_speed = cur_speed;
+              
+                              fun_info.speed = cur_speed;
+                              flag_get_speed = 1;
+                          }
+                      }
+                      else
+                      {
+                          // 如果速度未发生变化
+                          speed_increases_cnt = 0;
+                          speed_decreases_cnt = 0;
+                      }
+              #endif
+ 134   2      
+ 135   2              if (speed_scan_cnt < SPEED_SCAN_FILTER_CNT)
+ 136   2              {
+ 137   3                  // 如果未达到重复检测的次数
+ 138   3                  speed_scan_cnt++;
+ 139   3                  cur_speed_average_val += cur_speed; // 累加当前得到的时速(单位：km/h)
+ 140   3              }
+ 141   2              else
+ 142   2              {
+ 143   3                  // 如果达到了重复检测的次数
+ 144   3                  speed_scan_cnt = 0;
+ 145   3                  cur_speed_average_val /= SPEED_SCAN_FILTER_CNT; // 时速取平均值
+ 146   3                  fun_info.speed = cur_speed_average_val;         // 存放得到的时速
+ 147   3                  cur_speed_average_val = 0;                      // 清空变量的值
+ 148   3      #if USE_MY_DEBUG
+ 149   3      
+ 150   3                  if (fun_info.speed != 0)
+ 151   3                  {
+ 152   4                      printf("cur speed %lu km/h\n", fun_info.speed);
+ 153   4                  }
+ 154   3      
+ 155   3      #endif
+ 156   3      
+ 157   3                  // 限制要发送的时速:
+ 158   3                  if (fun_info.speed > 999)
+ 159   3                  {
+ 160   4                      fun_info.speed = 0;
+ 161   4                  }
+ 162   3                  else
+ 163   3                  {
+ 164   4                      // 如果时速未超出能够显示的范围
+ 165   4                      flag_get_speed = 1; //
+ 166   4                  }
+ 167   3              }
+ 168   2          }
+ 169   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    451    ----
-   CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =     14       4
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/23/2024 16:10:42 PAGE 4   
+
+   CODE SIZE        =    353    ----
+   CONSTANT SIZE    =     20    ----
+   XDATA SIZE       =     17       4
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----

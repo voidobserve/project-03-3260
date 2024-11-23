@@ -286,10 +286,10 @@ void instruction_handle(void)
         // 如果要获取发动机的转速
         flag_get_engine_speed = 0;
 #if USE_MY_DEBUG
-        printf(" flag_get_engine_speed \n");
-        printf(" cur engine speed %u rpm ", (u16)fun_info.engine_speeed);
+        // printf(" flag_get_engine_speed \n");
+        // printf(" cur engine speed %u rpm ", (u16)fun_info.engine_speeed);
 #endif
-        send_data(SEND_ENGINE_SPEED, fun_info.engine_speeed);
+        // send_data(SEND_ENGINE_SPEED, fun_info.engine_speeed); // 测试时注释了，方便观察串口
     }
 
     if (flag_get_speed)
@@ -297,12 +297,12 @@ void instruction_handle(void)
         // 如果要获取时速
         flag_get_speed = 0;
 #if USE_MY_DEBUG
-        printf(" flag_get_speed \n");
+        // printf(" flag_get_speed \n");
 #endif
 
 #ifdef USE_INTERNATIONAL // 使用公制单位
 
-        send_data(SEND_SPEED, fun_info.speed); // 发送当前采集到的车速（时速）
+        // send_data(SEND_SPEED, fun_info.speed); // 发送当前采集到的车速（时速）// 测试时注释了，方便观察串口
 
 #endif // USE_INTERNATIONAL 使用公制单位
 
@@ -342,7 +342,7 @@ void instruction_handle(void)
         flag_get_total_mileage = 0;
 #if USE_MY_DEBUG
         printf(" flag_get_total_mileage \n");
-        printf(" cur total mileage %lu /0.1km \n", (u32)fun_info.save_info.total_mileage);
+        printf(" cur total mileage %lu m \n", (u32)fun_info.save_info.total_mileage);
 #endif
 
 #ifdef USE_INTERNATIONAL // 公制单位
@@ -355,7 +355,7 @@ void instruction_handle(void)
 #ifdef USE_IMPERIAL // 英制单位
 
 #if USE_MY_DEBUG
-        printf("total mileage: %lu * 0.1 mile", fun_info.save_info.total_mileage / 161);
+        printf("total mileage: %lu m\n", fun_info.save_info.total_mileage / 161);
 #endif // USE_MY_DEBUG
 
         // 只发送0.1英里及以上的数据
@@ -370,7 +370,7 @@ void instruction_handle(void)
         flag_get_sub_total_mileage = 0;
 #if USE_MY_DEBUG
         printf(" flag_get_sub_total_mileage \n");
-        printf(" cur subtotal mileage %lu /0.1km \n", (u32)fun_info.save_info.subtotal_mileage);
+        printf(" cur subtotal mileage %lu m \n", (u32)fun_info.save_info.subtotal_mileage);
 #endif // USE_MY_DEBUG
 
 #ifdef USE_INTERNATIONAL // 公制单位
@@ -382,7 +382,7 @@ void instruction_handle(void)
 #ifdef USE_IMPERIAL // 英制单位
 
 #if USE_MY_DEBUG
-        printf("sub total mileage: %lu mile", fun_info.save_info.subtotal_mileage / 161);
+        printf("sub total mileage: %lu m\n", fun_info.save_info.subtotal_mileage / 161);
 #endif // USE_MY_DEBUG
        // 只发送0.1英里及以上的数据
        // 变量中存放的是以m为单位的数据，需要做转换再发送

@@ -21,7 +21,32 @@
 // USE_IMPERIAL -- 英制单位
 #define USE_INTERNATIONAL
 
-// 扫描时间配置：
+// ======================================================
+// 检测发动机转速所需的配置：
+
+// 检测到 多少个脉冲 表示 发动机转过一圈
+#define ENGINE_SPEED_SCAN_PULSE_PER_TURN (16)
+// 累计检测多久的发动机转速并更新状态： (单位：ms)(不能大于1min)
+#define ENGINE_SPEED_SCAN_TIME_MS (100)
+
+// 检测发动机转速所需的配置
+// ======================================================
+
+// ======================================================
+// 检测时速所需的配置：
+
+// 检测到 多少个脉冲 表示 车轮走过一圈
+#define SPEED_SCAN_PULSE_PER_TURN (64)
+// 车轮的一圈对应多少毫米
+#define SPEED_SCAN_MM_PER_TURN (1795) // 一圈 xx 毫米
+// 累计检测多久的时速并更新状态：(单位：ms)
+#define SPEED_SCAN_TIME_MS (100)
+// 重复检测多少次时速，才更新：(不能为0，也不能太大)
+// 例如 5次，  5(次) *  SPEED_SCAN_TIME_MS 之后，才更新速度
+#define SPEED_SCAN_FILTER_CNT (10) 
+
+// 检测时速所需的配置
+// ======================================================
 
 // ======================================================
 // 触摸按键配置
@@ -35,7 +60,7 @@
 #define AD_KEY_TWO_RIGHT_VAL (1744)   // 从右往下数，第二个按键对应的ad值 (2.13V)
 #define AD_KEY_THREE_RIGHT_VAL (2359) // 从右往下数，第三个按键对应的ad值 (2.88V)
 
-// 不能使用这种方式，ad值不在定义的按键对应的ad值区间时，都认为按键没有按下
+// 不能使用这种方式，ad值不在定义的按键对应的ad值区间时，都认为按键没有按下:
 // #define AD_KEY_NONE (4095) // 没有按键按下时，对应的ad值
 
 // 触摸按键键值定义(检测到短按/持续时，要发送的键值)：
@@ -52,25 +77,26 @@
 
 // 注意：只有 TOUCH_KEY_VAL_VOL_INC 和 TOUCH_KEY_VAL_VOL_DEC 需要检测持续按下
 
+// 扫描时间配置：
 // #define DETECT_DOUBLE_CLICK_INTERVAL (100) // 检测双击的时间间隔(单位：ms)(没有用到双击操作)
 #define LONG_PRESS_TIME_THRESHOLD_MS (750) // 长按时间阈值(单位：ms)(注意不能大于变量类型的大小)
 #define HOLD_PRESS_TIME_THRESHOLD_MS (150) // 长按持续(不松手)的时间阈值(单位：ms)，每隔 xx 时间认为有一次长按持续事件(注意不能大于变量类型的大小)
 #define LOOSE_PRESS_CNT_MS (50)            // 松手计时，松开手多久，才认为是真的松手了(注意不能大于变量类型的大小)
-#define ONE_CYCLE_TIME_MS (1)              // 主函数完成一次循环所需的时间，单位：ms (0--说明每次调用该函数的时间很短，可以忽略不计)(注意不能大于变量类型的大小)
+
 // 触摸按键配置
 // ======================================================
 
-// #define USE_MY_DEBUG 1
+#define ONE_CYCLE_TIME_MS (1) // 主函数完成一次循环所需的时间，单位：ms (0--说明每次调用该函数的时间很短，可以忽略不计)(注意不能大于变量类型的大小)
 
 #include <stdio.h>   // printf()
 #include "my_gpio.h" // 自定义的、使用到的引脚
 
-#include "uart0.h" // 接收 / 发送 指令 使用的串口
+#include "uart0.h" // 接收 / 发送 指令 使用的串口(使能USE_MY_DEBUG宏时，printf()也是使用该串口)
 
 #include "tmr0.h" // 串口检测数据超时需要使用到的定时器
-#include "tmr1.h" // 用于扫描发动机转速的定时器
-#include "tmr2.h" // 用于扫描时速的定时器
-#include "tmr3.h" // 定时将总里程写入flash所需的定时器
+#include "tmr1.h" // 用于 扫描发动机转速、扫描时速、定时将里程写入flash 的定时器
+// #include "tmr2.h" // 用于扫描时速的定时器
+// #include "tmr3.h" // 定时将总里程写入flash所需的定时器
 
 #include "tmr4.h" // 用于后台更新当前时间的定时器
 

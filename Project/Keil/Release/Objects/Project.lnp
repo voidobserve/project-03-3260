@@ -9,6 +9,7 @@
 ".\Release\Objects\uart0.obj",
 ".\Release\Objects\adc.obj",
 ".\Release\Objects\flash.obj",
+".\Release\Objects\gpio_interrupt.obj",
 ".\Release\Objects\main.obj",
 ".\Release\Objects\fun_info.obj",
 ".\Release\Objects\send_data.obj",

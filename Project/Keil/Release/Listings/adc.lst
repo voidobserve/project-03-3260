@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   ADC                                                               11/21/2024 17:58:18 PAGE 1   
+C51 COMPILER V9.60.7.0   ADC                                                               11/23/2024 16:08:28 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE ADC
@@ -62,7 +62,7 @@ line level    source
   49   1      
   50   1          delay_ms(1); // 等待ADC模块配置稳定，需要等待20us以上
   51   1      }
-C51 COMPILER V9.60.7.0   ADC                                                               11/21/2024 17:58:18 PAGE 2   
+C51 COMPILER V9.60.7.0   ADC                                                               11/23/2024 16:08:28 PAGE 2   
 
   52          
   53          // 获取adc值，存放到变量adc_val中(adc单次转换)
@@ -126,7 +126,7 @@ line level    source
  111          
  112          // // 测试用，还未能真正检测，只能将检测到的ad值直接转换成对应的百分比
  113          // void adc_scan(void)
-C51 COMPILER V9.60.7.0   ADC                                                               11/21/2024 17:58:18 PAGE 3   
+C51 COMPILER V9.60.7.0   ADC                                                               11/23/2024 16:08:28 PAGE 3   
 
  114          // {
  115          //     adc_sel_pin(ADC_PIN_BATTERY);

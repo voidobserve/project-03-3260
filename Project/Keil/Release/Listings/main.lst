@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 17:58:18 PAGE 1   
+C51 COMPILER V9.60.7.0   MAIN                                                              11/23/2024 16:08:28 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ line level    source
   51   5                          fun_info.save_info.time_hour++;
   52   5                      }
   53   4                      else
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 17:58:18 PAGE 2   
+C51 COMPILER V9.60.7.0   MAIN                                                              11/23/2024 16:08:28 PAGE 2   
 
   54   4                      {
   55   5                          fun_info.save_info.time_hour = 0;
@@ -72,7 +72,7 @@ line level    source
   59   4                  }
   60   3              }
   61   2      
-  62   2      #if USE_MY_DEBUG
+  62   2      #if USE_MY_DEBUG // 测试单片机发送的数据
   63   2              // printf("cur sec %d \n", (u16)fun_info.time_sec);
   64   2      
   65   2              // 测试用，可以在这里修改数据，然后发送
@@ -126,7 +126,7 @@ line level    source
                           {
                               fun_info.brake = 1;
                           }
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 17:58:18 PAGE 3   
+C51 COMPILER V9.60.7.0   MAIN                                                              11/23/2024 16:08:28 PAGE 3   
 
               
                           flag_get_brake = 1;
@@ -190,7 +190,7 @@ line level    source
                               fun_info.speed = 0;
                           }
               
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 17:58:18 PAGE 4   
+C51 COMPILER V9.60.7.0   MAIN                                                              11/23/2024 16:08:28 PAGE 4   
 
                           flag_get_speed = 1;
               #endif
@@ -254,7 +254,7 @@ line level    source
                               fun_info.save_info.total_mileage = 0xFFFF0000;
                           }
               
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 17:58:18 PAGE 5   
+C51 COMPILER V9.60.7.0   MAIN                                                              11/23/2024 16:08:28 PAGE 5   
 
                           flag_get_total_mileage = 1;
               
@@ -306,7 +306,7 @@ line level    source
               #endif
  288   3              }
  289   2      
- 290   2      #endif // #if USE_MY_DEBUG
+ 290   2      #endif // #if USE_MY_DEBUG // 测试单片机发送的数据
  291   2          }
  292   1      }
  293          
@@ -318,7 +318,7 @@ line level    source
  299   1          WDT_KEY = WDT_KEY_VAL(0xDD); //  关闭看门狗
  300   1      
  301   1          // 关闭HCK和HDA的调试功能
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 17:58:18 PAGE 6   
+C51 COMPILER V9.60.7.0   MAIN                                                              11/23/2024 16:08:28 PAGE 6   
 
  302   1          WDT_KEY = 0x55;  // 解除写保护
  303   1          IO_MAP &= ~0x01; // 清除这个寄存器的值，实现关闭HCK和HDA引脚的调试功能（解除�
@@ -335,11 +335,11 @@ line level    source
  313   2              pin_level_scan_config(); // 刹车、转向灯、挡位的检测引脚配置
  314   2      
  315   2              tmr1_config(); // 检测一段时间内的脉冲个数所需的定时器
- 316   2              tmr2_config(); // 时速扫描使用到的定时器
+ 316   2              // tmr2_config(); // 时速扫描使用到的定时器
  317   2              speed_scan_config();        // 时速扫描的配置
  318   2              engine_speed_scan_config(); // 发动机转速扫描的配置
  319   2      
- 320   2              tmr3_config();     // 定时将里程写入flash所需的定时器
+ 320   2              // tmr3_config();     // 定时将里程写入flash所需的定时器
  321   2              tmr4_cnt_config(); // 配置用于后台更新时间的定时器（时钟默认打开）
  322   2      
  323   2              p03_output_config(); // 输出高电平用的引脚，到时候检测acc,才输出高电平，现�
@@ -373,62 +373,60 @@ line level    source
               #endif
  349   1      
  350   1      
- 351   1          // 测试用到的配置：
- 352   1          // P1_MD0 &= (~GPIO_P11_MODE_SEL(0x3));
- 353   1          // P1_MD0 |= GPIO_P11_MODE_SEL(0x1); // 输出模式
- 354   1          // FOUT_S11 |= GPIO_FOUT_AF_FUNC;
- 355   1         
- 356   1      
- 357   1          /* 系统主循环 */
- 358   1          while (1)
- 359   1          {
-C51 COMPILER V9.60.7.0   MAIN                                                              11/21/2024 17:58:18 PAGE 7   
+ 351   1          tmr1_enable(); // 打开检测时速、发动机转速使用的定时器
+ 352   1      
+ 353   1          // 测试用到的配置：
+ 354   1          // P1_MD0 &= (~GPIO_P11_MODE_SEL(0x3));
+ 355   1          // P1_MD0 |= GPIO_P11_MODE_SEL(0x1); // 输出模式
+ 356   1          // FOUT_S11 |= GPIO_FOUT_AF_FUNC;
+ 357   1         
+ 358   1      
+ 359   1          /* 系统主循环 */
+C51 COMPILER V9.60.7.0   MAIN                                                              11/23/2024 16:08:28 PAGE 7   
 
- 360   2              // 扫描状态是否变化，如果变化则更新标志位，更新状态的信息到结构体�
+ 360   1          while (1)
+ 361   1          {
+ 362   2              // 扫描状态是否变化，如果变化则更新标志位，更新状态的信息到结构体�
              -�
- 361   2              // pin_level_scan();
- 362   2              // speed_scan();        // 扫描当前时速
- 363   2              // engine_speed_scan(); // 扫描当前发动机转速
- 364   2              // adc_scan(); // adc扫描，并转换成百分比的形式发送
- 365   2              // mileage_scan(); // 里程扫描（大计里程扫描+小计里程扫描）
- 366   2      
- 367   2              adc_sel_pin(ADC_PIN_TOUCH); // 内部至少占用1ms
- 368   2              ad_key_scan();  
- 369   2      
- 370   2              // 1. 测试 从串口接收指令，是否能够正确识别
- 371   2              {
- 372   3                  uart0_scan_handle();  // 检查串口接收缓冲区的数据是否符合协议,如果有正�
+ 363   2              // pin_level_scan();
+ 364   2              // speed_scan();        // 扫描当前时速
+ 365   2              // engine_speed_scan(); // 扫描当前发动机转速
+ 366   2              // adc_scan(); // adc扫描，并转换成百分比的形式发送
+ 367   2              // mileage_scan(); // 里程扫描（大计里程扫描+小计里程扫描）
+ 368   2      
+ 369   2              adc_sel_pin(ADC_PIN_TOUCH); // 内部至少占用1ms
+ 370   2              ad_key_scan();  // 检测触摸按键，内部会发送检测到的按键状态
+ 371   2      
+ 372   2              // 1. 测试 从串口接收指令，是否能够正确识别
+ 373   2              {
+ 374   3                  uart0_scan_handle();  // 检查串口接收缓冲区的数据是否符合协议,如果有正�
              -�的指令，会存到另一个缓冲区中
- 373   3                  instruction_scan();   // 扫描是否有合法的指令
- 374   3                  instruction_handle(); // 扫描是否有对应的获取/状态更新操作
- 375   3              }
- 376   2      
- 377   2              // 2. 测试 时速和发动机的转速的扫描，并且不会阻塞主循环
- 378   2              // 注意要先打开对应的定时器
- 379   2              // {
- 380   2              //     engine_speed_scan(); // 检测发动机转速
- 381   2              //     speed_scan();        // 检测时速
- 382   2              //     mileage_scan();      // 检测大计里程和小计里程
- 383   2              // }
- 384   2      
- 385   2              // 注意要先打开对应的定时器:
- 386   2              time_update(); // 更新时间
- 387   2      
- 388   2      
- 389   2                
- 390   2          
- 391   2          }
- 392   1      }
- 393          
- 394          /**
- 395           * @}
- 396           */
- 397          
- 398          /*************************** (C) COPYRIGHT 2022 HUGE-IC ***** END OF FILE *****/
+ 375   3                  instruction_scan();   // 扫描是否有合法的指令
+ 376   3                  instruction_handle(); // 扫描是否有对应的获取/状态更新操作
+ 377   3              }
+ 378   2      
+ 379   2              // 2. 测试 时速和发动机的转速的扫描，并且不会阻塞主循环
+ 380   2              // 注意要先打开对应的定时器
+ 381   2              {
+ 382   3                  engine_speed_scan(); // 检测发动机转速
+ 383   3                  speed_scan();        // 检测时速
+ 384   3                  mileage_scan();      // 检测大计里程和小计里程
+ 385   3              }
+ 386   2      
+ 387   2              // 注意要先打开对应的定时器:
+ 388   2              // time_update(); // 更新时间
+ 389   2          }
+ 390   1      }
+ 391          
+ 392          /**
+ 393           * @}
+ 394           */
+ 395          
+ 396          /*************************** (C) COPYRIGHT 2022 HUGE-IC ***** END OF FILE *****/
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    235    ----
+   CODE SIZE        =    238    ----
    CONSTANT SIZE    =     26    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----

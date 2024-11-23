@@ -62,7 +62,7 @@ static u16 __conver_cur_ad_to_ad_key(u16 cur_ad_key)
 // 内部的比较只会比对自定义的键值(id)
 void ad_key_scan(void)
 {
-    volatile u16 ad_key_id = 0;             // __tk_key_flag 单次按键标志
+    volatile u16 ad_key_id = 0;             // 单次按键标志
     static u16 ad_key_last_id = 0;          // 用于存放长按时，对应的按键
     static volatile u32 touch_time_cnt = 0; // 长按计数值
 

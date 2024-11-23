@@ -3,7 +3,7 @@
 
 // 定时器定时周期 (单位:Hz)
 // 周期值 = 系统时钟 / 定时器分频 / 频率 - 1
-#define TMR2_PERIOD (SYSCLK / 128 / 10000 - 1) // 10000Hz,100us
+#define TMR2_PERIOD (SYSCLK / 128 / 1000 - 1) // 1000Hz,1ms
 
 volatile u32 tmr2_cnt = 0; // 定时器TMR2的计数值（每次在中断服务函数中会加一）
 
@@ -71,7 +71,7 @@ void TIMR2_IRQHandler(void) interrupt TMR2_IRQn
     // 进入中断设置IP，不可删除
     __IRQnIPnPush(TMR2_IRQn);
     // ---------------- 用户函数处理 -------------------
-    // 周期中断
+    // // 周期中断
     if (TMR2_CONH & TMR_PRD_PND(0x1))
     {
         TMR2_CONH |= TMR_PRD_PND(0x1); // 清除pending
@@ -81,4 +81,3 @@ void TIMR2_IRQHandler(void) interrupt TMR2_IRQn
     // 退出中断设置IP，不可删除
     __IRQnIPnPop(TMR2_IRQn);
 }
-

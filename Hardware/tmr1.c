@@ -4,10 +4,10 @@
 
 // 定时器定时周期 (单位:Hz)
 // 周期值 = 系统时钟 / 定时器分频 / 频率 - 1
-#define TMR1_PERIOD (SYSCLK / 128 / 10000 - 1) // 10000Hz,100us
+#define TMR1_PERIOD (SYSCLK / 128 / 1000 - 1) // 1000Hz,1ms
 
 // volatile bit tmr1_flag = 0; // TMR1中断服务函数中会置位的标志位
-volatile u32 tmr1_cnt = 0; // 定时器TMR1的计数值（每次在中断服务函数中会加一）
+// volatile u32 tmr1_cnt = 0; // 定时器TMR1的计数值（每次在中断服务函数中会加一）
 
 /**
  * @brief 配置定时器TMR1，配置完成后，定时器默认关闭
@@ -35,7 +35,7 @@ void tmr1_config(void)
     TMR1_PRL = TMR_PERIOD_VAL_L((TMR1_PERIOD >> 0) & 0xFF);
 
     TMR1_CONL &= ~(TMR_SOURCE_SEL(0x07)); // 清除TMR1的时钟源配置寄存器
-    TMR1_CONL |= TMR_SOURCE_SEL(0x05); // 配置TMR1的时钟源，不用任何时钟
+    TMR1_CONL |= TMR_SOURCE_SEL(0x05);    // 配置TMR1的时钟源，不用任何时钟
 }
 
 /**
@@ -80,7 +80,22 @@ void TIMR1_IRQHandler(void) interrupt TMR1_IRQn
     {
         TMR1_CONH |= TMR_PRD_PND(0x1); // 清除pending
 
-        tmr1_cnt++;
+        // tmr1_cnt++;
+
+        if (engine_speed_scan_time_cnt < 4294967295) // 防止计数溢出
+        {
+            engine_speed_scan_time_cnt++;
+        }
+
+        if (speed_scan_time_cnt < 4294967295) // 防止计数溢出
+        {
+            speed_scan_time_cnt++;
+        }
+
+        if (mileage_scan_time_cnt < 4294967295) // 防止计数溢出
+        {
+            mileage_scan_time_cnt++;
+        }
 
 #if 0
         // 如果到了5s

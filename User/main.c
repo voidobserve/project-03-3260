@@ -59,7 +59,7 @@ void time_update(void)
             }
         }
 
-#if USE_MY_DEBUG
+#if USE_MY_DEBUG // 测试单片机发送的数据
         // printf("cur sec %d \n", (u16)fun_info.time_sec);
 
         // 测试用，可以在这里修改数据，然后发送
@@ -287,7 +287,7 @@ void time_update(void)
 #endif
         }
 
-#endif // #if USE_MY_DEBUG
+#endif // #if USE_MY_DEBUG // 测试单片机发送的数据
     }
 }
 
@@ -313,11 +313,11 @@ void main(void)
         pin_level_scan_config(); // 刹车、转向灯、挡位的检测引脚配置
 
         tmr1_config(); // 检测一段时间内的脉冲个数所需的定时器
-        tmr2_config(); // 时速扫描使用到的定时器
+        // tmr2_config(); // 时速扫描使用到的定时器
         speed_scan_config();        // 时速扫描的配置
         engine_speed_scan_config(); // 发动机转速扫描的配置
 
-        tmr3_config();     // 定时将里程写入flash所需的定时器
+        // tmr3_config();     // 定时将里程写入flash所需的定时器
         tmr4_cnt_config(); // 配置用于后台更新时间的定时器（时钟默认打开）
 
         p03_output_config(); // 输出高电平用的引脚，到时候检测acc,才输出高电平，现在它一开始就是高电平
@@ -348,6 +348,8 @@ void main(void)
 #endif
 
 
+    tmr1_enable(); // 打开检测时速、发动机转速使用的定时器
+
     // 测试用到的配置：
     // P1_MD0 &= (~GPIO_P11_MODE_SEL(0x3));
     // P1_MD0 |= GPIO_P11_MODE_SEL(0x1); // 输出模式
@@ -365,7 +367,7 @@ void main(void)
         // mileage_scan(); // 里程扫描（大计里程扫描+小计里程扫描）
 
         adc_sel_pin(ADC_PIN_TOUCH); // 内部至少占用1ms
-        ad_key_scan();  
+        ad_key_scan();  // 检测触摸按键，内部会发送检测到的按键状态
 
         // 1. 测试 从串口接收指令，是否能够正确识别
         {
@@ -376,18 +378,14 @@ void main(void)
 
         // 2. 测试 时速和发动机的转速的扫描，并且不会阻塞主循环
         // 注意要先打开对应的定时器
-        // {
-        //     engine_speed_scan(); // 检测发动机转速
-        //     speed_scan();        // 检测时速
-        //     mileage_scan();      // 检测大计里程和小计里程
-        // }
+        {
+            engine_speed_scan(); // 检测发动机转速
+            speed_scan();        // 检测时速
+            mileage_scan();      // 检测大计里程和小计里程
+        }
 
         // 注意要先打开对应的定时器:
-        time_update(); // 更新时间
-
-
-          
-    
+        // time_update(); // 更新时间
     }
 }
 
