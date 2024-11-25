@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   TMR2                                                              11/23/2024 16:08:27 PAGE 1   
+C51 COMPILER V9.60.7.0   TMR2                                                              11/25/2024 17:48:03 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TMR2
@@ -62,7 +62,7 @@ line level    source
   50   1      }
   51          
   52          /**
-C51 COMPILER V9.60.7.0   TMR2                                                              11/23/2024 16:08:27 PAGE 2   
+C51 COMPILER V9.60.7.0   TMR2                                                              11/25/2024 17:48:03 PAGE 2   
 
   53           * @brief 关闭定时器，清空计数值
   54           */

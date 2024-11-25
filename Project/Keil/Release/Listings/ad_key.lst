@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 1   
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE AD_KEY
@@ -62,7 +62,7 @@ line level    source
   50   2                  cur_ad_key < (ad_key_scan_table[i][1] + AD_KEY_INTERVAL))
   51   2              {
   52   3                  // 如果之前未检测到按键，现在检测到按键按下
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 2   
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 2   
 
   53   3                  ad_key_id = ad_key_scan_table[i][0]; // 获取ad值对应的键值
   54   3                  break;
@@ -126,7 +126,7 @@ line level    source
  111   3                  // 跳转到短按处理
  112   3                  ad_key_scan_status = AD_KEY_SCAN_STATUS_IS_HANDLE_SHORT_PRESS;
  113   3      #if USE_MY_DEBUG
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 3   
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 3   
 
  114   3                  printf("short press\n"); // 测试用
  115   3      #endif
@@ -190,7 +190,7 @@ line level    source
  173   2              {
  174   3                  // 如果没有按键被触摸
  175   3              }
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 4   
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 4   
 
  176   2      
  177   2              ad_key_scan_status = AD_KEY_SCAN_STATUS_IS_WAIT_SHORT_PRESS_RELEASE;
@@ -254,7 +254,7 @@ line level    source
  235   1      
  236   1          if (AD_KEY_SCAN_STATUS_IS_HANDLE_HOLD_PRESS == ad_key_scan_status)
  237   1          {
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 5   
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 5   
 
  238   2              // 处理长按持续
  239   2      
@@ -318,7 +318,7 @@ line level    source
  297   4                  }
  298   3                  else if (AD_KEY_ID_THREE_RIGHT == ad_key_last_id)
  299   3                  {
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 6   
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 6   
 
  300   4                      if (touch_time_cnt >= HOLD_PRESS_TIME_THRESHOLD_MS)
  301   4                      {
@@ -382,7 +382,7 @@ line level    source
  357   5      #endif
  358   5                      }
  359   4                      else if (AD_KEY_ID_THREE_LEFT == ad_key_last_id)
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 7   
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 7   
 
  360   4                      {
  361   5      #if USE_MY_DEBUG
@@ -446,7 +446,7 @@ line level    source
                   AD_KEY_TWO_LEFT_VAL,
                   AD_KEY_THREE_LEFT_VAL,
                   AD_KEY_ONE_RIGHT_VAL,
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 8   
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 8   
 
                   AD_KEY_TWO_RIGHT_VAL,
                   AD_KEY_THREE_RIGHT_VAL,
@@ -510,7 +510,7 @@ line level    source
                       // }
                       // else if (ad_key_last > (ad_key - AD_KEY_INTERVAL) &&
                       //          ad_key_last < (ad_key + AD_KEY_INTERVAL))
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 9   
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 9   
 
                       if (ad_key_last > (ad_key - AD_KEY_INTERVAL) &&
                           ad_key_last < (ad_key + AD_KEY_INTERVAL))
@@ -574,7 +574,7 @@ line level    source
                                ad_key_last < (AD_KEY_THREE_LEFT_VAL + AD_KEY_INTERVAL))
                       {
                           // 如果  被触摸
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 10  
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 10  
 
               
               #if USE_MY_DEBUG
@@ -638,7 +638,7 @@ line level    source
                           // printf("one left long press\n");
               #endif
                           // flag_get_touch_key_status = 0; // 这个按键没有长按对应的操作
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 11  
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 11  
 
                       }
                       else if (ad_key_last > (AD_KEY_TWO_LEFT_VAL - AD_KEY_INTERVAL) &&
@@ -702,7 +702,7 @@ line level    source
                       // 处理长按持续
                       // flag_get_touch_key_status = 1; // 默认获取到了按键状态
               
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 12  
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 12  
 
                       // 如果之前检测到的ad值(ad_key_last)与当前检测到的ad值(ad_key)基本一致
                       if (ad_key_last > (ad_key - AD_KEY_INTERVAL) &&
@@ -766,7 +766,7 @@ line level    source
                               {
                                   touch_time_cnt = 0;
               #if USE_MY_DEBUG
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 13  
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 13  
 
                                   // printf("two right continue press\n");
               #endif
@@ -830,7 +830,7 @@ line level    source
                               if (ad_key_last > (AD_KEY_ONE_LEFT_VAL - AD_KEY_INTERVAL) &&
                                   ad_key_last < (AD_KEY_ONE_LEFT_VAL + AD_KEY_INTERVAL))
                               {
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 14  
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 14  
 
               #if USE_MY_DEBUG
                                   // printf("one left long press loose\n");
@@ -894,7 +894,7 @@ line level    source
                       // fun_info.touch_key_val = 0;
               
                       ad_key_scan_status = AD_KEY_SCAN_STATUS_NONE;
-C51 COMPILER V9.60.7.0   AD_KEY                                                            11/23/2024 16:08:29 PAGE 15  
+C51 COMPILER V9.60.7.0   AD_KEY                                                            11/25/2024 17:48:05 PAGE 15  
 
                   }
               }

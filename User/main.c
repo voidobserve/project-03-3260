@@ -379,11 +379,16 @@ void main(void)
         // 2. 测试 时速和发动机的转速的扫描，并且不会阻塞主循环
         // 注意要先打开对应的定时器
         {
-            engine_speed_scan(); // 检测发动机转速
-            speed_scan();        // 检测时速
-            mileage_scan();      // 检测大计里程和小计里程
+            // engine_speed_scan(); // 检测发动机转速
+            // speed_scan();        // 检测时速
+            // mileage_scan();      // 检测大计里程和小计里程
         }
 
+        // 油量检测：
+        adc_sel_pin(ADC_PIN_FUEL);
+        fuel_capacity_scan();
+        // delay_ms(500);
+        
         // 注意要先打开对应的定时器:
         // time_update(); // 更新时间
     }

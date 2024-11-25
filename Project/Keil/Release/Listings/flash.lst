@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   FLASH                                                             11/23/2024 16:08:28 PAGE 1   
+C51 COMPILER V9.60.7.0   FLASH                                                             11/25/2024 17:48:04 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE FLASH
@@ -62,7 +62,7 @@ line level    source
   51           * @retval None
   52           */
   53          void flash_read(u8 addr, u8 *p_data, u8 len)
-C51 COMPILER V9.60.7.0   FLASH                                                             11/23/2024 16:08:28 PAGE 2   
+C51 COMPILER V9.60.7.0   FLASH                                                             11/25/2024 17:48:04 PAGE 2   
 
   54          {
   55   1          while (len != 0)

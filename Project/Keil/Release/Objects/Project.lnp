@@ -18,7 +18,8 @@
 ".\Release\Objects\engine_speed_scan.obj",
 ".\Release\Objects\mileage.obj",
 ".\Release\Objects\instruction.obj",
-".\Release\Objects\ad_key.obj" 
+".\Release\Objects\ad_key.obj",
+".\Release\Objects\fuel_capacity.obj" 
 TO ".\Release\Objects\Project" 
 PRINT(".\Release\Listings\Project.m51") RAMSIZE(256) 
 CODE( 0X0000-0X3EEF )

@@ -1,0 +1,130 @@
+C51 COMPILER V9.60.7.0   FUEL_CAPACITY                                                     11/25/2024 17:48:05 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE FUEL_CAPACITY
+OBJECT MODULE PLACED IN .\Release\Objects\fuel_capacity.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\fuel_capacity.c LARGE OPTIMIZE(8,SIZE) BROWSE INTVECTOR(0X000
+                    -C) INCDIR(..\..\Libraries\Include;..\..\User;..\..\User\lib;..\..\Hardware) INTERVAL(3) DEBUG OBJECTEXTEND PRINT(.\Relea
+                    -se\Listings\fuel_capacity.lst) OBJECT(.\Release\Objects\fuel_capacity.obj)
+
+line level    source
+
+   1          #include "fuel_capacity.h"
+   2          
+   3          volatile u32 fuel_capacity_scan_cnt = 0;
+   4          
+   5          volatile u32 fuel_adc_val = 0;
+   6          volatile u32 fuel_adc_scan_cnt = 0; // 在更新时间到来前，记录adc扫描的次数
+   7          
+   8          volatile u16 adc_cmp_val_left = 0;
+   9          volatile u16 adc_cmp_val_right = 0;
+  10          
+  11          volatile u8 fuel_percent = 0;
+  12          
+  13          void fuel_capacity_scan(void)
+  14          {
+  15   1          adc_val = adc_getval();
+  16   1          // printf("fuel adc %u \n", adc_val);
+  17   1      
+  18   1          fuel_adc_val += adc_val;
+  19   1          fuel_adc_scan_cnt++;
+  20   1      
+  21   1          fuel_capacity_scan_cnt += ONE_CYCLE_TIME_MS;
+  22   1          if (fuel_capacity_scan_cnt >= FUEL_CAPACITY_SCAN_TIME_MS)
+  23   1          {
+  24   2              // 如果到了扫描更新时间，
+  25   2              fuel_capacity_scan_cnt = 0;
+  26   2              fuel_adc_val /= fuel_adc_scan_cnt; // 求出扫描时间内得到的ad平均值
+  27   2              fuel_adc_scan_cnt = 0;
+  28   2              printf("fuel adc val %lu \n", fuel_adc_val);
+  29   2      
+  30   2      #if (FUEL_MAX_ADC_VAL > FUEL_MIN_ADC_VAL)
+                      // 如果满油量对应的ad值大于0油量对应的ad值
+              
+                      fun_info.fuel = fuel_adc_val / ((FUEL_MAX_ADC_VAL - FUEL_MIN_ADC_VAL) / 100);
+              #else
+  35   2              // 如果满油量对应的ad值小于0油量对应的ad值
+  36   2      
+  37   2              // if (fuel_adc_val > FUEL_MIN_ADC_VAL - FUEL_DELTA_ADC_VAL)
+  38   2              // {
+  39   2              //     // 大于最小油量对应的ad值-死区值时，认为是最小油量
+  40   2              //     fuel_adc_val = FUEL_MIN_ADC_VAL;
+  41   2              // }
+  42   2              // else if (fuel_adc_val < FUEL_MAX_ADC_VAL + FUEL_DELTA_ADC_VAL)
+  43   2              // {
+  44   2              //     // 小于最大油量对应的ad值+死区时，认为是最大油量
+  45   2              //     fuel_adc_val = FUEL_MAX_ADC_VAL;
+  46   2              // }
+  47   2      
+  48   2              adc_cmp_val_left = FUEL_MIN_ADC_VAL - FUEL_DELTA_ADC_VAL;
+  49   2              // adc_cmp_val_right = FUEL_MIN_ADC_VAL;
+  50   2              if (fuel_adc_val >= adc_cmp_val_left)
+  51   2              {
+  52   3                  // 如果油量已经接近0%：
+  53   3                  fuel_percent = 0;
+C51 COMPILER V9.60.7.0   FUEL_CAPACITY                                                     11/25/2024 17:48:05 PAGE 2   
+
+  54   3              }
+  55   2              else
+  56   2              {
+  57   3                  // 如果不是0%油量
+  58   3                  // 判断当前油量是否在10% ~ 100%
+  59   3                  u8 i;
+  60   3                  for (i = 1; i < 9; i++)
+  61   3                  {
+  62   4                      //                   满油量和零油量的差值 * i / 10 - 阈值 + 满油量时对应
+             -的ad值()
+  63   4                      // adc_cmp_val_left = (FUEL_MIN_ADC_VAL - FUEL_MAX_ADC_VAL) * i / 10 - FUEL_DELTA_ADC_VAL 
+             -+ FUEL_MAX_ADC_VAL;
+  64   4                      // adc_cmp_val_right = (FUEL_MIN_ADC_VAL - FUEL_MAX_ADC_VAL) * (i + 1) / 10 + FUEL_DELTA_A
+             -DC_VAL + FUEL_MAX_ADC_VAL;
+  65   4      
+  66   4                      adc_cmp_val_left = FUEL_MAX_ADC_VAL +                                  /* 基数 */
+  67   4                                         ((FUEL_MIN_ADC_VAL - FUEL_MAX_ADC_VAL) * i / 10) -  /* 级数--第i级 
+             -*/
+  68   4                                         ((FUEL_MIN_ADC_VAL - FUEL_MAX_ADC_VAL) * 7 / 100);  /* 阈值 */
+  69   4                      adc_cmp_val_right = FUEL_MAX_ADC_VAL +                                 /* 基数 */
+  70   4                                          ((FUEL_MIN_ADC_VAL - FUEL_MAX_ADC_VAL) * i / 10) + /* 级数--第i级 
+             -*/
+  71   4                                          ((FUEL_MIN_ADC_VAL - FUEL_MAX_ADC_VAL) * 7 / 100); /* 阈值 */
+  72   4      
+  73   4                      // 判断油量是否接近100%
+  74   4                      if (fuel_adc_val <= FUEL_MAX_ADC_VAL + FUEL_DELTA_ADC_VAL)
+  75   4                      {
+  76   5                          fuel_percent = 100;
+  77   5                          break;
+  78   5                      }
+  79   4      
+  80   4                      if (fuel_adc_val >= adc_cmp_val_left &&
+  81   4                          fuel_adc_val <= adc_cmp_val_right)
+  82   4                      {
+  83   5                          fuel_percent = 100 - i * 10; //
+  84   5                          break;
+  85   5                      }
+  86   4                  }
+  87   3              }
+  88   2      
+  89   2              printf("fuel percent %bu\n", fuel_percent);
+  90   2      
+  91   2      #endif
+  92   2      
+  93   2              // printf("fuel %u%% \n", (u16)fun_info.fuel);
+  94   2      
+  95   2              fuel_adc_val = 0;
+  96   2              flag_get_fuel = 1;
+  97   2          }
+  98   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    410    ----
+   CONSTANT SIZE    =     37    ----
+   XDATA SIZE       =     17       1
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

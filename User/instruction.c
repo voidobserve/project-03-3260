@@ -289,7 +289,7 @@ void instruction_handle(void)
         // printf(" flag_get_engine_speed \n");
         // printf(" cur engine speed %u rpm ", (u16)fun_info.engine_speeed);
 #endif
-        // send_data(SEND_ENGINE_SPEED, fun_info.engine_speeed); // 测试时注释了，方便观察串口
+        send_data(SEND_ENGINE_SPEED, fun_info.engine_speeed); // 测试时注释了，方便观察串口
     }
 
     if (flag_get_speed)
@@ -302,7 +302,7 @@ void instruction_handle(void)
 
 #ifdef USE_INTERNATIONAL // 使用公制单位
 
-        // send_data(SEND_SPEED, fun_info.speed); // 发送当前采集到的车速（时速）// 测试时注释了，方便观察串口
+        send_data(SEND_SPEED, fun_info.speed); // 发送当前采集到的车速（时速）// 测试时注释了，方便观察串口
 
 #endif // USE_INTERNATIONAL 使用公制单位
 
@@ -454,7 +454,7 @@ void instruction_handle(void)
         // 如果要清除大计里程
         flag_clear_total_mileage = 0;
         fun_info.save_info.total_mileage = 0;
-        distance = 0;
+        distance = 0; // 
         fun_info_save(); // 将信息写回flash
 #if USE_MY_DEBUG
         printf(" flag_clear_total_mileage \n");

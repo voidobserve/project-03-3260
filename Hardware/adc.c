@@ -1,6 +1,5 @@
 #include "adc.h"
 
-
 volatile u16 adc_val = 0; // adc值，0~4095
 // bit adc_done_flag = 0; // adc转换完成标志
 
@@ -9,11 +8,14 @@ void adc_config(void)
 {
     // // 配置P23为模拟输入模式
     // P2_MD0 |= GPIO_P23_MODE_SEL(0x3); // 设为模拟模式
-    
+
     // P04--测量电池电压的引脚
     P0_MD0 |= GPIO_P04_MODE_SEL(0x3); // 模拟模式
     // P05--测量触摸IC传过来的电压的引脚
     P0_MD0 |= GPIO_P05_MODE_SEL(0x3); // 模拟模式
+
+    // 检测油量的引脚：
+    P0_MD0 |= GPIO_P01_MODE_SEL(0x3); // 模拟模式
 
     // ADC配置
     ADC_ACON1 &= ~(ADC_VREF_SEL(0x7) | ADC_EXREF_SEL(0x1)); // 清除电压选择，关闭外部参考电压
@@ -45,6 +47,13 @@ void adc_sel_pin(u8 adc_pin)
         ADC_CFG0 |= ADC_CHAN0_EN(0x1) |    // 使能通道0转换
                     ADC_EN(0x1);           // 使能A/D转换
         break;
+
+    case ADC_PIN_FUEL:
+        ADC_CHS0 = ADC_ANALOG_CHAN(0x01) | // P01通路
+                   ADC_EXT_SEL(0x0);       // 选择外部通路
+        ADC_CFG0 |= ADC_CHAN0_EN(0x1) |    // 使能通道0转换
+                    ADC_EN(0x1);           // 使能A/D转换
+        break;
     }
 
     delay_ms(1); // 等待ADC模块配置稳定，需要等待20us以上
@@ -63,10 +72,10 @@ static u16 __adc_single_convert(void)
 // adc采集+滤波
 u16 adc_getval(void)
 {
-    u16 __adc_val_tmp = 0; // 存放单次采集到的ad值
-    u32 __adc_val_sum = 0; // 存放所有采集到的ad值的累加
-    u16 __get_adcmax = 0; // 存放采集到的最大的ad值
-    u16  __get_adcmin = 0xFFFF; // 存放采集到的最小的ad值(初始值为最大值)
+    u16 __adc_val_tmp = 0;     // 存放单次采集到的ad值
+    u32 __adc_val_sum = 0;     // 存放所有采集到的ad值的累加
+    u16 __get_adcmax = 0;      // 存放采集到的最大的ad值
+    u16 __get_adcmin = 0xFFFF; // 存放采集到的最小的ad值(初始值为最大值)
     u8 i = 0;
 
     for (i = 0; i < 20; i++)
@@ -81,8 +90,8 @@ u16 adc_getval(void)
         __adc_val_sum += __adc_val_tmp;
     }
 
-    __adc_val_sum -= __get_adcmax;          // 去掉一个最大
-    __adc_val_sum -= __get_adcmin;          // 去掉一个最小
+    __adc_val_sum -= __get_adcmax;        // 去掉一个最大
+    __adc_val_sum -= __get_adcmin;        // 去掉一个最小
     __adc_val_tmp = (__adc_val_sum >> 4); // 除以16，取平均值
 
     return __adc_val_tmp;

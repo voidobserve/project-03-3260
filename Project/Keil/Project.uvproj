@@ -499,6 +499,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\User\ad_key.c</FilePath>
             </File>
+            <File>
+              <FileName>fuel_capacity.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\fuel_capacity.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

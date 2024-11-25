@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/23/2024 16:45:58 PAGE 1   
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/25/2024 17:48:05 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE INSTRUCTION
@@ -62,7 +62,7 @@ line level    source
   50   5                          flag_get_all_status = 1;
   51   5                          break;
   52   5      
-C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/23/2024 16:45:58 PAGE 2   
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/25/2024 17:48:05 PAGE 2   
 
   53   5      #if 0  // 不对MP5发送的这些指令进行处理
                      // case INSTRUCTION_GET_GEAR: // 获取挡位的状态
@@ -126,7 +126,7 @@ line level    source
                               //     break;
               
                               // case INSTRUCTION_SET_TEMP_OF_WATER_WARNING: // 设置水温报警
-C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/23/2024 16:45:58 PAGE 3   
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/25/2024 17:48:05 PAGE 3   
 
                               //     flag_set_temp_of_water_warning = 1;
               
@@ -190,7 +190,7 @@ line level    source
  172   2      #if USE_MY_DEBUG
  173   2              printf(" flag_get_all_status\n");
  174   2      #endif
-C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/23/2024 16:45:58 PAGE 4   
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/25/2024 17:48:05 PAGE 4   
 
  175   2      
  176   2              // 获取所有功能的状态，需要把这些功能对应的状态都发送出去
@@ -254,7 +254,7 @@ line level    source
  219   2              // 如果要获取挡位的状态
  220   2              flag_get_gear = 0; //
  221   2      
-C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/23/2024 16:45:58 PAGE 5   
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/25/2024 17:48:05 PAGE 5   
 
  222   2      #if USE_MY_DEBUG
  223   2              printf(" flag_get_gear\n");
@@ -318,7 +318,7 @@ line level    source
  281   2              send_data(SEND_HIGH_BEAM, fun_info.high_beam); // 发送当前远光灯的状态
  282   2          }
  283   1      
-C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/23/2024 16:45:58 PAGE 6   
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/25/2024 17:48:05 PAGE 6   
 
  284   1          if (flag_get_engine_speed)
  285   1          {
@@ -328,7 +328,7 @@ line level    source
  289   2              // printf(" flag_get_engine_speed \n");
  290   2              // printf(" cur engine speed %u rpm ", (u16)fun_info.engine_speeed);
  291   2      #endif
- 292   2              // send_data(SEND_ENGINE_SPEED, fun_info.engine_speeed); 
+ 292   2              send_data(SEND_ENGINE_SPEED, fun_info.engine_speeed); // 测试时注释了，方便观察串口
  293   2          }
  294   1      
  295   1          if (flag_get_speed)
@@ -341,7 +341,8 @@ line level    source
  302   2      
  303   2      #ifdef USE_INTERNATIONAL // 使用公制单位
  304   2      
- 305   2              // send_data(SEND_SPEED, fun_info.speed); // 发送当前采集到的车速（时速）
+ 305   2              send_data(SEND_SPEED, fun_info.speed); // 发送当前采集到的车速（时速）// 测试时�
+             -�释了，方便观察串口
  306   2      
  307   2      #endif // USE_INTERNATIONAL 使用公制单位
  308   2      
@@ -381,9 +382,9 @@ line level    source
  342   2              flag_get_total_mileage = 0;
  343   2      #if USE_MY_DEBUG
  344   2              printf(" flag_get_total_mileage \n");
- 345   2              printf(" cur total mileage %lu m \n", (u32)fun_info.save_info.total_mileage);
-C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/23/2024 16:45:58 PAGE 7   
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/25/2024 17:48:05 PAGE 7   
 
+ 345   2              printf(" cur total mileage %lu m \n", (u32)fun_info.save_info.total_mileage);
  346   2      #endif
  347   2      
  348   2      #ifdef USE_INTERNATIONAL // 公制单位
@@ -445,9 +446,9 @@ line level    source
  404   1      
  405   1          if (flag_alter_date)
  406   1          {
- 407   2              // 如果要修改日期
-C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/23/2024 16:45:58 PAGE 8   
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/25/2024 17:48:05 PAGE 8   
 
+ 407   2              // 如果要修改日期
  408   2              flag_alter_date = 0;
  409   2      #if USE_MY_DEBUG
  410   2              printf(" flag_alter_date \n");
@@ -499,7 +500,7 @@ line level    source
  454   2              // 如果要清除大计里程
  455   2              flag_clear_total_mileage = 0;
  456   2              fun_info.save_info.total_mileage = 0;
- 457   2              distance = 0;
+ 457   2              distance = 0; // 
  458   2              fun_info_save(); // 将信息写回flash
  459   2      #if USE_MY_DEBUG
  460   2              printf(" flag_clear_total_mileage \n");
@@ -509,9 +510,9 @@ line level    source
  464   1          if (flag_clear_sub_total_mileage)
  465   1          {
  466   2              // 如果要清除小计里程
- 467   2              flag_clear_sub_total_mileage = 0;
-C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/23/2024 16:45:58 PAGE 9   
+C51 COMPILER V9.60.7.0   INSTRUCTION                                                       11/25/2024 17:48:05 PAGE 9   
 
+ 467   2              flag_clear_sub_total_mileage = 0;
  468   2              fun_info.save_info.subtotal_mileage = 0;
  469   2              distance = 0;
  470   2              fun_info_save(); // 将信息写回flash
@@ -523,7 +524,7 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1512    ----
+   CODE SIZE        =   1546    ----
    CONSTANT SIZE    =    510    ----
    XDATA SIZE       =   ----       5
    PDATA SIZE       =   ----    ----

@@ -12,6 +12,8 @@ enum
     
     ADC_PIN_BATTERY = 0x01,
     ADC_PIN_TOUCH,
+    ADC_PIN_FUEL,
+    
 };
 
 extern u16 adc_val;
