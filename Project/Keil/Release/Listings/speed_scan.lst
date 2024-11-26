@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/25/2024 17:48:04 PAGE 1   
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/26/2024 17:09:53 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE SPEED_SCAN
@@ -62,7 +62,7 @@ line level    source
   50   1          if (speed_scan_time_cnt >= SPEED_SCAN_TIME_MS) // 如果经过了 xx ms
   51   1          {
   52   2              speed_scan_time_cnt -= SPEED_SCAN_TIME_MS; // 为了准确，减去这部分时间对应的计数�
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/25/2024 17:48:04 PAGE 2   
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/26/2024 17:09:53 PAGE 2   
 
              -��，而不是直接清零
   53   2      
@@ -126,7 +126,7 @@ line level    source
                       {
                           speed_increases_cnt = 0;
                           speed_decreases_cnt++;
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/25/2024 17:48:04 PAGE 3   
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/26/2024 17:09:53 PAGE 3   
 
                           if (speed_decreases_cnt >= SPEED_SCAN_FILTER_CNT) //  
                           {
@@ -190,7 +190,7 @@ line level    source
 MODULE INFORMATION:   STATIC OVERLAYABLE
    CODE SIZE        =    353    ----
    CONSTANT SIZE    =     20    ----
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/25/2024 17:48:04 PAGE 4   
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/26/2024 17:09:53 PAGE 4   
 
    XDATA SIZE       =     13       4
    PDATA SIZE       =   ----    ----

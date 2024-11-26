@@ -175,4 +175,7 @@ void pin_level_scan(void)
             flag_get_gear = 1;
         }
     }
+
+    // if () // ACC引脚检测，检测到高电平，P03也输出高电平，检测到低电平，让P03输出低电平
+    
 }

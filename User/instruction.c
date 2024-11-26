@@ -183,7 +183,7 @@ void instruction_handle(void)
         send_data(SEND_ENGINE_SPEED, fun_info.engine_speeed);                        // 7. 发送发动机转速
         send_data(SEND_SPEED, fun_info.speed);                                       // 8. 发送当前采集到的车速（时速）
         send_data(SEND_FUEL, fun_info.fuel);                                         // 9. 发送当前油量(单位：百分比)
-        send_data(SEND_WATER_TEMP, fun_info.temp_of_water);                          // 10. 发送当前采集的水温
+        // send_data(SEND_WATER_TEMP, fun_info.temp_of_water);                          // 10. 发送当前采集的水温
 #ifdef USE_INTERNATIONAL                                                             // 公制单位
         send_data(SEND_TOTAL_MILEAGE, fun_info.save_info.total_mileage / 100);       // 11. 发送大计里程（只发送百米及以上的数据）
         send_data(SEND_SUBTOTAL_MILEAGE, fun_info.save_info.subtotal_mileage / 100); // 12. 发送小计里程(只发送百米及以上的数据)

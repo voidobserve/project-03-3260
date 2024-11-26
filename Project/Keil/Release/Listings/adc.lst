@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   ADC                                                               11/25/2024 17:48:03 PAGE 1   
+C51 COMPILER V9.60.7.0   ADC                                                               11/26/2024 17:09:52 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE ADC
@@ -62,7 +62,7 @@ line level    source
   49   2              break;
   50   2      
   51   2          case ADC_PIN_FUEL:
-C51 COMPILER V9.60.7.0   ADC                                                               11/25/2024 17:48:03 PAGE 2   
+C51 COMPILER V9.60.7.0   ADC                                                               11/26/2024 17:09:52 PAGE 2   
 
   52   2              ADC_CHS0 = ADC_ANALOG_CHAN(0x01) | // P01通路
   53   2                         ADC_EXT_SEL(0x0);       // 选择外部通路
@@ -111,50 +111,7 @@ line level    source
   96   1      
   97   1          return __adc_val_tmp;
   98   1      }
-  99          
- 100          // void adc_showval(void)
- 101          // {
- 102          //     adc_sel_pin(ADC_PIN_BATTERY);
- 103          //     adc_sample_filter();
- 104          
- 105          // // 连接串口查看ADC值
- 106          // #if USE_MY_DEBUG
- 107          //     // printf("ADC_PIN_BATTERY = %d\r\n", adc_val);
- 108          // #endif
- 109          //     delay_ms(500);
- 110          
- 111          //     adc_sel_pin(ADC_PIN_TOUCH);
- 112          //     adc_sample_filter();
- 113          
-C51 COMPILER V9.60.7.0   ADC                                                               11/25/2024 17:48:03 PAGE 3   
-
- 114          //     // 连接串口查看ADC值
- 115          // #if USE_MY_DEBUG
- 116          //     // printf("ADC_PIN_TOUCH = %d\r\n", adc_val);
- 117          // #endif
- 118          //     delay_ms(500);
- 119          // }
- 120          
- 121          // // 测试用，还未能真正检测，只能将检测到的ad值直接转换成对应的百分比
- 122          // void adc_scan(void)
- 123          // {
- 124          //     adc_sel_pin(ADC_PIN_BATTERY);
- 125          //     adc_sample_filter();                                // 滤波完成之后可能还会出现跳变�
-             -�应该在后续加入死区判断
- 126          //     fun_info.battery = (u8)((u32)adc_val * 100 / 4095); // u16的adc_val乘以100会直接溢出，这�
-             -��要强转为u32
- 127          
- 128          // #if USE_MY_DEBUG
- 129          //     // 测试用：
- 130          //     // printf("ADC_PIN_BATTERY = %d\r\n", adc_val);
- 131          //     // printf("battery : %d %%\n", (u16)fun_info.battery); // %d打印是两个字节，不强转会越
-             -界访问
- 132          // #endif
- 133          
- 134          //     flag_get_battery = 1;
- 135          
- 136          //     delay_ms(10); // adc采样不能太频繁
- 137          // }
+  99           
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE

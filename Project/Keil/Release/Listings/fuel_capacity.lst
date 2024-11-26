@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   FUEL_CAPACITY                                                     11/25/2024 17:48:05 PAGE 1   
+C51 COMPILER V9.60.7.0   FUEL_CAPACITY                                                     11/26/2024 17:09:53 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE FUEL_CAPACITY
@@ -11,115 +11,205 @@ line level    source
 
    1          #include "fuel_capacity.h"
    2          
-   3          volatile u32 fuel_capacity_scan_cnt = 0;
-   4          
-   5          volatile u32 fuel_adc_val = 0;
-   6          volatile u32 fuel_adc_scan_cnt = 0; // 在更新时间到来前，记录adc扫描的次数
-   7          
-   8          volatile u16 adc_cmp_val_left = 0;
-   9          volatile u16 adc_cmp_val_right = 0;
+   3          volatile u32 fuel_capacity_scan_cnt = 0; // 扫描时间计数，在1ms定时器中断中累加
+   4          volatile u32 fuel_adc_val = 0;
+   5          volatile u32 fuel_adc_scan_cnt = 0; // 在更新时间到来前，记录adc扫描的次数
+   6          
+   7          volatile u8 fuel_percent = 0xFF;
+   8          
+   9          // static volatile u8 last_fuel_percent = 0xFF; // 记录上一次检测到的油量百分比
   10          
-  11          volatile u8 fuel_percent = 0;
-  12          
-  13          void fuel_capacity_scan(void)
-  14          {
-  15   1          adc_val = adc_getval();
-  16   1          // printf("fuel adc %u \n", adc_val);
-  17   1      
-  18   1          fuel_adc_val += adc_val;
-  19   1          fuel_adc_scan_cnt++;
-  20   1      
-  21   1          fuel_capacity_scan_cnt += ONE_CYCLE_TIME_MS;
-  22   1          if (fuel_capacity_scan_cnt >= FUEL_CAPACITY_SCAN_TIME_MS)
-  23   1          {
-  24   2              // 如果到了扫描更新时间，
-  25   2              fuel_capacity_scan_cnt = 0;
-  26   2              fuel_adc_val /= fuel_adc_scan_cnt; // 求出扫描时间内得到的ad平均值
-  27   2              fuel_adc_scan_cnt = 0;
-  28   2              printf("fuel adc val %lu \n", fuel_adc_val);
-  29   2      
-  30   2      #if (FUEL_MAX_ADC_VAL > FUEL_MIN_ADC_VAL)
-                      // 如果满油量对应的ad值大于0油量对应的ad值
-              
-                      fun_info.fuel = fuel_adc_val / ((FUEL_MAX_ADC_VAL - FUEL_MIN_ADC_VAL) / 100);
-              #else
-  35   2              // 如果满油量对应的ad值小于0油量对应的ad值
-  36   2      
-  37   2              // if (fuel_adc_val > FUEL_MIN_ADC_VAL - FUEL_DELTA_ADC_VAL)
-  38   2              // {
-  39   2              //     // 大于最小油量对应的ad值-死区值时，认为是最小油量
-  40   2              //     fuel_adc_val = FUEL_MIN_ADC_VAL;
-  41   2              // }
-  42   2              // else if (fuel_adc_val < FUEL_MAX_ADC_VAL + FUEL_DELTA_ADC_VAL)
-  43   2              // {
-  44   2              //     // 小于最大油量对应的ad值+死区时，认为是最大油量
-  45   2              //     fuel_adc_val = FUEL_MAX_ADC_VAL;
-  46   2              // }
-  47   2      
-  48   2              adc_cmp_val_left = FUEL_MIN_ADC_VAL - FUEL_DELTA_ADC_VAL;
-  49   2              // adc_cmp_val_right = FUEL_MIN_ADC_VAL;
-  50   2              if (fuel_adc_val >= adc_cmp_val_left)
-  51   2              {
-  52   3                  // 如果油量已经接近0%：
-  53   3                  fuel_percent = 0;
-C51 COMPILER V9.60.7.0   FUEL_CAPACITY                                                     11/25/2024 17:48:05 PAGE 2   
+  11          void fuel_capacity_scan(void)
+  12          {
+  13   1          adc_val = adc_getval();
+  14   1          // printf("fuel adc %u \n", adc_val);
+  15   1      
+  16   1          fuel_adc_val += adc_val;
+  17   1          fuel_adc_scan_cnt++;
+  18   1      
+  19   1          // fuel_capacity_scan_cnt += ONE_CYCLE_TIME_MS;
+  20   1          if (fuel_capacity_scan_cnt >= FUEL_CAPACITY_SCAN_TIME_MS)
+  21   1          {
+  22   2              // 如果到了扫描更新时间，
+  23   2              // bit flag_is_update_percent = 1; // 是否更新百分比,0--不更新,1--更新
+  24   2              fuel_capacity_scan_cnt = 0;
+  25   2              fuel_adc_val /= fuel_adc_scan_cnt; // 求出扫描时间内得到的ad平均值
+  26   2              fuel_adc_scan_cnt = 0;
+  27   2      
+  28   2      #if USE_MY_DEBUG
+  29   2              printf("fuel adc val %lu \n", fuel_adc_val);
+  30   2      #endif
+  31   2      
+  32   2              // 先确定油量百分比的大致范围：
+  33   2              if (fuel_adc_val < FUEL_MAX_ADC_VAL + (FUEL_90_PERCENT_ADC_VAL - FUEL_MAX_ADC_VAL) / 3)
+  34   2              {
+  35   3                  fuel_percent = 100;
+  36   3              }
+  37   2              else if (fuel_adc_val < (FUEL_90_PERCENT_ADC_VAL - (FUEL_90_PERCENT_ADC_VAL - FUEL_MAX_ADC_VAL) / 
+             -3))
+  38   2              {
+  39   3                  fuel_percent = 90;
+  40   3              }
+  41   2              else if (fuel_adc_val < (FUEL_80_PERCENT_ADC_VAL - (FUEL_80_PERCENT_ADC_VAL - FUEL_90_PERCENT_ADC_
+             -VAL) / 3))
+  42   2              {
+  43   3                  fuel_percent = 80;
+  44   3              }
+  45   2              else if (fuel_adc_val < (FUEL_70_PERCENT_ADC_VAL - (FUEL_70_PERCENT_ADC_VAL - FUEL_80_PERCENT_ADC_
+             -VAL) / 3))
+  46   2              {
+  47   3                  fuel_percent = 70;
+  48   3              }
+  49   2              else if (fuel_adc_val < (FUEL_60_PERCENT_ADC_VAL - (FUEL_60_PERCENT_ADC_VAL - FUEL_70_PERCENT_ADC_
+             -VAL) / 3))
+C51 COMPILER V9.60.7.0   FUEL_CAPACITY                                                     11/26/2024 17:09:53 PAGE 2   
 
-  54   3              }
-  55   2              else
-  56   2              {
-  57   3                  // 如果不是0%油量
-  58   3                  // 判断当前油量是否在10% ~ 100%
-  59   3                  u8 i;
-  60   3                  for (i = 1; i < 9; i++)
-  61   3                  {
-  62   4                      //                   满油量和零油量的差值 * i / 10 - 阈值 + 满油量时对应
-             -的ad值()
-  63   4                      // adc_cmp_val_left = (FUEL_MIN_ADC_VAL - FUEL_MAX_ADC_VAL) * i / 10 - FUEL_DELTA_ADC_VAL 
-             -+ FUEL_MAX_ADC_VAL;
-  64   4                      // adc_cmp_val_right = (FUEL_MIN_ADC_VAL - FUEL_MAX_ADC_VAL) * (i + 1) / 10 + FUEL_DELTA_A
-             -DC_VAL + FUEL_MAX_ADC_VAL;
-  65   4      
-  66   4                      adc_cmp_val_left = FUEL_MAX_ADC_VAL +                                  /* 基数 */
-  67   4                                         ((FUEL_MIN_ADC_VAL - FUEL_MAX_ADC_VAL) * i / 10) -  /* 级数--第i级 
-             -*/
-  68   4                                         ((FUEL_MIN_ADC_VAL - FUEL_MAX_ADC_VAL) * 7 / 100);  /* 阈值 */
-  69   4                      adc_cmp_val_right = FUEL_MAX_ADC_VAL +                                 /* 基数 */
-  70   4                                          ((FUEL_MIN_ADC_VAL - FUEL_MAX_ADC_VAL) * i / 10) + /* 级数--第i级 
-             -*/
-  71   4                                          ((FUEL_MIN_ADC_VAL - FUEL_MAX_ADC_VAL) * 7 / 100); /* 阈值 */
-  72   4      
-  73   4                      // 判断油量是否接近100%
-  74   4                      if (fuel_adc_val <= FUEL_MAX_ADC_VAL + FUEL_DELTA_ADC_VAL)
-  75   4                      {
-  76   5                          fuel_percent = 100;
-  77   5                          break;
-  78   5                      }
-  79   4      
-  80   4                      if (fuel_adc_val >= adc_cmp_val_left &&
-  81   4                          fuel_adc_val <= adc_cmp_val_right)
-  82   4                      {
-  83   5                          fuel_percent = 100 - i * 10; //
-  84   5                          break;
-  85   5                      }
-  86   4                  }
+  50   2              {
+  51   3                  fuel_percent = 60;
+  52   3              }
+  53   2              else if (fuel_adc_val < (FUEL_50_PERCENT_ADC_VAL - (FUEL_50_PERCENT_ADC_VAL - FUEL_60_PERCENT_ADC_
+             -VAL) / 3))
+  54   2              {
+  55   3                  fuel_percent = 50;
+  56   3              }
+  57   2              else if (fuel_adc_val < (FUEL_40_PERCENT_ADC_VAL - (FUEL_40_PERCENT_ADC_VAL - FUEL_50_PERCENT_ADC_
+             -VAL) / 3))
+  58   2              {
+  59   3                  fuel_percent = 40;
+  60   3              }
+  61   2              else if (fuel_adc_val < (FUEL_30_PERCENT_ADC_VAL - (FUEL_30_PERCENT_ADC_VAL - FUEL_40_PERCENT_ADC_
+             -VAL) / 3))
+  62   2              {
+  63   3                  fuel_percent = 30;
+  64   3              }
+  65   2              else if (fuel_adc_val < (FUEL_20_PERCENT_ADC_VAL - (FUEL_20_PERCENT_ADC_VAL - FUEL_30_PERCENT_ADC_
+             -VAL) / 3))
+  66   2              {
+  67   3                  fuel_percent = 20;
+  68   3              }
+  69   2              else if (fuel_adc_val < (FUEL_10_PERCENT_ADC_VAL - (FUEL_10_PERCENT_ADC_VAL - FUEL_20_PERCENT_ADC_
+             -VAL) / 3))
+  70   2              {
+  71   3                  fuel_percent = 10;
+  72   3              }
+  73   2              else
+  74   2              {
+  75   3                  fuel_percent = 0;
+  76   3              }
+  77   2      
+  78   2      #if USE_MY_DEBUG
+  79   2              printf("fuel percent nearly %bu\n", fuel_percent);
+  80   2      #endif
+  81   2      
+  82   2              // 再根据死区限制油量百分比
+  83   2              if (fuel_adc_val > FUEL_MIN_ADC_VAL - ((FUEL_MIN_ADC_VAL - FUEL_10_PERCENT_ADC_VAL) / 3))
+  84   2              {
+  85   3                  // 0%油量
+  86   3                  fuel_percent = 0;
   87   3              }
-  88   2      
-  89   2              printf("fuel percent %bu\n", fuel_percent);
-  90   2      
-  91   2      #endif
-  92   2      
-  93   2              // printf("fuel %u%% \n", (u16)fun_info.fuel);
-  94   2      
-  95   2              fuel_adc_val = 0;
-  96   2              flag_get_fuel = 1;
-  97   2          }
-  98   1      }
+  88   2              else if (fuel_adc_val < (FUEL_10_PERCENT_ADC_VAL + (FUEL_MIN_ADC_VAL - FUEL_10_PERCENT_ADC_VAL) / 
+             -3) &&
+  89   2                       fuel_adc_val > FUEL_10_PERCENT_ADC_VAL - (FUEL_10_PERCENT_ADC_VAL - FUEL_20_PERCENT_ADC_V
+             -AL) / 3)
+  90   2              {
+  91   3                  // 10%油量
+  92   3                  fuel_percent = 10;
+  93   3              }
+  94   2              else if (fuel_adc_val < (FUEL_20_PERCENT_ADC_VAL + (FUEL_10_PERCENT_ADC_VAL - FUEL_20_PERCENT_ADC_
+             -VAL) / 3) &&
+  95   2                       fuel_adc_val > FUEL_20_PERCENT_ADC_VAL - (FUEL_20_PERCENT_ADC_VAL - FUEL_30_PERCENT_ADC_V
+             -AL) / 3)
+  96   2              {
+  97   3                  // 20%油量
+  98   3                  fuel_percent = 20;
+  99   3              }
+ 100   2              else if (fuel_adc_val < (FUEL_30_PERCENT_ADC_VAL + (FUEL_20_PERCENT_ADC_VAL - FUEL_30_PERCENT_ADC_
+             -VAL) / 3) &&
+ 101   2                       fuel_adc_val > FUEL_30_PERCENT_ADC_VAL - (FUEL_30_PERCENT_ADC_VAL - FUEL_40_PERCENT_ADC_V
+C51 COMPILER V9.60.7.0   FUEL_CAPACITY                                                     11/26/2024 17:09:53 PAGE 3   
+
+             -AL) / 3)
+ 102   2              {
+ 103   3                  // 30%油量
+ 104   3                  fuel_percent = 30;
+ 105   3              }
+ 106   2              else if (fuel_adc_val < (FUEL_40_PERCENT_ADC_VAL + (FUEL_30_PERCENT_ADC_VAL - FUEL_40_PERCENT_ADC_
+             -VAL) / 3) &&
+ 107   2                       fuel_adc_val > FUEL_40_PERCENT_ADC_VAL - (FUEL_40_PERCENT_ADC_VAL - FUEL_50_PERCENT_ADC_V
+             -AL) / 3)
+ 108   2              {
+ 109   3                  // 40%油量
+ 110   3                  fuel_percent = 40;
+ 111   3              }
+ 112   2              else if (fuel_adc_val < (FUEL_50_PERCENT_ADC_VAL + (FUEL_40_PERCENT_ADC_VAL - FUEL_50_PERCENT_ADC_
+             -VAL) / 3) &&
+ 113   2                       fuel_adc_val > FUEL_50_PERCENT_ADC_VAL - (FUEL_50_PERCENT_ADC_VAL - FUEL_60_PERCENT_ADC_V
+             -AL) / 3)
+ 114   2              {
+ 115   3                  // 50%油量
+ 116   3                  fuel_percent = 50;
+ 117   3              }
+ 118   2      
+ 119   2              else if (fuel_adc_val < (FUEL_60_PERCENT_ADC_VAL + (FUEL_50_PERCENT_ADC_VAL - FUEL_60_PERCENT_ADC_
+             -VAL) / 3) &&
+ 120   2                       fuel_adc_val > FUEL_60_PERCENT_ADC_VAL - (FUEL_60_PERCENT_ADC_VAL - FUEL_70_PERCENT_ADC_V
+             -AL) / 3)
+ 121   2              {
+ 122   3                  // 60%油量
+ 123   3                  fuel_percent = 60;
+ 124   3              }
+ 125   2              else if (fuel_adc_val < (FUEL_70_PERCENT_ADC_VAL + (FUEL_60_PERCENT_ADC_VAL - FUEL_70_PERCENT_ADC_
+             -VAL) / 3) &&
+ 126   2                       fuel_adc_val > FUEL_70_PERCENT_ADC_VAL - (FUEL_70_PERCENT_ADC_VAL - FUEL_80_PERCENT_ADC_V
+             -AL) / 3)
+ 127   2              {
+ 128   3                  // 70%油量
+ 129   3                  fuel_percent = 70;
+ 130   3              }
+ 131   2              else if (fuel_adc_val < (FUEL_80_PERCENT_ADC_VAL + (FUEL_70_PERCENT_ADC_VAL - FUEL_80_PERCENT_ADC_
+             -VAL) / 3) &&
+ 132   2                       fuel_adc_val > FUEL_80_PERCENT_ADC_VAL - (FUEL_80_PERCENT_ADC_VAL - FUEL_90_PERCENT_ADC_V
+             -AL) / 3)
+ 133   2              {
+ 134   3                  // 80%油量
+ 135   3                  fuel_percent = 80;
+ 136   3              }
+ 137   2              else if (fuel_adc_val < (FUEL_90_PERCENT_ADC_VAL + (FUEL_80_PERCENT_ADC_VAL - FUEL_90_PERCENT_ADC_
+             -VAL) / 3) &&
+ 138   2                       fuel_adc_val > FUEL_90_PERCENT_ADC_VAL - (FUEL_90_PERCENT_ADC_VAL - FUEL_MAX_ADC_VAL) / 3
+             -)
+ 139   2              {
+ 140   3                  // 90%油量
+ 141   3                  fuel_percent = 90;
+ 142   3              }
+ 143   2              else if (fuel_adc_val < (FUEL_MAX_ADC_VAL + ((FUEL_90_PERCENT_ADC_VAL - FUEL_MAX_ADC_VAL) / 3)))
+ 144   2              {
+ 145   3                  // 100%油量
+ 146   3                  fuel_percent = 100;
+ 147   3              }
+ 148   2              else
+ 149   2              {
+ 150   3                  // 如果检测到的ad值不在死区范围内,不更新油量
+C51 COMPILER V9.60.7.0   FUEL_CAPACITY                                                     11/26/2024 17:09:53 PAGE 4   
+
+ 151   3                  // flag_is_update_percent = 0;
+ 152   3              }
+ 153   2      
+ 154   2      #if USE_MY_DEBUG
+ 155   2              printf("fuel percent %bu\n", fuel_percent);
+ 156   2      #endif
+ 157   2      
+ 158   2              fun_info.fuel = fuel_percent;
+ 159   2              fuel_adc_val = 0xFF;
+ 160   2              flag_get_fuel = 1;
+ 161   2          } // if (fuel_capacity_scan_cnt >= FUEL_CAPACITY_SCAN_TIME_MS)
+ 162   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    410    ----
-   CONSTANT SIZE    =     37    ----
-   XDATA SIZE       =     17       1
+   CODE SIZE        =    953    ----
+   CONSTANT SIZE    =     62    ----
+   XDATA SIZE       =     13    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----

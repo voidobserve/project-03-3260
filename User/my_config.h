@@ -55,6 +55,17 @@
 #define FUEL_MAX_ADC_VAL (600)
 // 油量最小时，对应的ad值
 #define FUEL_MIN_ADC_VAL (2700)
+
+#define FUEL_10_PERCENT_ADC_VAL (2654)
+#define FUEL_20_PERCENT_ADC_VAL (2570)
+#define FUEL_30_PERCENT_ADC_VAL (2480)
+#define FUEL_40_PERCENT_ADC_VAL (2320)
+#define FUEL_50_PERCENT_ADC_VAL (2150)
+#define FUEL_60_PERCENT_ADC_VAL (2020)
+#define FUEL_70_PERCENT_ADC_VAL (1850)
+#define FUEL_80_PERCENT_ADC_VAL (1735)
+#define FUEL_90_PERCENT_ADC_VAL (1335)
+
 // adc差值
 #define FUEL_DELTA_ADC_VAL ((FUEL_MIN_ADC_VAL - FUEL_MAX_ADC_VAL) / 10 / 2)
 // 油量检测配置
@@ -98,7 +109,35 @@
 // 触摸按键配置
 // ======================================================
 
-#define ONE_CYCLE_TIME_MS (2) // 主函数完成一次循环所需的时间，单位：ms (0--说明每次调用该函数的时间很短，可以忽略不计)(注意不能大于变量类型的大小)
+// ======================================================
+// 水温检测配置:
+// 水温检测的累计时间(单位：ms)
+#define TEMP_OF_WATER_ACCUMULATE_TIEM_MS (10000) // 10s
+// 水温检测对应的报警ad值，满足该值且超过累计时间时，触发报警
+#define TEMP_OF_WATER_WARNING_AD_VAL (3015)
+// 水温检测对应的解除报警ad值，满足该值且超过累计时间时，解除报警
+#define TEMP_OF_WATER_CANCEL_WARNING_AD_VAL (2048)
+
+// 注意:水温报警和解除报警对应的ad值不能一致，差值也不能过小
+
+// 水温检测配置
+// ======================================================
+
+// ======================================================
+// 电池电量检测配置:
+// 电池电量检测的更新时间(单位：ms，每隔 xx ms更新一次)
+#define BATTERY_SCAN_UPDATE_TIME_MS (5000)
+
+// 电池满电时的电压:(例， 电池4.2V满电， MAX_VOLTAGE_OF_BATTERY == 42)
+#define MAX_VOLTAGE_OF_BATTERY (150)
+// 电池放电的截止电压：（例，电池2.3V截止,MIN_VOLTAGE_OF_BATTERY == 23）
+#define MIN_VOLTAGE_OF_BATTERY (90)
+// 电池满电时，在检测引脚检测到的ad值
+#define MAX_VOLTAGE_OF_BATTERY_AD_VAL (4034) 
+// 电池电量检测配置
+//======================================================
+
+#define ONE_CYCLE_TIME_MS (4) // 主函数完成一次循环所需的时间，单位：ms (0--说明每次调用该函数的时间很短，可以忽略不计)(注意不能大于变量类型的大小)
 
 #include <stdio.h>   // printf()
 #include "my_gpio.h" // 自定义的、使用到的引脚
@@ -129,6 +168,7 @@
 
 #include "ad_key.h" // 检测触摸IC发送过来的ad信号
 #include "fuel_capacity.h" // 油量检测
-
+#include "temp_of_water.h" // 水温报警检测
+#include "battery.h" // 电池电量检测
 
 #endif // end file

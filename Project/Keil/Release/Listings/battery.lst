@@ -1,0 +1,83 @@
+C51 COMPILER V9.60.7.0   BATTERY                                                           11/26/2024 17:09:54 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE BATTERY
+OBJECT MODULE PLACED IN .\Release\Objects\battery.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\battery.c LARGE OPTIMIZE(8,SIZE) BROWSE INTVECTOR(0X000C) INC
+                    -DIR(..\..\Libraries\Include;..\..\User;..\..\User\lib;..\..\Hardware) INTERVAL(3) DEBUG OBJECTEXTEND PRINT(.\Release\Lis
+                    -tings\battery.lst) OBJECT(.\Release\Objects\battery.obj)
+
+line level    source
+
+   1          #include "battery.h"
+   2          
+   3          //
+   4          
+   5          // 将ad值转换为对应的电压值
+   6          u8 conver_adc_val_to_voltage(u16 arg_adc_val)
+   7          {
+   8   1          // 假设使用5V参考电压，电池满电4.2V，
+   9   1          // 在电池满电下，检测脚检测到的电压是 2.1V,对应的ad值是 1720
+  10   1          /*
+  11   1              电压值 == arg_adc_val * 42 / 10 / 1720
+  12   1              转换成单片机可以计算的形式：
+  13   1              arg_adc_val * 42 / 17200 ;
+  14   1          */
+  15   1          return (u32)arg_adc_val * MAX_VOLTAGE_OF_BATTERY / (MAX_VOLTAGE_OF_BATTERY_AD_VAL * 10);
+  16   1      }
+  17          
+  18          // 将电池电压转换为对应的百分比
+  19          u8 conver_voltage_of_battery_to_percentage(u8 voltage)
+  20          {
+  21   1          // 假设电池电压从2.3V ~ 4.2V
+  22   1          // u8 percentage = voltage / (42-23);
+  23   1          return voltage / (MAX_VOLTAGE_OF_BATTERY - MIN_VOLTAGE_OF_BATTERY);
+  24   1      }
+  25          
+  26          void battery_scan(void)
+  27          {
+  28   1          u8 voltage_of_battery = 0;        // 存放电池电压
+  29   1          u8 cur_percentage_of_battery = 0; // 存放当前电池电量百分比
+  30   1      
+  31   1          static u32 battery_scan_cnt = 0;
+  32   1          static u32 battery_scan_time_cnt = 0;
+  33   1          static u32 battery_val = 0;
+  34   1      
+  35   1          // adc_val = adc_getval();
+  36   1          // voltage_of_battery = conver_adc_val_to_voltage(adc_val);
+  37   1          // cur_percentage_of_battery = conver_voltage_of_battery_to_percentage(voltage_of_battery);
+  38   1      
+  39   1          battery_val += adc_getval(); // 可能要防止计数溢出
+  40   1          battery_scan_cnt++;
+  41   1          battery_scan_time_cnt += ONE_CYCLE_TIME_MS;
+  42   1          if (battery_scan_cnt >= BATTERY_SCAN_UPDATE_TIME_MS)
+  43   1          {
+  44   2              battery_val /= battery_scan_cnt; // 取平均数
+  45   2              voltage_of_battery = conver_adc_val_to_voltage(battery_val);
+  46   2              cur_percentage_of_battery = conver_voltage_of_battery_to_percentage(voltage_of_battery);
+  47   2              battery_val = 0; // 清空数值
+  48   2              battery_scan_cnt = 0; // 清空计数值
+  49   2              battery_scan_time_cnt = 0; // 清空时间计数值
+  50   2      
+  51   2              fun_info.battery = cur_percentage_of_battery;
+  52   2              fun_info.voltage_of_battery = voltage_of_battery;
+  53   2              flag_get_voltage_of_battery = 1;
+C51 COMPILER V9.60.7.0   BATTERY                                                           11/26/2024 17:09:54 PAGE 2   
+
+  54   2              flag_get_battery = 1;
+  55   2          }
+  56   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    232    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     12       2
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

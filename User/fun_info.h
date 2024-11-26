@@ -66,9 +66,9 @@ typedef struct
     u8 high_beam;  // 远光灯的状态
 
     u8 fuel;          // 油量
-    u8 temp_of_water; // 水温
+    // u8 temp_of_water; // 水温
 
-    u8 flag_is_in_water_temp_warning; // 标志位，是否处于水温报警
+    u8 flag_is_in_water_temp_warning; // 标志位，是否处于水温报警（1--水温报警，0--解除水温报警）
 
     // 在结构体中使用一位的数据：
     // u8 bit0 : 1;

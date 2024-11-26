@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   MILEAGE                                                           11/25/2024 17:48:04 PAGE 1   
+C51 COMPILER V9.60.7.0   MILEAGE                                                           11/26/2024 17:09:53 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MILEAGE
@@ -62,7 +62,7 @@ line level    source
   48   2      
   49   2              distance -= 1000; // 剩下的、未保存的、不满1m的数据留到下一次再保存
   50   2          }
-C51 COMPILER V9.60.7.0   MILEAGE                                                           11/25/2024 17:48:04 PAGE 2   
+C51 COMPILER V9.60.7.0   MILEAGE                                                           11/26/2024 17:09:53 PAGE 2   
 
   51   1      
   52   1      #ifdef USE_INTERNATIONAL /* 公制单位 */

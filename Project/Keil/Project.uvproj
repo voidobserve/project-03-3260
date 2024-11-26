@@ -504,6 +504,16 @@
               <FileType>1</FileType>
               <FilePath>..\..\User\fuel_capacity.c</FilePath>
             </File>
+            <File>
+              <FileName>temp_of_water.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\temp_of_water.c</FilePath>
+            </File>
+            <File>
+              <FileName>battery.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\battery.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

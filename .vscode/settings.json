@@ -35,7 +35,9 @@
         "set_date_time.h": "c",
         "tmr4.h": "c",
         "ad_key.h": "c",
-        "fuel_capacity.h": "c"
+        "fuel_capacity.h": "c",
+        "temp_of_water.h": "c",
+        "battery.h": "c"
     },
     "typescript.suggest.jsdoc.generateReturns": false,
     "javascript.suggest.jsdoc.generateReturns": false

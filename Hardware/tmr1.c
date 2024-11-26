@@ -97,6 +97,11 @@ void TIMR1_IRQHandler(void) interrupt TMR1_IRQn
             mileage_scan_time_cnt++;
         }
 
+        if (fuel_capacity_scan_cnt < 4294967295) // 防止计数溢出
+        {
+            fuel_capacity_scan_cnt++;
+        }
+
 #if 0
         // 如果到了5s
         if (TMR1_cnt == 1000)

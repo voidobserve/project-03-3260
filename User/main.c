@@ -18,7 +18,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "include.h"
 
-
 // 更新时间
 void time_update(void)
 {
@@ -331,7 +330,7 @@ void main(void)
     printf("year %d month %d day %d \n", (u16)fun_info.save_info.year, (u16)fun_info.save_info.month, (u16)fun_info.save_info.day);
 #endif
 
-#if 0// 测试发送日期和时间
+#if 0 // 测试发送日期和时间
 //     // 当前日期
 //     fun_info.save_info.year = 2024;
 //     fun_info.save_info.month = 0x0B;
@@ -347,14 +346,12 @@ void main(void)
     // fun_info.save_info.time_sec = 55;
 #endif
 
-
-    tmr1_enable(); // 打开检测时速、发动机转速使用的定时器
+    tmr1_enable(); // 打开 检测时速、发动机转速、更新里程、定时检测油量 使用的定时器
 
     // 测试用到的配置：
     // P1_MD0 &= (~GPIO_P11_MODE_SEL(0x3));
     // P1_MD0 |= GPIO_P11_MODE_SEL(0x1); // 输出模式
     // FOUT_S11 |= GPIO_FOUT_AF_FUNC;
-   
 
     /* 系统主循环 */
     while (1)
@@ -367,14 +364,14 @@ void main(void)
         // mileage_scan(); // 里程扫描（大计里程扫描+小计里程扫描）
 
         adc_sel_pin(ADC_PIN_TOUCH); // 内部至少占用1ms
-        ad_key_scan();  // 检测触摸按键，内部会发送检测到的按键状态
+        ad_key_scan();              // 检测触摸按键，内部会发送检测到的按键状态
 
         // 1. 测试 从串口接收指令，是否能够正确识别
-        {
-            uart0_scan_handle();  // 检查串口接收缓冲区的数据是否符合协议,如果有正确的指令，会存到另一个缓冲区中
-            instruction_scan();   // 扫描是否有合法的指令
-            instruction_handle(); // 扫描是否有对应的获取/状态更新操作
-        }
+        // {
+        //     uart0_scan_handle();  // 检查串口接收缓冲区的数据是否符合协议,如果有正确的指令，会存到另一个缓冲区中
+        //     instruction_scan();   // 扫描是否有合法的指令
+        //     instruction_handle(); // 扫描是否有对应的获取/状态更新操作
+        // }
 
         // 2. 测试 时速和发动机的转速的扫描，并且不会阻塞主循环
         // 注意要先打开对应的定时器
@@ -385,12 +382,25 @@ void main(void)
         }
 
         // 油量检测：
-        adc_sel_pin(ADC_PIN_FUEL);
+        adc_sel_pin(ADC_PIN_FUEL); // 内部至少占用1ms
         fuel_capacity_scan();
+
+        // 水温检测：
+        adc_sel_pin(ADC_PIN_TEMP_OF_WATER);
+        temp_of_water_scan();
+
+        // 电池电量检测：
+        adc_sel_pin(ADC_PIN_BATTERY);
+        battery_scan();
+
+        uart0_scan_handle();  // 检查串口接收缓冲区的数据是否符合协议,如果有正确的指令，会存到另一个缓冲区中
+        instruction_scan();   // 扫描是否有合法的指令
+        instruction_handle(); // 扫描是否有对应的获取/状态更新操作
+
         // delay_ms(500);
-        
+
         // 注意要先打开对应的定时器:
-        // time_update(); // 更新时间
+        time_update(); // 更新时间
     }
 }
 
