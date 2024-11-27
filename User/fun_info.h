@@ -16,7 +16,7 @@ enum
     GEAR_SIXTH = 0x06    // 六档
 };
 
-// 定义，灯的开关状态
+// 
 enum
 {
     ON = 0x01,

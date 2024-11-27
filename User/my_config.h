@@ -6,7 +6,7 @@
 
 #define ARRAY_SIZE(arry) (sizeof(arry) / sizeof(arry[0]))
 
-#define USE_MY_DEBUG 1
+#define USE_MY_DEBUG 0
 
 // 串口0波特率
 #define UART0_BAUDRATE (115200)
@@ -20,6 +20,12 @@
 // USE_INTERNATIONAL -- 国际通用单位
 // USE_IMPERIAL -- 英制单位
 #define USE_INTERNATIONAL
+// ======================================================
+// 引脚电平扫描配置：
+#define PIN_LEVEL_SCAN_TIME_MS (100) // 扫描时间，每隔 xx ms更新一次状态
+// 引脚电平扫描配置
+// ======================================================
+
 
 // ======================================================
 // 检测发动机转速所需的配置：
@@ -36,7 +42,7 @@
 // 检测时速所需的配置：
 
 // 检测到 多少个脉冲 表示 车轮走过一圈
-#define SPEED_SCAN_PULSE_PER_TURN (64)
+#define SPEED_SCAN_PULSE_PER_TURN (32)
 // 车轮的一圈对应多少毫米
 #define SPEED_SCAN_MM_PER_TURN (1795) // 一圈 xx 毫米
 // 累计检测多久的时速并更新状态：(单位：ms)
@@ -65,9 +71,6 @@
 #define FUEL_70_PERCENT_ADC_VAL (1850)
 #define FUEL_80_PERCENT_ADC_VAL (1735)
 #define FUEL_90_PERCENT_ADC_VAL (1335)
-
-// adc差值
-#define FUEL_DELTA_ADC_VAL ((FUEL_MIN_ADC_VAL - FUEL_MAX_ADC_VAL) / 10 / 2)
 // 油量检测配置
 // ======================================================
 
@@ -126,18 +129,21 @@
 // ======================================================
 // 电池电量检测配置:
 // 电池电量检测的更新时间(单位：ms，每隔 xx ms更新一次)
-#define BATTERY_SCAN_UPDATE_TIME_MS (5000)
+// 注意更新时间不能过长(不超过1min)，否则在求电池电压平均值前，会计数溢出
+#define BATTERY_SCAN_UPDATE_TIME_MS (1000)
 
 // 电池满电时的电压:(例， 电池4.2V满电， MAX_VOLTAGE_OF_BATTERY == 42)
 #define MAX_VOLTAGE_OF_BATTERY (150)
 // 电池放电的截止电压：（例，电池2.3V截止,MIN_VOLTAGE_OF_BATTERY == 23）
-#define MIN_VOLTAGE_OF_BATTERY (90)
+// #define MIN_VOLTAGE_OF_BATTERY (90)
 // 电池满电时，在检测引脚检测到的ad值
 #define MAX_VOLTAGE_OF_BATTERY_AD_VAL (4034) 
 // 电池电量检测配置
 //======================================================
 
-#define ONE_CYCLE_TIME_MS (4) // 主函数完成一次循环所需的时间，单位：ms (0--说明每次调用该函数的时间很短，可以忽略不计)(注意不能大于变量类型的大小)
+// 主函数完成一次循环所需的时间，单位：ms (0--说明每次调用该函数的时间很短，可以忽略不计)(注意不能大于变量类型的大小)
+// 功能全部开放后，每一轮的时间可能都不一样，不在时间要求高的场合使用
+#define ONE_CYCLE_TIME_MS (8) 
 
 #include <stdio.h>   // printf()
 #include "my_gpio.h" // 自定义的、使用到的引脚

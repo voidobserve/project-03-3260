@@ -2,7 +2,7 @@
 #include "mileage.h"
 
 volatile u32 mileage_scan_time_cnt = 0; // 里程扫描所需的计数值,每隔一定时间将里程写入flash
-volatile u32 distance = 0;               // 存放每次扫描时走过的路程（单位：毫米）-->用于里程表的计数
+volatile u32 distance = 0;              // 存放每次扫描时走过的路程（单位：毫米）-->用于里程表的计数
 
 // 总里程扫描
 void mileage_scan(void)
@@ -15,7 +15,9 @@ void mileage_scan(void)
         mileage_scan_time_cnt = 0;
         fun_info_save(); // 将 fun_info 写回flash
 
+#if USE_MY_DEBUG
         printf("fun_info_save()");
+#endif
     }
 
     if (distance >= 1000) // 1000mm -- 1m
@@ -61,10 +63,8 @@ void mileage_scan(void)
 
         // printf("total mileage: %lum\n", fun_info.save_info.total_mileage);
 
-        {
-            // 发送数据的操作，可以先置标志位
-            flag_get_total_mileage = 1;
-        }
+        // 发送数据的操作，可以先置标志位
+        flag_get_total_mileage = 1;
     }
 
 #ifdef USE_INTERNATIONAL /* 公制单位 */
@@ -79,9 +79,7 @@ void mileage_scan(void)
 
         // printf("subtotal mileage: %lum\n", fun_info.save_info.subtotal_mileage);
 
-        {
-            // 发送数据的操作，可以先置标志位
-            flag_get_sub_total_mileage = 1;
-        }
+        // 发送数据的操作，可以先置标志位
+        flag_get_sub_total_mileage = 1;
     }
 }

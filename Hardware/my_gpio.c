@@ -14,41 +14,33 @@ void output_pin_init(void)
     P11 = 1;
 }
 
-/**
- * @brief P11配置为输出模式
- */
-void p11_output_config(void)
-{
-    P1_MD0 &= ~(GPIO_P11_MODE_SEL(0x1)); // 对应的寄存器先清零
-    P1_MD0 |= GPIO_P11_MODE_SEL(0x1);    // 配置为输出模式
+// /**
+//  * @brief P11配置为输出模式
+//  */
+// void p11_output_config(void)
+// {
+//     P1_MD0 &= ~(GPIO_P11_MODE_SEL(0x1)); // 对应的寄存器先清零
+//     P1_MD0 |= GPIO_P11_MODE_SEL(0x1);    // 配置为输出模式
 
-    FOUT_S11 = GPIO_FOUT_AF_FUNC; // 选择AF功能输出
+//     FOUT_S11 = GPIO_FOUT_AF_FUNC; // 选择AF功能输出
 
-    P1_PU |= GPIO_P11_PULL_UP(0x01); // 内部的上拉电阻
-    P1_PD |= GPIO_P11_PULL_PD(0x01); // 内部的下拉电阻
-    // 配置完上下拉电阻后，这个引脚就相当于浮空状态，同时能够避免一些电路的干扰
+//     // 位操作
+//     P11 = 1;
+// }
 
-    // 位操作
-    P11 = 1;
-}
+// /**
+//  * @brief P12配置为输出模式
+//  */
+// void p12_output_config(void)
+// {
+//     P1_MD0 &= ~(GPIO_P12_MODE_SEL(0x1)); // 对应的寄存器先清零
+//     P1_MD0 |= GPIO_P12_MODE_SEL(0x1);    // 配置为输出模式
 
-/**
- * @brief P12配置为输出模式
- */
-void p12_output_config(void)
-{
-    P1_MD0 &= ~(GPIO_P12_MODE_SEL(0x1)); // 对应的寄存器先清零
-    P1_MD0 |= GPIO_P12_MODE_SEL(0x1);    // 配置为输出模式
+//     FOUT_S12 = GPIO_FOUT_AF_FUNC; // 选择AF功能输出
 
-    FOUT_S12 = GPIO_FOUT_AF_FUNC; // 选择AF功能输出
-
-    P1_PU |= GPIO_P12_PULL_UP(0x01); // 内部的上拉电阻
-    P1_PD |= GPIO_P12_PULL_PD(0x01); // 内部的下拉电阻
-    // 配置完上下拉电阻后，这个引脚就相当于浮空状态，同时能够避免一些电路的干扰
-
-    // 位操作
-    P12 = 1;
-}
+//     // 位操作
+//     P12 = 1;
+// }
 
 /**
  * @brief P01配置为输出模式
@@ -89,10 +81,6 @@ void p26_output_config(void)
     P2_MD1 |= GPIO_P26_MODE_SEL(0x1);    // 配置为输出模式
 
     FOUT_S26 = GPIO_FOUT_AF_FUNC; // 选择AF功能输出
-
-    P2_PU |= GPIO_P26_PULL_UP(0x01); // 内部的上拉电阻
-    P2_PD |= GPIO_P26_PULL_PD(0x01); // 内部的下拉电阻
-    // 配置完上下拉电阻后，这个引脚就相当于浮空状态，同时能够避免一些电路的干扰
 
     // 位操作
     P26 = 0;

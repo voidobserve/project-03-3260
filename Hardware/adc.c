@@ -10,9 +10,9 @@ void adc_config(void)
     // P2_MD0 |= GPIO_P23_MODE_SEL(0x3); // 设为模拟模式
 
     // P04--测量电池电压的引脚
-    P0_MD0 |= GPIO_P04_MODE_SEL(0x3); // 模拟模式
+    P0_MD1 |= GPIO_P04_MODE_SEL(0x3); // 模拟模式
     // P05--测量触摸IC传过来的电压的引脚
-    P0_MD0 |= GPIO_P05_MODE_SEL(0x3); // 模拟模式
+    P0_MD1 |= GPIO_P05_MODE_SEL(0x3); // 模拟模式
 
     // 检测油量的引脚：
     P0_MD0 |= GPIO_P01_MODE_SEL(0x3); // 模拟模式
@@ -33,22 +33,29 @@ void adc_sel_pin(u8 adc_pin)
 {
     switch (adc_pin)
     {
-    case ADC_PIN_BATTERY:                  // P04
+    case ADC_PIN_BATTERY:                  // 检测电池电量
         ADC_CHS0 = ADC_ANALOG_CHAN(0x04) | // P04通路
                    ADC_EXT_SEL(0x0);       // 选择外部通路
         ADC_CFG0 |= ADC_CHAN0_EN(0x1) |    // 使能通道0转换
                     ADC_EN(0x1);           // 使能A/D转换
         break;
 
-    case ADC_PIN_TOUCH:                    // P05
+    case ADC_PIN_TOUCH:                    // 检测触摸IC传过来的电压
         ADC_CHS0 = ADC_ANALOG_CHAN(0x05) | // P05通路
                    ADC_EXT_SEL(0x0);       // 选择外部通路
         ADC_CFG0 |= ADC_CHAN0_EN(0x1) |    // 使能通道0转换
                     ADC_EN(0x1);           // 使能A/D转换
         break;
 
-    case ADC_PIN_FUEL:
+    case ADC_PIN_FUEL: // 检测油量
         ADC_CHS0 = ADC_ANALOG_CHAN(0x01) | // P01通路
+                   ADC_EXT_SEL(0x0);       // 选择外部通路
+        ADC_CFG0 |= ADC_CHAN0_EN(0x1) |    // 使能通道0转换
+                    ADC_EN(0x1);           // 使能A/D转换
+        break;
+
+    case ADC_PIN_TEMP_OF_WATER:            // 检测水温的引脚
+        ADC_CHS0 = ADC_ANALOG_CHAN(0x00) | // P00通路
                    ADC_EXT_SEL(0x0);       // 选择外部通路
         ADC_CFG0 |= ADC_CHAN0_EN(0x1) |    // 使能通道0转换
                     ADC_EN(0x1);           // 使能A/D转换
@@ -95,4 +102,3 @@ u16 adc_getval(void)
 
     return __adc_val_tmp;
 }
- 

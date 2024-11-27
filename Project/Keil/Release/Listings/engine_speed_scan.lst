@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   ENGINE_SPEED_SCAN                                                 11/26/2024 17:09:53 PAGE 1   
+C51 COMPILER V9.60.7.0   ENGINE_SPEED_SCAN                                                 11/28/2024 14:06:59 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE ENGINE_SPEED_SCAN
@@ -19,7 +19,8 @@ line level    source
    8          volatile u32 engine_speed_scan_time_cnt = 0; // 发动机转速扫描时，用到的时间计数值，会�
              -��定时器中断中累加
    9          
-  10          volatile u32 detect_engine_pulse_cnt = 0; // 检测发送机转速的脉冲计数值
+  10          volatile u32 detect_engine_pulse_cnt = 0; // 检测发送机转速的脉冲计数值，会在IO中断内�
+             -�加
   11          
   12          // 发动机转速的相关配置
   13          void engine_speed_scan_config(void)
@@ -29,11 +30,11 @@ line level    source
   17   1          __EnableIRQ(P1_IRQn);             // 使能P1中断
   18   1          IE_EA = 1;                        // 使能总开关
   19   1      
-  20   1          P1_MD0 &= ~GPIO_P12_MODE_SEL(0x3); // 输入模式
-  21   1          P1_PU |= GPIO_P12_PULL_UP(0x1);    // 配置为上拉
-  22   1          P1_IMK |= GPIO_P12_IRQ_MASK(0x1);  // 使能IO中断
-  23   1          P1_TRG0 &= ~GPIO_P12_TRG_SEL(0x3);
-  24   1          P1_TRG0 |= GPIO_P12_TRG_SEL(0x2); // 配置上升沿触发
+  20   1          P1_MD1 &= ~GPIO_P15_MODE_SEL(0x3); // 输入模式
+  21   1          P1_PU |= GPIO_P15_PULL_UP(0x1);    // 配置为上拉
+  22   1          P1_IMK |= GPIO_P15_IRQ_MASK(0x1);  // 使能IO中断
+  23   1          P1_TRG1 &= ~GPIO_P15_TRG_SEL(0x3);
+  24   1          P1_TRG1 |= GPIO_P15_TRG_SEL(0x2); // 配置上升沿触发
   25   1      }
   26          
   27          // 发动机转速扫描
@@ -61,9 +62,9 @@ line level    source
              -应的脉冲个数 / 扫描时间
   46   2              rpm = detect_engine_pulse_cnt * (CONVER_ONE_MINUTE_TO_MS / ENGINE_SPEED_SCAN_TIME_MS) / ENGINE_SPE
              -ED_SCAN_PULSE_PER_TURN; 
-  47   2              detect_engine_pulse_cnt = 0; // 计算完成后，清空计数值
-C51 COMPILER V9.60.7.0   ENGINE_SPEED_SCAN                                                 11/26/2024 17:09:53 PAGE 2   
+C51 COMPILER V9.60.7.0   ENGINE_SPEED_SCAN                                                 11/28/2024 14:06:59 PAGE 2   
 
+  47   2              detect_engine_pulse_cnt = 0; // 计算完成后，清空计数值
   48   2      
   49   2              // 限制待发送的发动机转速
   50   2              if (rpm >= 65535)
@@ -73,8 +74,8 @@ line level    source
   54   2      
   55   2              fun_info.engine_speeed = rpm; //
   56   2      #if USE_MY_DEBUG
-  57   2              // printf("engine speed %lu rpm\n", rpm);
-  58   2      #endif
+                      // printf("engine speed %lu rpm\n", rpm);
+              #endif
   59   2              flag_get_engine_speed = 1; // 多久更新一次状态还未确定
   60   2          }
   61   1      }

@@ -1,5 +1,7 @@
 #include "pin_level_scan.h"
 
+u32 pin_level_scan_time_cnt = 0;
+
 void pin_level_scan_config(void)
 {
     p21_input_config(); // 远光灯状态对应的引脚
@@ -19,163 +21,107 @@ void pin_level_scan_config(void)
 // 引脚电平扫描，都是低电平有效
 void pin_level_scan(void)
 {
-    if (P23 == 0)
+    // 如果到了扫描时间，再更新挡位、转向灯和刹车的状态
+    if (pin_level_scan_time_cnt >= PIN_LEVEL_SCAN_TIME_MS)
     {
-        // 如果 刹车
+        pin_level_scan_time_cnt = 0;
 
-        // printf("P23 == 0\n");
-        if (OFF == fun_info.brake)
+        if (P23)
         {
-            // 如果之前刹车是关闭的
-            flag_get_brake = 1;
-            fun_info.brake = ON;
+            // 如果没有刹车
+            fun_info.brake = OFF;
         }
         else
         {
-            // 如果刹车在上一次扫描时就是开启的
-            // 不用更新状态
+            // 如果有刹车
+            fun_info.brake = ON;
         }
-    }
-    else
-    {
-        // 如果现在刹车是关闭的，看看上一次扫描时刹车是否开启，
-        // 如果上一次扫描时是开启的，要发送刹车关闭的信息
-        if (ON == fun_info.brake)
-        {
-            fun_info.brake = OFF;
-            flag_get_brake = 1;
-        }
-    }
+        flag_get_brake = 1;
 
-    if (P25 == 0)
-    {
-        // 如果 左转向灯开启
-        if (OFF == fun_info.left_turn)
+        if (P25)
         {
-            // 如果上一次扫描时远光灯是关闭的
-            fun_info.left_turn = ON;
-            flag_get_left_turn = 1;
-        }
-    }
-    else
-    {
-        if (ON == fun_info.left_turn)
-        {
-            // 如果上一次扫描时远光灯是开启的
+            // 如果左转向灯未开启
             fun_info.left_turn = OFF;
-            flag_get_left_turn = 1;
         }
-    }
+        else
+        {
+            // 如果左转向灯开启
+            fun_info.left_turn = ON;
+        }
+        flag_get_left_turn = 1;
 
-    if (P22 == 0)
-    {
-        // 如果 右转向灯开启
-        // printf("P22 == 0\n");
-        if (OFF == fun_info.right_turn)
+        if (P22)
         {
-            // 如果上一次扫描时右转向灯是关闭的
-            fun_info.right_turn = ON;
-            flag_get_right_turn = 1;
-        }
-    }
-    else
-    {
-        if (ON == fun_info.right_turn)
-        {
-            // 如果上一次扫描时右转向灯是开启的
+            // 如果右转向灯未开启
             fun_info.right_turn = OFF;
-            flag_get_right_turn = 1;
         }
-    }
-
-    if (P21 == 0)
-    {
-        // 如果 远光灯开启
-        // printf("P21 == 0\n");
-
-        if (OFF == fun_info.high_beam)
+        else
         {
-            // 如果上一次扫描时远光灯是关闭的
-            fun_info.high_beam = ON;
-            flag_get_high_beam = 1;
+            // 如果右转向灯开启
+            fun_info.right_turn = ON;
         }
-    }
-    else
-    {
-        if (ON == fun_info.high_beam)
+        flag_get_right_turn = 1;
+
+        if (P21)
         {
-            // 如果上一次扫描时远光灯是开启的
+            // 如果远光灯未开启
             fun_info.high_beam = OFF;
-            flag_get_high_beam = 1;
         }
-    }
+        else
+        {
+            // 如果远光灯开启
+            fun_info.high_beam = ON;
+        }
+        flag_get_high_beam = 1;
 
-    // 以最低挡位优先，当最低档有信号时，不管其他挡位的信号，直接以最低档的为主
-    if (0 == P06)
-    {
-        if (GEAR_NEUTRAL != fun_info.gear)
+        // 以最低挡位优先，当最低档有信号时，不管其他挡位的信号，直接以最低档的为主
+
+        if (0 == P06)
         {
-            // 如果上一次扫描时的挡位不是空挡
+            // 空挡
             fun_info.gear = GEAR_NEUTRAL;
-            flag_get_gear = 1;
         }
-    }
-    else if (0 == P07)
-    {
-        if (GEAR_FIRST != fun_info.gear)
+        else if (0 == P07)
         {
-            // 如果上一次扫描时的挡位不是一档
+            // 一档
             fun_info.gear = GEAR_FIRST;
-            flag_get_gear = 1;
         }
-    }
-    else if (0 == P10)
-    {
-        if (GEAR_SECOND != fun_info.gear)
+        else if (0 == P10)
         {
-            // 如果上一次扫描时的挡位不是二档
+            // 二档
             fun_info.gear = GEAR_SECOND;
-            flag_get_gear = 1;
         }
-    }
-    else if (0 == P13)
-    {
-        if (GEAR_THIRD != fun_info.gear)
+        else if (0 == P13)
         {
-            // 如果上一次扫描时的挡位不是三档
+            // 三档
             fun_info.gear = GEAR_THIRD;
-            flag_get_gear = 1;
         }
-    }
-    else if (0 == P14)
-    {
-        if (GEAR_FOURTH != fun_info.gear)
+        else if (0 == P14)
         {
-            // 如果上一次扫描时的挡位不是四档
+            // 四档
             fun_info.gear = GEAR_FOURTH;
-            flag_get_gear = 1;
         }
-    }
-    else if (0 == P27)
-    {
-        if (GEAR_FIFTH != fun_info.gear)
+        else if (0 == P27)
         {
-            // 如果上一次扫描时的挡位不是五档
+            // 五档
             fun_info.gear = GEAR_FIFTH;
-            flag_get_gear = 1;
         }
-    }
-    else if (0 == P30)
-    {
-        // printf("P30 == 0\n");
-        if (GEAR_SIXTH != fun_info.gear)
+        else if (0 == P30)
         {
-            // 如果上一次扫描时的挡位不是六档
+            // 六档
             fun_info.gear = GEAR_SIXTH;
-            flag_get_gear = 1;
         }
+        flag_get_gear = 1;
     }
 
     // if () // ACC引脚检测，检测到高电平，P03也输出高电平，检测到低电平，让P03输出低电平
-    
+    if (P04)
+    {
+        // 检测到ACC为高电平,
+        P03 = 1;
+    }
+    else
+    {
+        P03 = 0;
+    }
 }

@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   GPIO_INTERRUPT                                                    11/26/2024 17:09:52 PAGE 1   
+C51 COMPILER V9.60.7.0   GPIO_INTERRUPT                                                    11/28/2024 14:06:58 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE GPIO_INTERRUPT
@@ -48,7 +48,7 @@ line level    source
   37   1          // ---------------- 用户函数处理 -------------------
   38   1      
   39   1          // 如果是检测发动机转速的引脚触发的中断
-  40   1          if (p1_pnd & GPIO_P12_IRQ_PNG(0x1))
+  40   1          if (p1_pnd & GPIO_P15_IRQ_PNG(0x1))
   41   1          {
   42   2              if (detect_engine_pulse_cnt < 4294967295) // 防止计数溢出
   43   2              {
@@ -62,7 +62,7 @@ line level    source
   51   1          __IRQnIPnPop(P1_IRQn);
   52   1      }
 
-C51 COMPILER V9.60.7.0   GPIO_INTERRUPT                                                    11/26/2024 17:09:52 PAGE 2   
+C51 COMPILER V9.60.7.0   GPIO_INTERRUPT                                                    11/28/2024 14:06:58 PAGE 2   
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE

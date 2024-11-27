@@ -37,7 +37,7 @@ void P1_IRQHandler(void) interrupt P1_IRQn
     // ---------------- 用户函数处理 -------------------
 
     // 如果是检测发动机转速的引脚触发的中断
-    if (p1_pnd & GPIO_P12_IRQ_PNG(0x1))
+    if (p1_pnd & GPIO_P15_IRQ_PNG(0x1))
     {
         if (detect_engine_pulse_cnt < 4294967295) // 防止计数溢出
         {

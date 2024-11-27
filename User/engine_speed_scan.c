@@ -7,7 +7,7 @@
 
 volatile u32 engine_speed_scan_time_cnt = 0; // 发动机转速扫描时，用到的时间计数值，会在定时器中断中累加
 
-volatile u32 detect_engine_pulse_cnt = 0; // 检测发送机转速的脉冲计数值
+volatile u32 detect_engine_pulse_cnt = 0; // 检测发送机转速的脉冲计数值，会在IO中断内累加
 
 // 发动机转速的相关配置
 void engine_speed_scan_config(void)
@@ -17,11 +17,11 @@ void engine_speed_scan_config(void)
     __EnableIRQ(P1_IRQn);             // 使能P1中断
     IE_EA = 1;                        // 使能总开关
 
-    P1_MD0 &= ~GPIO_P12_MODE_SEL(0x3); // 输入模式
-    P1_PU |= GPIO_P12_PULL_UP(0x1);    // 配置为上拉
-    P1_IMK |= GPIO_P12_IRQ_MASK(0x1);  // 使能IO中断
-    P1_TRG0 &= ~GPIO_P12_TRG_SEL(0x3);
-    P1_TRG0 |= GPIO_P12_TRG_SEL(0x2); // 配置上升沿触发
+    P1_MD1 &= ~GPIO_P15_MODE_SEL(0x3); // 输入模式
+    P1_PU |= GPIO_P15_PULL_UP(0x1);    // 配置为上拉
+    P1_IMK |= GPIO_P15_IRQ_MASK(0x1);  // 使能IO中断
+    P1_TRG1 &= ~GPIO_P15_TRG_SEL(0x3);
+    P1_TRG1 |= GPIO_P15_TRG_SEL(0x2); // 配置上升沿触发
 }
 
 // 发动机转速扫描

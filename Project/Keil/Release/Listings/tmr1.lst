@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   TMR1                                                              11/26/2024 17:09:51 PAGE 1   
+C51 COMPILER V9.60.7.0   TMR1                                                              11/28/2024 14:06:57 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TMR1
@@ -62,7 +62,7 @@ line level    source
   50   1          __EnableIRQ(TMR1_IRQn); // 使能中断
   51   1          IE_EA = 1;              // 打开总中断
   52   1      }
-C51 COMPILER V9.60.7.0   TMR1                                                              11/26/2024 17:09:51 PAGE 2   
+C51 COMPILER V9.60.7.0   TMR1                                                              11/28/2024 14:06:57 PAGE 2   
 
   53          
   54          /**
@@ -95,46 +95,50 @@ line level    source
   81   2              TMR1_CONH |= TMR_PRD_PND(0x1); // 清除pending
   82   2      
   83   2              // tmr1_cnt++;
-  84   2      
-  85   2              if (engine_speed_scan_time_cnt < 4294967295) // 防止计数溢出
-  86   2              {
-  87   3                  engine_speed_scan_time_cnt++;
-  88   3              }
-  89   2      
-  90   2              if (speed_scan_time_cnt < 4294967295) // 防止计数溢出
-  91   2              {
-  92   3                  speed_scan_time_cnt++;
-  93   3              }
-  94   2      
-  95   2              if (mileage_scan_time_cnt < 4294967295) // 防止计数溢出
-  96   2              {
-  97   3                  mileage_scan_time_cnt++;
-  98   3              }
-  99   2      
- 100   2              if (fuel_capacity_scan_cnt < 4294967295) // 防止计数溢出
- 101   2              {
- 102   3                  fuel_capacity_scan_cnt++;
- 103   3              }
- 104   2      
- 105   2      #if 0
+  84   2              if (pin_level_scan_time_cnt < 4294967295) // 防止计数溢出
+  85   2              {
+  86   3                  pin_level_scan_time_cnt++;
+  87   3              }
+  88   2      
+  89   2              if (engine_speed_scan_time_cnt < 4294967295) // 防止计数溢出
+  90   2              {
+  91   3                  engine_speed_scan_time_cnt++;
+  92   3              }
+  93   2      
+  94   2              if (speed_scan_time_cnt < 4294967295) // 防止计数溢出
+  95   2              {
+  96   3                  speed_scan_time_cnt++;
+  97   3              }
+  98   2      
+  99   2              if (mileage_scan_time_cnt < 4294967295) // 防止计数溢出
+ 100   2              {
+ 101   3                  mileage_scan_time_cnt++;
+ 102   3              }
+ 103   2      
+ 104   2              if (fuel_capacity_scan_cnt < 4294967295) // 防止计数溢出
+ 105   2              {
+ 106   3                  fuel_capacity_scan_cnt++;
+ 107   3              }
+ 108   2      
+ 109   2      #if 0
                       // 如果到了5s
                       if (TMR1_cnt == 1000)
                       {
                           TMR1_cnt = 0;
                           TMR1_flag = 1; // 给对应的标志位置一
+C51 COMPILER V9.60.7.0   TMR1                                                              11/28/2024 14:06:57 PAGE 3   
+
                       }
               #endif
- 113   2          }
- 114   1      
-C51 COMPILER V9.60.7.0   TMR1                                                              11/26/2024 17:09:51 PAGE 3   
-
- 115   1          // 退出中断设置IP，不可删除
- 116   1          __IRQnIPnPop(TMR1_IRQn);
- 117   1      }
+ 117   2          }
+ 118   1      
+ 119   1          // 退出中断设置IP，不可删除
+ 120   1          __IRQnIPnPop(TMR1_IRQn);
+ 121   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    341    ----
+   CODE SIZE        =    384    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----

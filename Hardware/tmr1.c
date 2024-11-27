@@ -81,6 +81,10 @@ void TIMR1_IRQHandler(void) interrupt TMR1_IRQn
         TMR1_CONH |= TMR_PRD_PND(0x1); // 清除pending
 
         // tmr1_cnt++;
+        if (pin_level_scan_time_cnt < 4294967295) // 防止计数溢出
+        {
+            pin_level_scan_time_cnt++;
+        }
 
         if (engine_speed_scan_time_cnt < 4294967295) // 防止计数溢出
         {

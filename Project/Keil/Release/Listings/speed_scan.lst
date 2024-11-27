@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/26/2024 17:09:53 PAGE 1   
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/28/2024 14:06:59 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE SPEED_SCAN
@@ -62,7 +62,7 @@ line level    source
   50   1          if (speed_scan_time_cnt >= SPEED_SCAN_TIME_MS) // 如果经过了 xx ms
   51   1          {
   52   2              speed_scan_time_cnt -= SPEED_SCAN_TIME_MS; // 为了准确，减去这部分时间对应的计数�
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/26/2024 17:09:53 PAGE 2   
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/28/2024 14:06:59 PAGE 2   
 
              -��，而不是直接清零
   53   2      
@@ -126,7 +126,7 @@ line level    source
                       {
                           speed_increases_cnt = 0;
                           speed_decreases_cnt++;
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/26/2024 17:09:53 PAGE 3   
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/28/2024 14:06:59 PAGE 3   
 
                           if (speed_decreases_cnt >= SPEED_SCAN_FILTER_CNT) //  
                           {
@@ -164,13 +164,13 @@ line level    source
  145   3                  fun_info.speed = cur_speed_average_val;         // 存放得到的时速
  146   3                  cur_speed_average_val = 0;                      // 清空变量的值
  147   3      #if USE_MY_DEBUG
- 148   3      
- 149   3                  if (fun_info.speed != 0)
- 150   3                  {
- 151   4                      printf("cur speed %lu km/h\n", fun_info.speed);
- 152   4                  }
- 153   3      
- 154   3      #endif
+              
+                          if (fun_info.speed != 0)
+                          {
+                              printf("cur speed %lu km/h\n", fun_info.speed);
+                          }
+              
+              #endif
  155   3      
  156   3                  // 限制要发送的时速:
  157   3                  if (fun_info.speed > 999)
@@ -188,9 +188,9 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    353    ----
-   CONSTANT SIZE    =     20    ----
-C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/26/2024 17:09:53 PAGE 4   
+   CODE SIZE        =    315    ----
+   CONSTANT SIZE    =   ----    ----
+C51 COMPILER V9.60.7.0   SPEED_SCAN                                                        11/28/2024 14:06:59 PAGE 4   
 
    XDATA SIZE       =     13       4
    PDATA SIZE       =   ----    ----
